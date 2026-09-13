@@ -1,0 +1,11 @@
+# Cloudflare Pages 部署配置（前端静态站）
+# 使用：npx wrangler pages deploy --project-name aihospital
+name = "aihospital"
+pages_build_output_dir = "client/dist"
+compatibility_date = "2026-09-13"
+compatibility_flags = ["nodejs_compat"]
+
+# /api/* 由 functions/api/[[path]].js 反向代理到下列后端地址
+# 部署后请在 Cloudflare Pages 项目的环境变量中把 BACKEND_ORIGIN 改成真实后端域名
+[vars]
+BACKEND_ORIGIN = "https://api.aihospital.com"

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>大气AI医院 · 管理中心</title>
+    <link rel="stylesheet" href="./admin.css?v=20260913a" />
+  </head>
+  <body>
+    <!-- 登录视图 -->
+    <div id="login-view" class="login-wrap" hidden>
+      <div class="login-card">
+        <div class="login-brand">大气AI医院</div>
+        <h2>管理中心登录</h2>
+        <div class="sub">请输入管理员账号与密码</div>
+        <form id="login-form">
+          <label for="username">管理员账号</label>
+          <input id="username" type="text" placeholder="请输入管理员账号" autocomplete="username" />
+          <label for="password" style="margin-top:14px">管理密码</label>
+          <input id="password" type="password" placeholder="请输入管理密码" autocomplete="current-password" />
+          <div class="error" id="login-error"></div>
+          <button type="submit" class="btn btn-primary">登 录</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 管理中心布局 -->
+    <div id="app-view" class="admin-layout" hidden>
+      <aside class="sidebar">
+        <div class="sidebar-brand">
+          <div class="sidebar-logo">医</div>
+          <div>
+            <div class="sidebar-name">大气AI医院</div>
+            <div class="sidebar-sub">管理中心</div>
+          </div>
+        </div>
+        <nav class="sidebar-nav" id="sidebar-nav">
+          <button class="nav-item active" data-view="dashboard">仪表盘</button>
+          <button class="nav-item" data-view="members">会员中心</button>
+          <button class="nav-item" data-view="records">问诊记录</button>
+          <button class="nav-item" data-view="purchases">购买记录</button>
+          <button class="nav-item" data-view="services">服务项目</button>
+          <button class="nav-item" data-view="pay">支付设置</button>
+          <button class="nav-item" data-view="recharges">充值单</button>
+          <button class="nav-item" data-view="settings">系统设置</button>
+        </nav>
+        <div class="sidebar-foot">
+          <div class="sidebar-user" id="sidebar-user"></div>
+          <button class="nav-item" id="logout-btn">退出登录</button>
+        </div>
+      </aside>
+      <div class="admin-main">
+        <header class="topbar">
+          <div class="topbar-title" id="view-title">仪表盘</div>
+          <div class="topbar-right">
+            <span class="topbar-date" id="topbar-date"></span>
+            <button class="btn-outline" id="export-btn">导出数据</button>
+          </div>
+        </header>
+        <main class="content" id="view-content"></main>
+      </div>
+    </div>
+
+    <script type="module" src="./admin.js?v=20260913a"></script>
+  </body>
+</html>

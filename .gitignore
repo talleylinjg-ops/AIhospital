@@ -104,6 +104,14 @@
 *.log
 **/logs/
 
+# Local database
+data/
+*.db
+*.db-journal
+*.db-wal
+*.sqlite
+*.sqlite3
+
 # Environment and secrets
 **/.env
 **/.env.local
