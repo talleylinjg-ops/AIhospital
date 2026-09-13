@@ -113,3 +113,14 @@ Entries discovered by the Agent during task execution should follow this format:
   - 前端会员充值（client/src/member.js）用 qrcode 依赖（client workspace 本地安装，vite 走 browser 入口，import QRCode from "qrcode" 后 QRCode.toCanvas）渲染二维码并每 3 秒轮询 /api/member/recharge/:id/status 自动到账；无渠道时提示模拟支付。
   - 服务订单在线直付（2026-09-11 增补，满足「直接支付」）：purchases 表加 out_trade_no/pay_channel/pay_qr 列（迁移 + 局部唯一索引 WHERE out_trade_no<>''）；server/purchasepay.js 挂 /api，POST /api/purchase/:id/pay（会员 token 或下单手机号授权，校验订单归属/未支付/金额）与 GET /api/purchase/:id/pay-status。发起支付复用未支付同渠道的收款码（reused），到账走 db.confirmPurchasePayment（幂等，不改余额、不记 wallet_ledger）。前台购买弹窗（client/src/main.js openBuyDialog）按 /api/pay/status 动态渲染「余额支付 / 支付宝 / 微信 / 客服线下」选项，在线支付先 POST /api/purchase 建单再取二维码轮询；main.js 也已 import qrcode。
   - 回调公网可达性限制：沙箱内无公网回调地址，真实支付回调只能在正式部署（独立静态站托管）后填真实参数验证；本地可用 gateway 指向本地假网关 + 自签密钥签名回调来做离线端到端验证（见 /tmp/opencode/pay-e2e.mjs 与 /tmp/opencode/purchase-pay-e2e.mjs）。会员测试账号 13800001234 当前密码为 newpass888。
+
+[Project Knowledge Summary]
+- Date: 2026-09-13
+- Context: Discovered by Agent while adding SEO/GEO assets and preparing Cloudflare Pages deployment
+- Category: Operations & Deployment / Build Methods / Environment Configuration
+- Instructions:
+  - 生产域名确定为 aihospital.com；部署形态为 Cloudflare Pages 托管前端静态站 + 独立服务器跑 Express+SQLite 后端。wrangler.toml 中 pages_build_output_dir=client/dist，Pages 环境变量 BACKEND_ORIGIN 指向后端域名（默认示例 https://api.aihospital.com）；functions/api/[[path]].js 把 /api/* 反向代理到 BACKEND_ORIGIN，前端保持同源相对路径；支付回调域名应直接指向后端域名而非 Pages。
+  - 部署步骤：`npm run build --workspace client` 后 `npx wrangler pages deploy --project-name aihospital`（需 CLOUDFLARE_API_TOKEN 与 CLOUDFLARE_ACCOUNT_ID）。前端为 hash 路由，无需 _redirects SPA 回退。
+  - SEO/GEO 资源位于 client/public，构建后落到 dist 根：robots.txt（放行 GPTBot/ClaudeBot/PerplexityBot 等）、sitemap.xml、llms.txt、_headers（安全与缓存）、og-cover.png（1200x630，用 /tmp/opencode/make-og.mjs 纯 Node 生成，环境无 ImageMagick/Chromium）。canonical、OG/Twitter、JSON-LD（MedicalClinic/WebSite/WebPage/FAQPage）内联在 client/index.html；首页另有 GEO 介绍与 FAQ 文案。域名或文案变更需同步这四处。
+  - 数据库由 server/db.js 在 data/consultations.db 自动建表（含旧库迁移），.gitignore 已忽略 data/ 与 *.db，禁止提交数据库文件（含密钥与患者数据）。admin 资源版本已 bump 到 v=20260913a。
+  - 仓库此前无 remote，需用户提供仓库地址与访问令牌后再推送；提交前用 `git status --porcelain --untracked-files=all` 核对，确保 server/hospital.db、data/ 等不入库。
