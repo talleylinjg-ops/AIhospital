@@ -557,54 +557,43 @@ async function renderAccount(el) {
   const saved = loadMember();
   const saveToken = getToken();
   el.innerHTML = `
-    <div class="acct-hero">
-      <div class="acct-avatar">${esc(displayName().slice(0, 1))}</div>
-      <div class="acct-ident">
-        <div class="acct-name">${esc(displayName())}<span class="acct-chip">会员</span></div>
-        <div class="acct-phone">${esc(memberDisplayPhone())}</div>
-      </div>
-      <a class="acct-detail-link" href="#/member/orders">账户明细</a>
+    <div class="acct-header">
+      <h2>账号设置</h2>
+      <p>管理登录信息与账号安全</p>
     </div>
 
-    <div class="acct-grid">
-      <section class="acct-card">
-        <header class="acct-card-head">
-          <span class="acct-ico">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4" /><path d="M4 20c0-4 4-6 8-6s8 2 8 6" /></svg>
-          </span>
-          <div><h3>基本资料</h3><p>更新称呼，或更换登录手机号</p></div>
-        </header>
+    <section class="acct-profile">
+      <div class="acct-avatar">${esc(displayName().slice(0, 1))}</div>
+      <div class="acct-profile-main">
+        <div class="acct-profile-name">${esc(displayName())}<span class="acct-badge">会员</span></div>
+        <div class="acct-profile-meta">${esc(memberDisplayPhone())}</div>
+      </div>
+      <a class="acct-profile-link" href="#/member/orders">账户明细</a>
+    </section>
+
+    <div class="acct-panels">
+      <section class="acct-panel">
+        <div class="acct-panel-head"><h3>基本资料</h3><span class="acct-panel-desc">更新称呼或更换登录手机号</span></div>
         <div class="field"><label>登录手机号</label><input id="ac-phone" type="tel" maxlength="11" value="${esc(m.phone || "")}" placeholder="新手机号（留空则不修改）" /></div>
         <div class="field"><label>称呼</label><input id="ac-name" type="text" maxlength="20" value="${esc(m.name || "")}" placeholder="如何称呼您" /></div>
         <div class="field"><label>当前密码<span class="opt-mark">用于确认本次修改</span></label><input id="ac-cur1" type="password" maxlength="64" placeholder="请输入当前密码" /></div>
         <div class="error" id="ac-error"></div>
-        <div class="acct-actions"><button class="btn btn-primary" id="ac-save">保存资料</button></div>
+        <div class="acct-panel-foot"><button class="btn btn-primary" id="ac-save">保存资料</button></div>
       </section>
 
-      <section class="acct-card">
-        <header class="acct-card-head">
-          <span class="acct-ico">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2" /><path d="M8 10V7a4 4 0 0 1 8 0v3" /></svg>
-          </span>
-          <div><h3>修改密码</h3><p>建议使用 6 位以上、不易猜测的密码</p></div>
-        </header>
+      <section class="acct-panel">
+        <div class="acct-panel-head"><h3>修改密码</h3><span class="acct-panel-desc">建议使用 6 位以上、不易猜测的密码</span></div>
         <div class="field"><label>当前密码</label><input id="pw-old" type="password" maxlength="64" placeholder="请输入当前密码" /></div>
         <div class="field"><label>新密码</label><input id="pw-new" type="password" maxlength="64" placeholder="6-64 位新密码" /></div>
         <div class="field"><label>确认新密码</label><input id="pw-new2" type="password" maxlength="64" placeholder="再次输入新密码" /></div>
         <div class="error" id="pw-error"></div>
-        <div class="acct-actions"><button class="btn btn-primary" id="pw-save">修改密码</button></div>
+        <div class="acct-panel-foot"><button class="btn btn-primary" id="pw-save">修改密码</button></div>
       </section>
     </div>
 
-    <section class="acct-card acct-card-danger">
-      <header class="acct-card-head">
-        <span class="acct-ico acct-ico-danger">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3" /><path d="M10 17l5-5-5-5" /><path d="M15 12H3" /></svg>
-        </span>
-        <div><h3>退出登录</h3><p>退出后需要重新输入手机号与密码</p></div>
-      </header>
-      <div class="acct-actions acct-actions-left"><button class="btn-outline" id="logout-btn">退出登录</button></div>
-    </section>`;
+    <div class="acct-logout-row">
+      <button class="acct-logout" id="logout-btn">退出登录</button>
+    </div>`;
   const flash = (idEl, msg, ok) => {
     const e = document.getElementById(idEl);
     e.textContent = msg;
