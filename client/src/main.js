@@ -877,6 +877,7 @@ function render() {
     app.innerHTML = homeView();
     bindHome();
   }
+  bindHeader();
   window.scrollTo(0, 0);
 }
 
@@ -896,7 +897,6 @@ function bindHome() {
       location.hash = `#/form/${state.level}`;
     });
   });
-  bindHeader();
   renderChannelModels();
 }
 
