@@ -351,44 +351,60 @@ body {
 .buy-form .buy-opt label { display: flex; align-items: center; gap: 6px; font-weight: 500; margin: 2px 0; }
 
 /* ===== 账号设置 ===== */
-.acct-header, .acct-profile, .acct-panels, .acct-logout-row { max-width: 680px; margin-left: auto; margin-right: auto; }
-.acct-header { margin-bottom: 20px; }
+.acct-header { max-width: 860px; margin: 0 auto 20px; }
 .acct-header h2 { font-size: 19px; font-weight: 800; letter-spacing: -.2px; }
 .acct-header p { font-size: 13px; color: var(--ink-3, #9ca3af); margin-top: 3px; }
 
+.acct-layout { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 20px; align-items: start; max-width: 860px; margin: 0 auto; }
+.acct-side { position: sticky; top: 16px; }
+
 .acct-profile {
-  display: flex; align-items: center; gap: 14px;
-  padding: 18px 20px; border-radius: 14px; margin-bottom: 22px;
+  display: flex; align-items: center; gap: 12px;
+  padding: 16px; border-radius: 14px; margin-bottom: 14px;
   background: linear-gradient(120deg, #f4fbfa, #eaf6f5);
   border: 1px solid #dceff0;
 }
 .acct-avatar {
-  width: 52px; height: 52px; border-radius: 50%; flex: 0 0 auto;
+  width: 46px; height: 46px; border-radius: 50%; flex: 0 0 auto;
   display: flex; align-items: center; justify-content: center;
-  color: #fff; font-size: 22px; font-weight: 800;
+  color: #fff; font-size: 19px; font-weight: 800;
   background: linear-gradient(135deg, #0e7c86, #2bb3a3);
-  box-shadow: 0 8px 18px rgba(14,124,134,.28);
+  box-shadow: 0 6px 14px rgba(14,124,134,.26);
 }
-.acct-profile-main { flex: 1; min-width: 0; }
-.acct-profile-name { font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
-.acct-badge { font-size: 11px; font-weight: 700; color: #0e7c86; background: #d6efed; border-radius: 999px; padding: 2px 8px; }
-.acct-profile-meta { font-size: 12.5px; color: #6b7280; margin-top: 3px; letter-spacing: .3px; }
-.acct-profile-link { font-size: 13px; font-weight: 600; color: var(--primary, #0e7c86); text-decoration: none; white-space: nowrap; }
-.acct-profile-link:hover { text-decoration: underline; }
+.acct-profile-main { min-width: 0; }
+.acct-profile-name { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+.acct-badge { font-size: 10px; font-weight: 700; color: #0e7c86; background: #d6efed; border-radius: 999px; padding: 2px 7px; }
+.acct-profile-meta { font-size: 12px; color: #6b7280; margin-top: 2px; letter-spacing: .2px; }
 
-.acct-panels { margin-top: 0; }
-.acct-panel {
-  background: #f9fbfc; border: 1px solid #eef1f3; border-radius: 14px;
-  padding: 22px; margin-bottom: 16px;
+.acct-nav { display: flex; flex-direction: column; gap: 2px; background: #f9fbfc; border: 1px solid #eef1f3; border-radius: 14px; padding: 6px; }
+.acct-nav-item {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  padding: 10px 12px; border: none; background: none; border-radius: 9px;
+  font-size: 14px; font-weight: 600; color: #4b5563; cursor: pointer; font-family: inherit;
+  text-align: left; transition: background .15s, color .15s;
 }
-.acct-panel-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 18px; }
-.acct-panel-head h3 { font-size: 15px; font-weight: 700; margin: 0; }
-.acct-panel-desc { font-size: 12.5px; color: var(--ink-3, #9ca3af); }
-.acct-panel .field input { height: 44px; border-radius: 10px; background: #fff; }
-.acct-panel-foot { margin-top: 18px; display: flex; justify-content: flex-end; }
-.acct-panel-foot .btn-primary { width: auto; min-width: 132px; padding: 12px 24px; }
+.acct-nav-item svg { width: 18px; height: 18px; flex: 0 0 auto; }
+.acct-nav-item:hover { background: #eef4f5; color: var(--primary, #0e7c86); }
+.acct-nav-item.active { background: var(--primary, #0e7c86); color: #fff; box-shadow: 0 6px 14px rgba(14,124,134,.22); }
+.acct-side-link { display: block; text-align: center; margin-top: 12px; font-size: 13px; font-weight: 600; color: var(--primary, #0e7c86); text-decoration: none; }
+.acct-side-link:hover { text-decoration: underline; }
 
-.acct-logout-row { display: flex; justify-content: flex-end; margin-top: 2px; }
+.acct-pane { background: #f9fbfc; border: 1px solid #eef1f3; border-radius: 14px; padding: 22px; }
+.acct-pane[hidden] { display: none; }
+.acct-pane-head { margin-bottom: 18px; }
+.acct-pane-head h3 { font-size: 16px; font-weight: 700; margin: 0 0 3px; }
+.acct-pane-head p { font-size: 12.5px; color: var(--ink-3, #9ca3af); margin: 0; }
+.acct-pane .field input { height: 44px; border-radius: 10px; background: #fff; }
+.acct-pane-foot { margin-top: 18px; display: flex; justify-content: flex-end; }
+.acct-pane-foot .btn-primary { width: auto; min-width: 132px; padding: 12px 24px; }
+.acct-pane-foot-left { justify-content: flex-start; }
+
+.acct-sec-list { margin-bottom: 4px; }
+.acct-sec-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 13px 0; border-bottom: 1px dashed #e5e7eb; }
+.acct-sec-row:last-child { border-bottom: none; }
+.acct-sec-row span { font-size: 13px; color: #6b7280; }
+.acct-sec-row b { font-size: 13.5px; }
+
 .acct-logout {
   background: none; border: 1px solid #f0c9c9; color: #c0392b; border-radius: 10px;
   padding: 10px 18px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit;
@@ -397,9 +413,11 @@ body {
 .acct-logout:hover { background: #fdf2f2; border-color: #e59a9a; }
 
 @media (max-width: 720px) {
-  .acct-profile { flex-wrap: wrap; }
-  .acct-profile-link { order: 3; }
-  .acct-panel-foot .btn-primary { width: 100%; }
+  .acct-layout { grid-template-columns: 1fr; }
+  .acct-side { position: static; }
+  .acct-nav { flex-direction: row; overflow-x: auto; }
+  .acct-nav-item { width: auto; white-space: nowrap; }
+  .acct-pane-foot .btn-primary { width: 100%; }
 }
 
 /* 登录 / 注册 */

@@ -562,38 +562,69 @@ async function renderAccount(el) {
       <p>管理登录信息与账号安全</p>
     </div>
 
-    <section class="acct-profile">
-      <div class="acct-avatar">${esc(displayName().slice(0, 1))}</div>
-      <div class="acct-profile-main">
-        <div class="acct-profile-name">${esc(displayName())}<span class="acct-badge">会员</span></div>
-        <div class="acct-profile-meta">${esc(memberDisplayPhone())}</div>
+    <div class="acct-layout">
+      <aside class="acct-side">
+        <div class="acct-profile">
+          <div class="acct-avatar">${esc(displayName().slice(0, 1))}</div>
+          <div class="acct-profile-main">
+            <div class="acct-profile-name">${esc(displayName())}<span class="acct-badge">会员</span></div>
+            <div class="acct-profile-meta">${esc(memberDisplayPhone())}</div>
+          </div>
+        </div>
+        <nav class="acct-nav">
+          <button class="acct-nav-item active" data-acct="basic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4" /><path d="M4 20c0-4 4-6 8-6s8 2 8 6" /></svg>
+            <span>基本资料</span>
+          </button>
+          <button class="acct-nav-item" data-acct="password">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2" /><path d="M8 10V7a4 4 0 0 1 8 0v3" /></svg>
+            <span>修改密码</span>
+          </button>
+          <button class="acct-nav-item" data-acct="security">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.4-3 8.3-7 9-4-.7-7-4.6-7-9V6l7-3z" /><path d="M9.5 12l1.8 1.8 3.2-3.6" /></svg>
+            <span>账号安全</span>
+          </button>
+        </nav>
+        <a class="acct-side-link" href="#/member/orders">账户明细</a>
+      </aside>
+
+      <div class="acct-body">
+        <section class="acct-pane" data-pane="basic">
+          <div class="acct-pane-head"><h3>基本资料</h3><p>更新称呼或更换登录手机号</p></div>
+          <div class="field"><label>登录手机号</label><input id="ac-phone" type="tel" maxlength="11" value="${esc(m.phone || "")}" placeholder="新手机号（留空则不修改）" /></div>
+          <div class="field"><label>称呼</label><input id="ac-name" type="text" maxlength="20" value="${esc(m.name || "")}" placeholder="如何称呼您" /></div>
+          <div class="field"><label>当前密码<span class="opt-mark">用于确认本次修改</span></label><input id="ac-cur1" type="password" maxlength="64" placeholder="请输入当前密码" /></div>
+          <div class="error" id="ac-error"></div>
+          <div class="acct-pane-foot"><button class="btn btn-primary" id="ac-save">保存资料</button></div>
+        </section>
+
+        <section class="acct-pane" data-pane="password" hidden>
+          <div class="acct-pane-head"><h3>修改密码</h3><p>建议使用 6 位以上、不易猜测的密码</p></div>
+          <div class="field"><label>当前密码</label><input id="pw-old" type="password" maxlength="64" placeholder="请输入当前密码" /></div>
+          <div class="field"><label>新密码</label><input id="pw-new" type="password" maxlength="64" placeholder="6-64 位新密码" /></div>
+          <div class="field"><label>确认新密码</label><input id="pw-new2" type="password" maxlength="64" placeholder="再次输入新密码" /></div>
+          <div class="error" id="pw-error"></div>
+          <div class="acct-pane-foot"><button class="btn btn-primary" id="pw-save">修改密码</button></div>
+        </section>
+
+        <section class="acct-pane" data-pane="security" hidden>
+          <div class="acct-pane-head"><h3>账号安全</h3><p>查看账号状态并安全退出</p></div>
+          <div class="acct-sec-list">
+            <div class="acct-sec-row"><span>登录账号</span><b>${esc(memberDisplayPhone())}</b></div>
+            <div class="acct-sec-row"><span>账号类型</span><b>会员</b></div>
+            <div class="acct-sec-row"><span>密码状态</span><b>已设置</b></div>
+          </div>
+          <div class="acct-pane-foot acct-pane-foot-left"><button class="acct-logout" id="logout-btn">退出登录</button></div>
+        </section>
       </div>
-      <a class="acct-profile-link" href="#/member/orders">账户明细</a>
-    </section>
-
-    <div class="acct-panels">
-      <section class="acct-panel">
-        <div class="acct-panel-head"><h3>基本资料</h3><span class="acct-panel-desc">更新称呼或更换登录手机号</span></div>
-        <div class="field"><label>登录手机号</label><input id="ac-phone" type="tel" maxlength="11" value="${esc(m.phone || "")}" placeholder="新手机号（留空则不修改）" /></div>
-        <div class="field"><label>称呼</label><input id="ac-name" type="text" maxlength="20" value="${esc(m.name || "")}" placeholder="如何称呼您" /></div>
-        <div class="field"><label>当前密码<span class="opt-mark">用于确认本次修改</span></label><input id="ac-cur1" type="password" maxlength="64" placeholder="请输入当前密码" /></div>
-        <div class="error" id="ac-error"></div>
-        <div class="acct-panel-foot"><button class="btn btn-primary" id="ac-save">保存资料</button></div>
-      </section>
-
-      <section class="acct-panel">
-        <div class="acct-panel-head"><h3>修改密码</h3><span class="acct-panel-desc">建议使用 6 位以上、不易猜测的密码</span></div>
-        <div class="field"><label>当前密码</label><input id="pw-old" type="password" maxlength="64" placeholder="请输入当前密码" /></div>
-        <div class="field"><label>新密码</label><input id="pw-new" type="password" maxlength="64" placeholder="6-64 位新密码" /></div>
-        <div class="field"><label>确认新密码</label><input id="pw-new2" type="password" maxlength="64" placeholder="再次输入新密码" /></div>
-        <div class="error" id="pw-error"></div>
-        <div class="acct-panel-foot"><button class="btn btn-primary" id="pw-save">修改密码</button></div>
-      </section>
-    </div>
-
-    <div class="acct-logout-row">
-      <button class="acct-logout" id="logout-btn">退出登录</button>
     </div>`;
+  el.querySelectorAll(".acct-nav-item").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const key = btn.dataset.acct;
+      el.querySelectorAll(".acct-nav-item").forEach((b) => b.classList.toggle("active", b === btn));
+      el.querySelectorAll(".acct-pane").forEach((p) => (p.hidden = p.dataset.pane !== key));
+    });
+  });
   const flash = (idEl, msg, ok) => {
     const e = document.getElementById(idEl);
     e.textContent = msg;
