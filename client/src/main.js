@@ -439,7 +439,7 @@ function resultView() {
 /* ===== 服务购买（访客） ===== */
 function servicesView() {
   return `
-    ${header(false)}
+    ${header()}
     <div class="container">
       <div class="hero services-hero">
         <h1>服务购买</h1>
