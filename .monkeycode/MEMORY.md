@@ -124,3 +124,14 @@ Entries discovered by the Agent during task execution should follow this format:
   - SEO/GEO 资源位于 client/public，构建后落到 dist 根：robots.txt（放行 GPTBot/ClaudeBot/PerplexityBot 等）、sitemap.xml、llms.txt、_headers（安全与缓存）、og-cover.png（1200x630，用 /tmp/opencode/make-og.mjs 纯 Node 生成，环境无 ImageMagick/Chromium）。canonical、OG/Twitter、JSON-LD（MedicalClinic/WebSite/WebPage/FAQPage）内联在 client/index.html；首页另有 GEO 介绍与 FAQ 文案。域名或文案变更需同步这四处。
   - 数据库由 server/db.js 在 data/consultations.db 自动建表（含旧库迁移），.gitignore 已忽略 data/ 与 *.db，禁止提交数据库文件（含密钥与患者数据）。admin 资源版本已 bump 到 v=20260913a。
   - 仓库此前无 remote，需用户提供仓库地址与访问令牌后再推送；提交前用 `git status --porcelain --untracked-files=all` 核对，确保 server/hospital.db、data/ 等不入库。
+
+[Project Knowledge Summary]
+- Date: 2026-09-16
+- Context: Discovered by Agent while pushing to GitHub and deploying the frontend to Cloudflare Pages
+- Category: Operations & Deployment / Environment Configuration / Workflow & Collaboration
+- Instructions:
+  - GitHub 仓库：https://github.com/talleylinjg-ops/AIhospital ，主分支为 `main`（本地已从 master 改名并跟踪 origin/main）。推送使用一次性凭据，不写入 .git/config：`git -c credential.helper='!f() { printf "username=%s\npassword=%s\n" <user> "$GH_PAT"; }; f' push origin main`。平台自带 git-credential-helper 对 github.com 返回空，不要依赖它。
+  - Cloudflare：Pages 项目名 `aihospital`，账户 `Daqi Account`（account id 2e33f078edc00ade4b25e61526d6f544），生产分支 `main`，线上地址 https://aihospital-eq8.pages.dev 。部署命令：`wrangler pages project create aihospital --production-branch main` 与 `wrangler pages deploy client/dist --project-name aihospital --branch main`（需 CLOUDFLARE_API_TOKEN + CLOUDFLARE_ACCOUNT_ID）。Pages 的 `[vars] BACKEND_ORIGIN` 从 wrangler.toml 读取并自动生效。
+  - 沙箱出网限制：可以访问 api.cloudflare.com（wrangler 正常），但无法访问 *.pages.dev，验证部署请改用 Cloudflare API（`/accounts/{id}/pages/projects/aihospital/deployments`）而非 curl 站点。
+  - `.github/workflows/deploy-pages.yml` 已添加：push 到 main 或手动触发即构建并部署；仓库需在 Settings→Secrets→Actions 配置 CLOUDFLARE_API_TOKEN 与 CLOUDFLARE_ACCOUNT_ID，未配置时会跳过部署而不是失败。
+  - 后端仍是 Express+SQLite，需另有一台公网服务器并把 Pages 的 BACKEND_ORIGIN 指向它，否则线上 /api 不可用（前端可正常打开）。
