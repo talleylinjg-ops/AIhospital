@@ -24,7 +24,7 @@ const NAV_SHORT = { L1: "轻微快诊", L2: "中等症状", L3: "危重症", L4:
 /* 导航未激活文字用通道色相（比 LEVEL_META.color 提亮一档，保证在深青 header 上可读）；激活态仍用原色 */
 const NAV_TEXT_COLOR = {
   L1: "#2dd4bf", L2: "#fbbf24", L3: "#f87171", L4: "#4ade80",
-  L5: "#f472b6", L6: "#a78bfa", L7: "#22d3ee", L8: "#fbbf24",
+  L5: "#f472b6", L6: "#a78bfa", L7: "#22d3ee", L8: "#fbbf24", L9: "#818cf8",
 };
 
 /* ===== Header ===== */
@@ -68,10 +68,10 @@ function footer() {
 }
 
 /* ===== Views ===== */
-/* 就诊通道 → 路由场景：L5 妇幼独用 maternal；L6 中医复用保健组；L7/L8 眼科/口腔复用门诊组 */
-const CHANNEL_SCENE = { L1: "fast", L2: "clinic", L3: "emergency", L4: "wellness", L5: "maternal", L6: "wellness", L7: "clinic", L8: "clinic" };
+/* 就诊通道 → 路由场景：L5 妇幼独用 maternal；L6 中医复用保健组；L7 眼科/L8 口腔/L9 牙科复用门诊组 */
+const CHANNEL_SCENE = { L1: "fast", L2: "clinic", L3: "emergency", L4: "wellness", L5: "maternal", L6: "wellness", L7: "clinic", L8: "clinic", L9: "clinic" };
 /* 复用他组场景的通道：标注实际承接的评估组 */
-const SHARED_GROUP = { L6: { scene: "wellness", group: "保健" }, L7: { scene: "clinic", group: "门诊" }, L8: { scene: "clinic", group: "门诊" } };
+const SHARED_GROUP = { L6: { scene: "wellness", group: "保健" }, L7: { scene: "clinic", group: "门诊" }, L8: { scene: "clinic", group: "门诊" }, L9: { scene: "clinic", group: "门诊" } };
 
 function homeView() {
   const cards = Object.entries(LEVEL_META)
@@ -110,9 +110,9 @@ function homeView() {
         <p>
           大气AI医院是基于大模型的 AI 智能预问诊与分诊平台。选择与您情况相符的就诊通道并填写完整病史后，系统会给出分诊建议、可能病因鉴别与就医指引，帮助您在就诊前理清思路、选择合适的科室与就医时机。
         </p>
-        <h3>8 条就诊通道</h3>
+        <h3>9 条就诊通道</h3>
         <p>
-          平台提供轻微快诊、中等症状、危重症、日常保健、妇幼保健、中医、眼科、口腔共 8 条通道。每条通道有各自的必填病史项与评估重点，例如妇幼保健会额外关注孕产与哺乳情况，中医与口腔通道会聚焦相应症状。
+          平台提供轻微快诊、中等症状、危重症、日常保健、妇幼保健、中医、眼科、口腔、牙科共 9 条通道。每条通道有各自的必填病史项与评估重点，例如妇幼保健会额外关注孕产与哺乳情况，中医、口腔与牙科通道会聚焦相应症状。
         </p>
         <h3>在线健康服务</h3>
         <p>

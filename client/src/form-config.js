@@ -57,8 +57,15 @@ export const LEVEL_META = {
     name: "口腔问诊",
     tag: "口腔",
     color: "#d97706",
-    subtitle: "牙痛 · 牙周 · 口腔溃疡",
-    desc: "适合牙痛、牙龈出血、智齿、口腔溃疡、口臭等口腔问题。剧痛伴面部肿胀、颌面外伤等请优先急诊并尽快线下就医。",
+    subtitle: "口腔黏膜 · 颌面 · 口腔溃疡",
+    desc: "适合口腔溃疡、口腔黏膜病变、口臭、颌面部不适等口腔问题。剧痛伴面部肿胀、颌面外伤等请优先急诊并尽快线下就医。",
+  },
+  L9: {
+    name: "牙科问诊",
+    tag: "牙科",
+    color: "#4338ca",
+    subtitle: "牙体牙髓 · 牙周 · 修复种植",
+    desc: "适合龋齿、牙痛、牙髓炎、牙龈出血、牙周病、缺牙修复与种植、正畸、智齿等牙齿问题。请注明具体牙位与冷热刺激、咬合痛等诱因；剧痛伴面部肿胀发热或颌面外伤请优先急诊并尽快线下就医。",
   },
 };
 
@@ -77,7 +84,7 @@ export const SECTIONS = [
 /**
  * 字段定义
  * type: text | textarea | number | select | radio
- * requiredBy: 该字段在哪些等级下必填（L1/L2/L3/L4）；L5-L8 专项通道必填集见下方 EXTRA_REQUIRED
+ * requiredBy: 该字段在哪些等级下必填（L1/L2/L3/L4）；L5-L9 专项通道必填集见下方 EXTRA_REQUIRED
  */
 export const FIELDS = [
   // 零、联系方式（用于建立个人健康档案，全部选填）
@@ -135,12 +142,13 @@ export const FIELDS = [
 
 /* 专项通道独立必填集（不随 requiredBy 数组逐字段维护）
    L5 妇幼：基础信息 + 紧急度 + 现病史主干 + 女性专项（孕期/哺乳为安全核心，男性/儿童填「不适用」）
-   L6 中医 / L7 眼科 / L8 口腔：基础信息 + 紧急度 + 现病史主干（专科细节靠选填字段补充） */
+   L6 中医 / L7 眼科 / L8 口腔 / L9 牙科：基础信息 + 紧急度 + 现病史主干（专科细节靠选填字段补充） */
 const EXTRA_REQUIRED = {
   L5: new Set(["gender", "age", "is_emergency", "chief_complaint", "symptom_onset", "symptom_severity", "female_special"]),
   L6: new Set(["gender", "age", "is_emergency", "chief_complaint", "symptom_onset", "symptom_severity"]),
   L7: new Set(["gender", "age", "is_emergency", "chief_complaint", "symptom_onset", "symptom_severity"]),
   L8: new Set(["gender", "age", "is_emergency", "chief_complaint", "symptom_onset", "symptom_severity"]),
+  L9: new Set(["gender", "age", "is_emergency", "chief_complaint", "symptom_onset", "symptom_severity"]),
 };
 
 export function getRequiredFields(level) {
