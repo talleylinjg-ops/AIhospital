@@ -29,12 +29,15 @@ const NAV_TEXT_COLOR = {
 
 /* ===== Header ===== */
 function header(showLevels = true) {
-  const levelButtons = Object.entries(LEVEL_META)
-    .map(([key, m]) => {
-      const active = state.level === key ? " active" : "";
-      const text = NAV_SHORT[key] || m.tag;
-      return `<button class="nav-level-btn${active}" data-nav-level="${key}" title="${esc(m.name)}" style="--lv-color:${m.color};--nav-color:${NAV_TEXT_COLOR[key] || m.color}">${esc(text)}</button>`;
-    })
+  const renderLevelBtn = ([key, m]) => {
+    const active = state.level === key ? " active" : "";
+    const text = NAV_SHORT[key] || m.tag;
+    return `<button class="nav-level-btn${active}" data-nav-level="${key}" title="${esc(m.name)}" style="--lv-color:${m.color};--nav-color:${NAV_TEXT_COLOR[key] || m.color}">${esc(text)}</button>`;
+  };
+  const entries = Object.entries(LEVEL_META);
+  /* 固定两行：第 1 行 L1-L4（快诊/门诊/急诊/保健），自 L5 妇幼起排到第 2 行 */
+  const levelButtons = [entries.slice(0, 4), entries.slice(4)]
+    .map((row) => `<div class="nav-level-row">${row.map(renderLevelBtn).join("")}</div>`)
     .join("");
   return `
   <header class="site-header">
