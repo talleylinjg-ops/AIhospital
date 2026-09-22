@@ -3,7 +3,7 @@ import { listProviderRowsForScene, listAllEnabledProviderRows, getLLMProviderRow
 
 const SCENE_LABELS = { fast: "快诊", clinic: "门诊", emergency: "急诊", wellness: "保健", maternal: "妇幼" };
 /* 就诊通道 → 路由场景：妇幼恒定 maternal；中医复用保健组；眼科/口腔复用门诊组 */
-const LEVEL_SCENES = { L1: "fast", L2: "clinic", L3: "emergency", L4: "wellness", L5: "maternal", L6: "wellness", L7: "clinic", L8: "clinic", L9: "clinic" };
+const LEVEL_SCENES = { L1: "fast", L2: "clinic", L3: "emergency", L4: "wellness", L5: "maternal", L6: "wellness", L7: "clinic", L8: "clinic" };
 const TIMEOUT_MS = Number(process.env.LLM_TIMEOUT_MS || 120000);
 
 /* 按就诊通道 + 疑难特征选择路由场景：妇幼通道恒定路由到妇幼垂直模型组 */
