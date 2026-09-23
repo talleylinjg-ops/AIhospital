@@ -51,7 +51,7 @@ Entries discovered by the Agent during task execution should follow this format:
 - Context: Discovered by Agent while implementing guest purchase flow and LLM provider management
 - Category: Operations & Deployment / Build Methods / Testing Methods
 - Instructions:
-  - 大模型配置存 SQLite llm_providers 表，后台「系统设置」按分类分组管理，支持增改删/启用/连接测试/备注。LLM_PRESETS 预置 19 条（国内通用 6 / 海外通用 5 / 国内垂直 6 / 海外垂直 2），initLLMProviders 幂等补种（按 name 查重），老库自动获得新预置；DeepSeek 预置已更名为 DeepSeek-R1（deepseek-reasoner）。api_key 不回传明文（has_key/key_masked）。医联 MedGPT/MedSeek/小荷/联影/Med-PaLM2/Med-Gemini 无公开 API（base_url 留空），启用前需填 Key 与地址。2026-09-03 场景词汇已从 general/complex/maternal 迁移为 fast/clinic/emergency/wellness/maternal 五通道。
+  - 大模型配置存 SQLite llm_providers 表，后台「系统设置」按分类分组管理，支持增改删/启用/连接测试/备注。LLM_PRESETS 预置 36 条（国内通用 19 / 海外通用 9 / 国内垂直 6 / 海外垂直 2，2026-09-23 升级为最新国内外旗舰），initLLMProviders 幂等补种（按 name 查重），老库自动获得新预置；PRESET_RENAMES 把旧预置名改名为新预置并补齐模型/地址/分类/场景/优先级（保留 api_key 与 enabled）。api_key 不回传明文（has_key/key_masked）。医联 MedGPT/MedSeek/小荷/联影/Med-PaLM2/Med-Gemini 无公开 API（base_url 留空），启用前需填 Key 与地址。2026-09-03 场景词汇已从 general/complex/maternal 迁移为 fast/clinic/emergency/wellness/maternal 五通道。
   - 前台访客购买：GET /api/services（公开）+ POST /api/purchase（无鉴权，自动建档，订单 status=待付款 source=前台下单）；后台购买记录含来源列（前台下单/后台登记）。
   - jsdom E2E 脚本在 /tmp/opencode/admin-e2e.mjs：自动复制 admin.js 到 /tmp/opencode/admin/（Node ESM file:// 相对解析需要等价目录结构）；mock fetch 需覆盖全部 admin API（新加路由要同步补 mock）。
   - 后台弹窗是动态创建的 .modal-mask（无固定 id），E2E 用 .modal-mask .modal-body 选取；openModal 返回 mask，闭包内用 mask.querySelector(".modal-body") 与 mask.remove()。
@@ -68,11 +68,11 @@ Entries discovered by the Agent during task execution should follow this format:
   - 前端展示要点：首页模型芯片经 CHANNEL_SCENE + SHARED_GROUP（main.js）读取 /api/status scene_models——自持场景通道显示"{tag}模型：主+备用"，复用组通道显示"{tag}通道（{组}模型组承接）· 主模型"，未启用统一兜底文案；结果页通道徽标改用 LEVEL_META[state.level].tag（而非 route.scene_label），保证中医/眼科/口腔显示本通道名而非保健/门诊。
   - 头部导航（2026-09-06 改为单行）：.nav-level-btn 文案前 4 个用 NAV_SHORT 的 4 字名称（轻微快诊/中等症状/危重症/日常保健，L3 急诊按钮取"危重症"短称），后 4 个显示 LEVEL_META.tag（妇幼/中医/眼科/口腔），悬停 title 才放全名；header-inner/header-right 用 flex nowrap，.nav-levels 内部 overflow-x:auto 横向滚动（隐藏滚动条）保证品牌标题与导航恒在同一行不换行；@media ≤900px 隐藏 .nav-services"服务购买"（放不下即删除入口，通道跳转不受影响）。
   - 通道降级兜底：某场景无专属启用模型时不再报错，callLLM 改用 listAllEnabledProviderRows（全部已启用）兜底，route.degraded=true 标记；前台结果页展示"该通道未专属配置，已用可用模型兜底"。
-  - 智谱 GLM（id=4，fast 通道主模型，glm-4-flash，用户自填 Key 存 SQLite）当前唯一启用模型；其余预置 base_url 有值但未填 Key，启用需先填 Key。clinic/emergency/wellness/maternal 暂无专属启用模型，命中时走全局兜底（degraded）。
+  - 智谱 GLM（id=4，fast 通道主模型，2026-09-23 由 glm-4-flash 升级为 glm-5.3-flash，用户自填 Key 存 SQLite）当前唯一启用模型；其余预置 base_url 有值但未填 Key，启用需先填 Key。clinic/emergency/wellness/maternal 暂无专属启用模型，命中时走全局兜底（degraded）。
   - llm.js 主备链：callLLM 按场景取 listProviderRowsForScene（含 api_key 原始行）按 priority 升序，主失败切备用，全失败 502；callLLMWithProvider 供手动对比；公开 GET /api/providers + POST /api/compare。listProvidersForScene 返回脱敏行不能用（api_key 为空），必须用 listProviderRowsForScene 给 LLM 调用层。
-  - 预置 19 条关键分配：fast=智谱(5)主/晓医(7)/豆包(14)；clinic=DeepSeek-R1(8)主/通义(12)/Kimi(24)/GPT-4o(20)；emergency=GPT-o1(3)主/Claude(6)/DeepSeek(8)/GPT-4o(20)；wellness=通义(12)主/豆包(14)/文心(16)/Gemini(26)；maternal=晓医(7)主/百川(30)。数字为 priority。
+  - 预置 36 条（2026-09-23）主备分配（数字为 priority，小者主）：fast=GLM-5.3-Flash(30)主，备 DeepSeek V4-Flash(31)/Qwen3.6-Flash(32)/豆包Seed2.1Turbo(33)/GPT-6 Luna(34)/Gemini3.1Pro(35)/GLM-5.3-FlashX(36)/DeepSeek V4.1 Flash(37)/硅基流动(40)/OpenRouter(41)；clinic=DeepSeek V4-Pro(10)主，备 GLM-5.3(11)/Kimi K3(12)/GPT-6 Sol(13)/Claude Sonnet5(17)/Qwen3.7-Plus(21)/Kimi K2.8(22)/豆包Seed2.1Pro(23)/豆包Seed Evolving(24)/混元Pro(25)/混元Hy4(26)/MiniMax M3(27)/硅基流动(40)/OpenRouter(41)；emergency=GPT-6 Astra(1)主，备 Claude Opus5.5(2)/DeepSeek V4-Pro(10)/Gemini3Pro(14)/Grok4.7(15)/豆包Seed2.1Pro(23)/MiniMax M3(27)/硅基流动(40)/OpenRouter(41)；wellness=Qwen3.8-Max(8)主，备 GLM-5.3(11)/Kimi K3(12)/Gemini3Pro(14)/ERNIE6.0(16)/混元Pro(25)/硅基流动(40)/OpenRouter(41)；maternal=Spark-X2.5(3)主，备 Baichuan-M4(4)/Qwen3.8-Max(8)/GLM-5.3(11)。无公开 API 的垂直预置（MedGPT/MedSeek/小荷/联影/Med-PaLM2/Med-Gemini）priority 90+，仅列表展示。
   - E2E mock：llm-providers 需含 scenes/scene_labels/priority，/api/status 需含 scene_models（五通道 fast/clinic/emergency/wellness/maternal）；admin-e2e 断言含通道徽章、启用/停用、弹窗场景多选。
-  - 旧词汇迁移（initLLMProviders 启动时执行）：预置行按 LLM_PRESETS 同步 scenes/priority；用户自定义行 general→fast,clinic,wellness、complex→emergency。当前线上 DB 重启后端即自动完成迁移。
+  - 旧词汇/旧预置迁移（initLLMProviders 启动时执行）：PRESET_RENAMES 先改名旧预置行并补齐新元数据（保留 Key 与启用态）；未填 Key 的预置行按 LLM_PRESETS 同步 base_url/model/category/note/scenes/priority；用户自定义行 general→fast,clinic,wellness、complex→emergency。当前线上 DB 重启后端即自动完成迁移。DB 中存在历史遗留行「通义千问」「OpenAI」（名称不在 PRESET_RENAMES，未合并），可在后台手动删除。
 
 [Project Knowledge Summary]
 - Date: 2026-09-08
@@ -122,7 +122,7 @@ Entries discovered by the Agent during task execution should follow this format:
   - 生产域名确定为 aihospital.com；部署形态为 Cloudflare Pages 托管前端静态站 + 独立服务器跑 Express+SQLite 后端。wrangler.toml 中 pages_build_output_dir=client/dist，Pages 环境变量 BACKEND_ORIGIN 指向后端域名（默认示例 https://api.aihospital.com）；functions/api/[[path]].js 把 /api/* 反向代理到 BACKEND_ORIGIN，前端保持同源相对路径；支付回调域名应直接指向后端域名而非 Pages。
   - 部署步骤：`npm run build --workspace client` 后 `npx wrangler pages deploy --project-name aihospital`（需 CLOUDFLARE_API_TOKEN 与 CLOUDFLARE_ACCOUNT_ID）。前端为 hash 路由，无需 _redirects SPA 回退。
   - SEO/GEO 资源位于 client/public，构建后落到 dist 根：robots.txt（放行 GPTBot/ClaudeBot/PerplexityBot 等）、sitemap.xml、llms.txt、_headers（安全与缓存）、og-cover.png（1200x630，用 /tmp/opencode/make-og.mjs 纯 Node 生成，环境无 ImageMagick/Chromium）。canonical、OG/Twitter、JSON-LD（MedicalClinic/WebSite/WebPage/FAQPage）内联在 client/index.html；首页另有 GEO 介绍与 FAQ 文案。域名或文案变更需同步这四处。
-  - 数据库由 server/db.js 在 data/consultations.db 自动建表（含旧库迁移），.gitignore 已忽略 data/ 与 *.db，禁止提交数据库文件（含密钥与患者数据）。admin 资源版本已 bump 到 v=20260913a。
+  - 数据库由 server/db.js 在 data/consultations.db 自动建表（含旧库迁移），.gitignore 已忽略 data/ 与 *.db，禁止提交数据库文件（含密钥与患者数据）。admin 资源版本已 bump 到 v=20260923a。
   - 仓库此前无 remote，需用户提供仓库地址与访问令牌后再推送；提交前用 `git status --porcelain --untracked-files=all` 核对，确保 server/hospital.db、data/ 等不入库。
 
 [Project Knowledge Summary]
@@ -135,3 +135,13 @@ Entries discovered by the Agent during task execution should follow this format:
   - 沙箱出网限制：可以访问 api.cloudflare.com（wrangler 正常），但无法访问 *.pages.dev，验证部署请改用 Cloudflare API（`/accounts/{id}/pages/projects/aihospital/deployments`）而非 curl 站点。
   - 自动部署工作流已准备在 `.github/workflows/deploy-pages.yml`（push main 或手动触发即构建部署，未配置 Secrets 时跳过而非失败）。当前 PAT 只有 `repo` 作用域，GitHub 拒绝推送 workflow 文件；需换成含 `workflow` 作用域的令牌，或直接在 GitHub 网页端创建该文件。仓库还需在 Settings→Secrets→Actions 配置 CLOUDFLARE_API_TOKEN 与 CLOUDFLARE_ACCOUNT_ID 才会真正自动部署。
   - 后端仍是 Express+SQLite，需另有一台公网服务器并把 Pages 的 BACKEND_ORIGIN 指向它，否则线上 /api 不可用（前端可正常打开）。
+
+[Project Knowledge Summary]
+- Date: 2026-09-23
+- Context: Discovered by Agent while deploying the frontend to Cloudflare Pages with an Account API Token
+- Category: Operations & Deployment / Troubleshooting & Debugging / Environment Configuration
+- Instructions:
+  - Cloudflare 新版凭据前缀：`cfat_` = Account API Token、`cfut_` = User API Token、`cfk_` = Global API Key，格式均为 `前缀 + 40 位 + 8 位校验和`（共 53 位）。
+  - 校验 Account Token 必须用账户级端点 `GET /accounts/{account_id}/tokens/verify`（返回 active）；用户级 `/user/tokens/verify` 对它一律返回 Invalid API Token，不代表令牌无效。该 verify 端点不会校验账户归属，传任意 account id 都返回 active，真正的归属证明是能访问该账户下的其他接口（如 `/accounts/{id}/workers/scripts`）。
+  - Pages 接口对权限缺失的 Account Token 返回 `Authentication error [code: 10000]`（而账户资料接口缺权限是 9109）。部署 Pages 需令牌含 `Account · Cloudflare Pages · Edit`。若只有 Workers 权限，`wrangler pages deploy` 会在 `GET /accounts/{id}/pages/projects/{name}` 处报 10000；同时 wrangler 会用 `/user/tokens/verify` 兜底导致二次 `fetch failed`，后者是假象。
+  - `wrangler pages deploy` 需同时设置 `CLOUDFLARE_API_TOKEN` 与 `CLOUDFLARE_ACCOUNT_ID`；GitHub 推送可用一次性内联 credential helper（`GH_PAT=xxx git -c credential.helper='!f() { printf "username=%s\npassword=%s\n" <user> "$GH_PAT"; }; f' push`），平台自带 git-credential-helper 对本仓库无效。

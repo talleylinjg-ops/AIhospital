@@ -208,21 +208,38 @@ migrate();
    priority: 同场景内升序为主备顺序（小者优先为主模型） */
 const LLM_PRESETS = [
   /* ---- 国内通用 ---- */
-  { name: "DeepSeek-R1", base_url: "https://api.deepseek.com/v1", model: "deepseek-reasoner", category: "国内通用", scenes: "clinic,emergency", priority: 8, note: "门诊主推：常见病/慢病/老年共病推理第一梯队，贴合国内指南；同时作为急诊国内兜底" },
-  { name: "豆包 Pro（火山方舟）", base_url: "https://ark.cn-beijing.volces.com/api/v3", model: "doubao-pro-32k", category: "国内通用", scenes: "fast,wellness", priority: 14, note: "快诊/保健：口语化症状理解强、体检报告解读好；model 需填方舟推理接入点 ID" },
-  { name: "通义千问 Max", base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1", model: "qwen-max", category: "国内通用", scenes: "clinic,wellness", priority: 12, note: "保健主推：长文本/健康方案/患者教育文本强；门诊可作备选" },
-  { name: "文心一言 X1（千帆）", base_url: "https://qianfan.baidubce.com/v2", model: "ernie-x1-32k-preview", category: "国内通用", scenes: "wellness", priority: 16, note: "保健：中医药知识、公卫宣教；model 名以千帆控制台为准" },
-  { name: "月之暗面 Kimi", base_url: "https://api.moonshot.cn/v1", model: "moonshot-v1-8k", category: "国内通用", scenes: "clinic,wellness", priority: 24, note: "门诊/保健：长文本处理与中文理解优秀，适合补充阅读" },
-  { name: "智谱 GLM", base_url: "https://open.bigmodel.cn/api/paas/v4", model: "glm-4-flash", category: "国内通用", scenes: "fast", priority: 5, note: "快诊主推：中文医疗对话均衡，glm-4-flash 免费额度高、响应快" },
+  { name: "DeepSeek V4-Pro", base_url: "https://api.deepseek.com/v1", model: "deepseek-v4-pro", category: "国内通用", scenes: "clinic,emergency", priority: 10, note: "门诊主推 + 急诊国内旗舰：复杂推理、多病共病、罕见病排查第一梯队，贴合国内指南" },
+  { name: "DeepSeek V4-Flash", base_url: "https://api.deepseek.com/v1", model: "deepseek-v4-flash", category: "国内通用", scenes: "fast", priority: 31, note: "快诊：V4 高效经济版，1M 上下文，响应快、成本低，适合高并发问诊" },
+  { name: "DeepSeek V4.1 Flash", base_url: "https://api.deepseek.com/v1", model: "deepseek-v4.1-flash", category: "国内通用", scenes: "fast,clinic", priority: 37, note: "快诊/门诊备选：V4 系列最新经济版，Agent 与长文本能力增强" },
+  { name: "智谱 GLM-5.3", base_url: "https://open.bigmodel.cn/api/paas/v4", model: "glm-5.3", category: "国内通用", scenes: "clinic,wellness,maternal", priority: 11, note: "门诊/保健主推：1M 上下文，长程任务与循证文本强" },
+  { name: "智谱 GLM-5.3-Flash", base_url: "https://open.bigmodel.cn/api/paas/v4", model: "glm-5.3-flash", category: "国内通用", scenes: "fast", priority: 30, note: "快诊主推：原生多模态、极致低成本，1M 上下文" },
+  { name: "智谱 GLM-5.3-FlashX", base_url: "https://open.bigmodel.cn/api/paas/v4", model: "glm-5.3-flashx", category: "国内通用", scenes: "fast", priority: 36, note: "快诊备选：同基座提速档，最高约 200 tokens/s" },
+  { name: "通义千问 Qwen3.8-Max", base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1", model: "qwen3.8-max", category: "国内通用", scenes: "wellness,maternal", priority: 8, note: "保健/妇幼主推：开源旗舰，长文本健康方案与患者教育强" },
+  { name: "通义千问 Qwen3.7-Plus", base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1", model: "qwen3.7-plus", category: "国内通用", scenes: "clinic", priority: 21, note: "门诊备选：性价比高，推理 + 视觉理解，1M 上下文" },
+  { name: "通义千问 Qwen3.6-Flash", base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1", model: "qwen3.6-flash", category: "国内通用", scenes: "fast", priority: 32, note: "快诊备选：轻量低成本，支持视觉理解" },
+  { name: "Kimi K3", base_url: "https://api.moonshot.cn/v1", model: "kimi-k3", category: "国内通用", scenes: "clinic,wellness", priority: 12, note: "门诊/保健：1M 上下文 + 原生视觉，复杂推理与长文阅读" },
+  { name: "Kimi K2.8 Preview", base_url: "https://api.moonshot.cn/v1", model: "kimi-k2.8-preview", category: "国内通用", scenes: "clinic", priority: 22, note: "门诊备选：思考效率高，长上下文指令遵循稳定" },
+  { name: "豆包 Seed 2.1 Pro（火山方舟）", base_url: "https://ark.cn-beijing.volces.com/api/v3", model: "doubao-seed-2.1-pro", category: "国内通用", scenes: "clinic,emergency", priority: 23, note: "门诊/急诊备选：中文创作与多模态强；model 需填方舟推理接入点 ID" },
+  { name: "豆包 Seed 2.1 Turbo（火山方舟）", base_url: "https://ark.cn-beijing.volces.com/api/v3", model: "doubao-seed-2.1-turbo", category: "国内通用", scenes: "fast", priority: 33, note: "快诊：效果与成本均衡，多模态与长链路执行升级；model 需填方舟推理接入点 ID" },
+  { name: "豆包 Seed Evolving（火山方舟）", base_url: "https://ark.cn-beijing.volces.com/api/v3", model: "doubao-seed-evolving", category: "国内通用", scenes: "clinic", priority: 24, note: "门诊备选：面向 Coding/Agent，1M 上下文，统一模型 ID 周级升级；需填方舟接入点 ID" },
+  { name: "文心一言 ERNIE 6.0（千帆）", base_url: "https://qianfan.baidubce.com/v2", model: "ernie-6.0", category: "国内通用", scenes: "wellness", priority: 16, note: "保健：中医药知识、公卫宣教；model 名以千帆控制台为准" },
+  { name: "腾讯混元 Pro", base_url: "https://api.hunyuan.cloud.tencent.com/v1", model: "hunyuan-pro", category: "国内通用", scenes: "clinic,wellness", priority: 25, note: "门诊/保健备选：中文理解与工具调用均衡" },
+  { name: "腾讯混元 Hy4 Preview", base_url: "https://api.hunyuan.cloud.tencent.com/v1", model: "hy4-preview", category: "国内通用", scenes: "clinic", priority: 26, note: "门诊备选：约 770B 稀疏旗舰，1M 上下文，Agent 与代码优化；model 名以控制台为准" },
+  { name: "MiniMax M3", base_url: "https://api.minimax.chat/v1", model: "MiniMax-M3", category: "国内通用", scenes: "clinic,emergency", priority: 27, note: "门诊/急诊备选：编码与智能体评测顶尖，长上下文" },
+  { name: "硅基流动 SiliconFlow", base_url: "https://api.siliconflow.cn/v1", model: "deepseek-ai/DeepSeek-V4-Pro", category: "国内通用", scenes: "fast,clinic,emergency,wellness", priority: 40, note: "国内聚合网关，一个 Key 调多家开源模型（DeepSeek/Qwen/GLM/Kimi/MiniMax）；四通道兜底" },
   /* ---- 海外通用 ---- */
-  { name: "OpenAI GPT-o1", base_url: "https://api.openai.com/v1", model: "o1", category: "海外通用", scenes: "emergency", priority: 3, note: "急诊主推：复杂多病共存/罕见病临床推理最强，用药方案必须按国内指南复核" },
-  { name: "OpenAI GPT-4o", base_url: "https://api.openai.com/v1", model: "gpt-4o", category: "海外通用", scenes: "clinic,emergency", priority: 20, note: "多模态：化验单/皮肤照片/影像初步解读，门诊/急诊可选" },
-  { name: "Claude 3.7 Sonnet", base_url: "https://api.anthropic.com/v1", model: "claude-3-7-sonnet-20250219", category: "海外通用", scenes: "emergency", priority: 6, note: "急诊备选：超长病历/多页报告无损消化，输出稳定幻觉低" },
-  { name: "Gemini 2.5 Pro", base_url: "https://generativelanguage.googleapis.com/v1beta/openai", model: "gemini-2.5-pro", category: "海外通用", scenes: "clinic,wellness", priority: 26, note: "医学多模态强，放射/皮肤/病理影像辅助解读（体检报告）" },
-  { name: "OpenRouter", base_url: "https://openrouter.ai/api/v1", model: "openai/gpt-4o-mini", category: "海外通用", scenes: "fast,clinic,emergency,wellness", priority: 40, note: "聚合网关，一个 Key 调多家模型；四通道通用兜底" },
+  { name: "OpenAI GPT-6 Astra", base_url: "https://api.openai.com/v1", model: "gpt-6-astra", category: "海外通用", scenes: "emergency", priority: 1, note: "急诊主推：当前旗舰，复杂推理/编码/Agent 最强；用药必须按国内指南复核，model 名以控制台为准" },
+  { name: "OpenAI GPT-6 Sol", base_url: "https://api.openai.com/v1", model: "gpt-6-sol", category: "海外通用", scenes: "clinic", priority: 13, note: "门诊备选：复杂编码与 Agent 工作流，成本较旗舰大幅下降；model 名以控制台为准" },
+  { name: "OpenAI GPT-6 Luna", base_url: "https://api.openai.com/v1", model: "gpt-6-luna", category: "海外通用", scenes: "fast", priority: 34, note: "快诊备选：面向信息提取/摘要等高容量低成本任务；model 名以控制台为准" },
+  { name: "Claude Opus 5.5", base_url: "https://api.anthropic.com/v1", model: "claude-opus-5-5", category: "海外通用", scenes: "emergency", priority: 2, note: "急诊备选：超长病历/多页报告无损消化，输出稳定幻觉低；model 名以控制台为准" },
+  { name: "Claude Sonnet 5", base_url: "https://api.anthropic.com/v1", model: "claude-sonnet-5", category: "海外通用", scenes: "clinic", priority: 17, note: "门诊备选：均衡性价比，长文本稳定；model 名以控制台为准" },
+  { name: "Gemini 3 Pro", base_url: "https://generativelanguage.googleapis.com/v1beta/openai", model: "gemini-3-pro", category: "海外通用", scenes: "emergency,wellness", priority: 14, note: "急诊/保健：医学多模态强，放射/皮肤/病理影像与体检报告解读" },
+  { name: "Gemini 3.1 Pro", base_url: "https://generativelanguage.googleapis.com/v1beta/openai", model: "gemini-3.1-pro", category: "海外通用", scenes: "fast", priority: 35, note: "快诊备选：前沿档中成本最低，多模态" },
+  { name: "Grok 4.7", base_url: "https://api.x.ai/v1", model: "grok-4.7", category: "海外通用", scenes: "emergency", priority: 15, note: "急诊备选：多智能体协作与实时信息接入，复杂推理；model 名以控制台为准" },
+  { name: "OpenRouter", base_url: "https://openrouter.ai/api/v1", model: "openai/gpt-6-sol", category: "海外通用", scenes: "fast,clinic,emergency,wellness", priority: 41, note: "海外聚合网关，一个 Key 调多家模型；四通道兜底" },
   /* ---- 国内垂直 ---- */
-  { name: "讯飞星火医疗（晓医）", base_url: "https://spark-api-open.xf-yun.com/v1", model: "4.0Ultra", category: "国内垂直", scenes: "fast,maternal", priority: 7, note: "妇幼通道主推：孕产妇/儿童健康评估与用药安全语义理解，医疗版需讯飞授权" },
-  { name: "百川 Baichuan-M4", base_url: "https://api.baichuan-ai.com/v1", model: "Baichuan-M2-32B", category: "国内垂直", scenes: "maternal,emergency", priority: 30, note: "妇幼备选：肿瘤/儿科专科，低幻觉强循证；医疗版需商务授权" },
+  { name: "讯飞星火医疗（晓医）", base_url: "https://spark-api-open.xf-yun.com/v1", model: "Spark-X2.5", category: "国内垂直", scenes: "maternal", priority: 3, note: "妇幼主推：孕产妇/儿童健康评估与用药安全语义理解；医疗版需讯飞授权，model 名以控制台为准" },
+  { name: "百川 Baichuan-M4", base_url: "https://api.baichuan-ai.com/v1", model: "Baichuan-M4", category: "国内垂直", scenes: "maternal", priority: 4, note: "妇幼备选：低幻觉强循证，儿科/肿瘤专科；医疗版需商务授权" },
   { name: "医联 MedGPT", base_url: "", model: "medgpt", category: "国内垂直", scenes: "wellness", priority: 90, note: "慢病随访/健康管理；无公开 API，需企业合作接入" },
   { name: "智愈 MedSeek（良医汇）", base_url: "", model: "medseek", category: "国内垂直", scenes: "emergency", priority: 90, note: "肿瘤专科循证检索（TNM 分期/化疗方案），面向医生；无公开 API" },
   { name: "小荷 AI 医生", base_url: "", model: "xiaohe", category: "国内垂直", scenes: "clinic", priority: 90, note: "门诊：化验单拍照解读、用药科普；无公开 API" },
@@ -232,21 +249,41 @@ const LLM_PRESETS = [
   { name: "Med-Gemini", base_url: "", model: "med-gemini", category: "海外垂直", scenes: "emergency", priority: 99, note: "医学影像+基因组多模态科研；面向 B 端，无公开 API" },
 ];
 
+/* 旧预置名称 → 新预置名称：老库升级时改名（避免同厂商出现新旧两行），并按新预置补齐模型/地址/场景/优先级 */
+const PRESET_RENAMES = {
+  "DeepSeek-R1": "DeepSeek V4-Pro",
+  "通义千问 Max": "通义千问 Qwen3.8-Max",
+  "月之暗面 Kimi": "Kimi K3",
+  "智谱 GLM": "智谱 GLM-5.3-Flash",
+  "OpenAI GPT-o1": "OpenAI GPT-6 Astra",
+  "OpenAI GPT-4o": "OpenAI GPT-6 Sol",
+  "Claude 3.7 Sonnet": "Claude Opus 5.5",
+  "Gemini 2.5 Pro": "Gemini 3 Pro",
+  "豆包 Pro（火山方舟）": "豆包 Seed 2.1 Pro（火山方舟）",
+  "文心一言 X1（千帆）": "文心一言 ERNIE 6.0（千帆）",
+};
+
+
 function initLLMProviders() {
   const insert = db.prepare("INSERT INTO llm_providers (name, base_url, model, api_key, enabled, category, note, scenes, priority) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-  // 旧库一次性迁移：旧 DeepSeek 预置（未填 Key）更名为 DeepSeek-R1 并指向推理模型
-  db.prepare("UPDATE llm_providers SET name = 'DeepSeek-R1', model = 'deepseek-reasoner', category = '国内通用', scenes = 'clinic,emergency', priority = 8, note = ? WHERE name = 'DeepSeek' AND api_key = ''").run(
-    LLM_PRESETS.find((p) => p.name === "DeepSeek-R1").note
-  );
-  // 旧库分类修正：海外网关与 OpenAI 归入海外通用
-  db.prepare("UPDATE llm_providers SET category = '海外通用' WHERE name IN ('OpenAI', 'OpenRouter') AND category = '国内通用'").run();
+  const findName = db.prepare("SELECT id FROM llm_providers WHERE name = ?");
+  const renameStmt = db.prepare("UPDATE llm_providers SET name = ?, base_url = ?, model = ?, category = ?, note = ?, scenes = ?, priority = ? WHERE id = ?");
+  // 旧预置改名到新预置，并按新预置补齐模型/地址/分类/备注/场景/优先级（保留 api_key 与 enabled）
+  for (const [oldName, newName] of Object.entries(PRESET_RENAMES)) {
+    const p = LLM_PRESETS.find((x) => x.name === newName);
+    const oldRow = findName.get(oldName);
+    if (!p || !oldRow) continue;
+    const newRow = findName.get(newName);
+    if (newRow && newRow.id !== oldRow.id) continue;
+    renameStmt.run(p.name, p.base_url, p.model, p.category, p.note, p.scenes, p.priority, oldRow.id);
+  }
   // 幂等补种：老库也自动获得全部新预置
   const existing = new Set(db.prepare("SELECT name FROM llm_providers").all().map((r) => r.name));
   const envKey = String(process.env.USER_LLM_API_KEY || "").trim();
   const hasRealEnvKey = Boolean(envKey) && envKey !== "your-api-key-here";
   for (const p of LLM_PRESETS) {
     if (existing.has(p.name)) continue;
-    const isDeepSeek = p.name === "DeepSeek-R1";
+    const isDeepSeek = p.name === "DeepSeek V4-Pro";
     insert.run(p.name, p.base_url, p.model, isDeepSeek && hasRealEnvKey ? envKey : "", 0, p.category, p.note, p.scenes, p.priority);
   }
   // 旧词汇迁移（general/complex -> 新通道路由）：仅对非预置用户自定义行，把旧标签翻译成新通道标签
@@ -264,13 +301,13 @@ function initLLMProviders() {
     }
     if (out.length) migrateLegacy.run([...new Set(out)].join(","), r.id);
   }
-  // 预置行同步：已存在的预置行若仍用旧场景词汇或未自定义优先级，同步最新预置元数据，避免路由错乱
-  const syncMetaStmt = db.prepare("UPDATE llm_providers SET scenes = ?, priority = ? WHERE name = ? AND (priority = 100 OR scenes LIKE '%general%' OR scenes LIKE '%complex%')");
-  for (const p of LLM_PRESETS) syncMetaStmt.run(p.scenes, p.priority, p.name);
-  // 兜底：无任何启用配置时，默认启用 DeepSeek-R1（填入 Key 后即可推理）
+  // 预置行同步：未填 Key 的预置行始终跟随最新预置的地址/模型/分类/备注/场景/优先级（已填 Key 的用户自定义不被覆盖）
+  const syncPresetStmt = db.prepare("UPDATE llm_providers SET base_url = ?, model = ?, category = ?, note = ?, scenes = ?, priority = ? WHERE name = ? AND api_key = ''");
+  for (const p of LLM_PRESETS) syncPresetStmt.run(p.base_url, p.model, p.category, p.note, p.scenes, p.priority, p.name);
+  // 兜底：无任何启用配置时，默认启用 DeepSeek V4-Pro（填入 Key 后即可推理）
   const anyEnabled = db.prepare("SELECT COUNT(*) AS n FROM llm_providers WHERE enabled = 1").get().n;
   if (!anyEnabled) {
-    db.prepare("UPDATE llm_providers SET enabled = 1 WHERE name = 'DeepSeek-R1' AND api_key = ''").run();
+    db.prepare("UPDATE llm_providers SET enabled = 1 WHERE name = 'DeepSeek V4-Pro' AND api_key = ''").run();
   }
 }
 initLLMProviders();
