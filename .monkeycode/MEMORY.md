@@ -141,7 +141,8 @@ Entries discovered by the Agent during task execution should follow this format:
 - Context: Discovered by Agent while deploying the frontend to Cloudflare Pages with an Account API Token
 - Category: Operations & Deployment / Troubleshooting & Debugging / Environment Configuration
 - Instructions:
-  - Cloudflare 新版凭据前缀：`cfat_` = Account API Token、`cfut_` = User API Token、`cfk_` = Global API Key，格式均为 `前缀 + 40 位 + 8 位校验和`（共 53 位）。
-  - 校验 Account Token 必须用账户级端点 `GET /accounts/{account_id}/tokens/verify`（返回 active）；用户级 `/user/tokens/verify` 对它一律返回 Invalid API Token，不代表令牌无效。该 verify 端点不会校验账户归属，传任意 account id 都返回 active，真正的归属证明是能访问该账户下的其他接口（如 `/accounts/{id}/workers/scripts`）。
-  - Pages 接口对权限缺失的 Account Token 返回 `Authentication error [code: 10000]`（而账户资料接口缺权限是 9109）。部署 Pages 需令牌含 `Account · Cloudflare Pages · Edit`。若只有 Workers 权限，`wrangler pages deploy` 会在 `GET /accounts/{id}/pages/projects/{name}` 处报 10000；同时 wrangler 会用 `/user/tokens/verify` 兜底导致二次 `fetch failed`，后者是假象。
-  - `wrangler pages deploy` 需同时设置 `CLOUDFLARE_API_TOKEN` 与 `CLOUDFLARE_ACCOUNT_ID`；GitHub 推送可用一次性内联 credential helper（`GH_PAT=xxx git -c credential.helper='!f() { printf "username=%s\npassword=%s\n" <user> "$GH_PAT"; }; f' push`），平台自带 git-credential-helper 对本仓库无效。
+  - Cloudflare 新版凭据前缀：`cfat_` = Account API Token、`cfut_` = User API Token、`cfk_` = Global API Key，格式均为 `前缀 + 40 位 + 8 位校验和`（共 53 位）。校验 Account Token 用账户级 `GET /accounts/{id}/tokens/verify`（active）；用户级 `/user/tokens/verify` 对它返回 Invalid API Token，不代表无效，且 verify 不校验账户归属。
+  - Pages 接口对权限缺失的 Account Token 返回 `Authentication error [code: 10000]`（账户资料接口缺权限是 9109）；部署 Pages 需令牌含 `Account · Cloudflare Pages · Edit`。仅 Workers 权限时 `wrangler pages deploy` 会在 `/accounts/{id}/pages/projects/{name}` 处报 10000，且 wrangler 用 `/user/tokens/verify` 兜底会出现二次 `fetch failed`（假象）。
+  - 2026-09-24 已用含 Pages Edit 的 Account Token 部署成功：`CLOUDFLARE_API_TOKEN=... CLOUDFLARE_ACCOUNT_ID=2e33f078edc00ade4b25e61526d6f544 wrangler pages deploy --branch main`（自动读 wrangler.toml 的 pages_build_output_dir=client/dist，Functions 与 _headers 一并上传）。线上生产地址 https://aihospital-eq8.pages.dev 。令牌保存在 /root/.cloudflare-token（600）。
+  - 沙箱与 webfetch 都无法访问 *.pages.dev，验证部署只能走 Cloudflare API（`/accounts/{id}/pages/projects/aihospital` 的 canonical_deployment）。
+  - 线上 /api 仍指向占位 BACKEND_ORIGIN=https://api.aihospital.com，在前端可正常打开，但问诊接口不可用；需公网后端服务器后再改 Pages 环境变量。
