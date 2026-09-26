@@ -130,7 +130,7 @@ Entries discovered by the Agent during task execution should follow this format:
 - Context: Discovered by Agent while pushing to GitHub and deploying the frontend to Cloudflare Pages
 - Category: Operations & Deployment / Environment Configuration / Workflow & Collaboration
 - Instructions:
-  - GitHub 仓库：https://github.com/talleylinjg-ops/AIhospital ，主分支为 `main`（本地已从 master 改名并跟踪 origin/main）。推送使用一次性凭据，不写入 .git/config：`git -c credential.helper='!f() { printf "username=%s\npassword=%s\n" <user> "$GH_PAT"; }; f' push origin main`。平台自带 git-credential-helper 对 github.com 返回空，不要依赖它。
+  - GitHub 仓库：https://github.com/talleylinjg-ops/AIhospital ，主分支为 `main`（本地已从 master 改名并跟踪 origin/main）。推送使用一次性凭据，不写入 .git/config：`git -c credential.helper='!f() { printf "username=%s\npassword=%s\n" <user> "$GH_PAT"; }; f' push origin main`。平台自带 git-credential-helper 对 github.com 返回 500，不要依赖它；内联 helper 里的令牌变量必须先 `export`，否则子 shell 取不到值会导致 `Invalid username or token`。
   - Cloudflare：Pages 项目名 `aihospital`，账户 `Daqi Account`（account id 2e33f078edc00ade4b25e61526d6f544），生产分支 `main`；创建用 `wrangler pages project create aihospital --production-branch main`。沙箱可访问 api.cloudflare.com 但访问不了 *.pages.dev，验证部署走 Cloudflare API 而非 curl 站点。Pages 的 `[vars] BACKEND_ORIGIN` 从 wrangler.toml 读取并自动生效。
   - 自动部署工作流已准备在 `.github/workflows/deploy-pages.yml`（push main 或手动触发即构建部署，未配置 Secrets 时跳过而非失败）。当前 PAT 只有 `repo` 作用域，GitHub 拒绝推送 workflow 文件；需换成含 `workflow` 作用域的令牌，或直接在 GitHub 网页端创建该文件。仓库还需在 Settings→Secrets→Actions 配置 CLOUDFLARE_API_TOKEN 与 CLOUDFLARE_ACCOUNT_ID 才会真正自动部署。
 

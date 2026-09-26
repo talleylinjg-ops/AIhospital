@@ -8,6 +8,15 @@ const app = document.getElementById("app");
 const esc = (s) =>
   String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
+/* 把浏览器网络层报错翻译成面向用户的中文提示 */
+const netErrorText = (err) => {
+  const m = String((err && err.message) || err || "");
+  if (/Failed to fetch|NetworkError|Load failed|fetch failed|ECONNREFUSED|network/i.test(m)) {
+    return "无法连接问诊服务，请检查网络后重试";
+  }
+  return m || "网络异常，请重试";
+};
+
 const state = {
   level: null,
   formData: {},
@@ -1013,7 +1022,7 @@ function bindForm(level) {
       }
       location.hash = "#/result";
     } catch (err) {
-      location.hash = `#/error/${encodeURIComponent(err.message || "网络异常，请重试")}`;
+      location.hash = `#/error/${encodeURIComponent(netErrorText(err))}`;
     }
   });
 }
@@ -1126,7 +1135,7 @@ function bindResult() {
       const json = await res.json();
       renderCompareResult(json);
     } catch (err) {
-      if (el) el.innerHTML = `<p class="compare-error">${esc(err.message || "网络异常，请重试")}</p>`;
+      if (el) el.innerHTML = `<p class="compare-error">${esc(netErrorText(err))}</p>`;
     } finally {
       btn.disabled = false;
       btn.textContent = "对比分析";
