@@ -5,7 +5,9 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DATA_DIR = path.join(__dirname, "..", "data");
+const DATA_DIR = process.env.AIHOSPITAL_DATA_DIR
+  ? path.resolve(process.env.AIHOSPITAL_DATA_DIR)
+  : path.join(__dirname, "..", "data");
 const DB_PATH = path.join(DATA_DIR, "consultations.db");
 
 fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -281,10 +283,22 @@ function initLLMProviders() {
   const existing = new Set(db.prepare("SELECT name FROM llm_providers").all().map((r) => r.name));
   const envKey = String(process.env.USER_LLM_API_KEY || "").trim();
   const hasRealEnvKey = Boolean(envKey) && envKey !== "your-api-key-here";
+  const envBaseUrl = String(process.env.USER_LLM_BASE_URL || "").trim().replace(/\/+$/, "");
+  const envModel = String(process.env.USER_LLM_MODEL || "").trim();
   for (const p of LLM_PRESETS) {
     if (existing.has(p.name)) continue;
     const isDeepSeek = p.name === "DeepSeek V4-Pro";
-    insert.run(p.name, p.base_url, p.model, isDeepSeek && hasRealEnvKey ? envKey : "", 0, p.category, p.note, p.scenes, p.priority);
+    insert.run(
+      p.name,
+      isDeepSeek && envBaseUrl ? envBaseUrl : p.base_url,
+      isDeepSeek && envModel ? envModel : p.model,
+      isDeepSeek && hasRealEnvKey ? envKey : "",
+      0,
+      p.category,
+      p.note,
+      p.scenes,
+      p.priority
+    );
   }
   // 旧词汇迁移（general/complex -> 新通道路由）：仅对非预置用户自定义行，把旧标签翻译成新通道标签
   const presetNames = new Set(LLM_PRESETS.map((p) => p.name));
@@ -304,10 +318,15 @@ function initLLMProviders() {
   // 预置行同步：未填 Key 的预置行始终跟随最新预置的地址/模型/分类/备注/场景/优先级（已填 Key 的用户自定义不被覆盖）
   const syncPresetStmt = db.prepare("UPDATE llm_providers SET base_url = ?, model = ?, category = ?, note = ?, scenes = ?, priority = ? WHERE name = ? AND api_key = ''");
   for (const p of LLM_PRESETS) syncPresetStmt.run(p.base_url, p.model, p.category, p.note, p.scenes, p.priority, p.name);
-  // 兜底：无任何启用配置时，默认启用 DeepSeek V4-Pro（填入 Key 后即可推理）
+  // 兜底：无任何启用配置时，默认启用 DeepSeek V4-Pro（优先已通过环境变量填好 Key 的那一行）
   const anyEnabled = db.prepare("SELECT COUNT(*) AS n FROM llm_providers WHERE enabled = 1").get().n;
   if (!anyEnabled) {
-    db.prepare("UPDATE llm_providers SET enabled = 1 WHERE name = 'DeepSeek V4-Pro' AND api_key = ''").run();
+    const preferred =
+      db.prepare("SELECT id FROM llm_providers WHERE name = 'DeepSeek V4-Pro' AND api_key <> ''").get() ||
+      db.prepare("SELECT id FROM llm_providers WHERE name = 'DeepSeek V4-Pro'").get();
+    if (preferred) {
+      db.prepare("UPDATE llm_providers SET enabled = 1 WHERE id = ?").run(preferred.id);
+    }
   }
 }
 initLLMProviders();

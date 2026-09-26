@@ -1,0 +1,15 @@
+services:
+  aihospital:
+    build: .
+    image: aihospital:latest
+    container_name: aihospital
+    ports:
+      - "3001:3001"
+    env_file:
+      - .env
+    volumes:
+      - aihospital-data:/app/data
+    restart: unless-stopped
+
+volumes:
+  aihospital-data:

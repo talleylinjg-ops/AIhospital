@@ -131,18 +131,17 @@ Entries discovered by the Agent during task execution should follow this format:
 - Category: Operations & Deployment / Environment Configuration / Workflow & Collaboration
 - Instructions:
   - GitHub 仓库：https://github.com/talleylinjg-ops/AIhospital ，主分支为 `main`（本地已从 master 改名并跟踪 origin/main）。推送使用一次性凭据，不写入 .git/config：`git -c credential.helper='!f() { printf "username=%s\npassword=%s\n" <user> "$GH_PAT"; }; f' push origin main`。平台自带 git-credential-helper 对 github.com 返回空，不要依赖它。
-  - Cloudflare：Pages 项目名 `aihospital`，账户 `Daqi Account`（account id 2e33f078edc00ade4b25e61526d6f544），生产分支 `main`，线上地址 https://aihospital-eq8.pages.dev 。部署命令：`wrangler pages project create aihospital --production-branch main` 与 `wrangler pages deploy client/dist --project-name aihospital --branch main`（需 CLOUDFLARE_API_TOKEN + CLOUDFLARE_ACCOUNT_ID）。Pages 的 `[vars] BACKEND_ORIGIN` 从 wrangler.toml 读取并自动生效。
-  - 沙箱出网限制：可以访问 api.cloudflare.com（wrangler 正常），但无法访问 *.pages.dev，验证部署请改用 Cloudflare API（`/accounts/{id}/pages/projects/aihospital/deployments`）而非 curl 站点。
+  - Cloudflare：Pages 项目名 `aihospital`，账户 `Daqi Account`（account id 2e33f078edc00ade4b25e61526d6f544），生产分支 `main`；创建用 `wrangler pages project create aihospital --production-branch main`。沙箱可访问 api.cloudflare.com 但访问不了 *.pages.dev，验证部署走 Cloudflare API 而非 curl 站点。Pages 的 `[vars] BACKEND_ORIGIN` 从 wrangler.toml 读取并自动生效。
   - 自动部署工作流已准备在 `.github/workflows/deploy-pages.yml`（push main 或手动触发即构建部署，未配置 Secrets 时跳过而非失败）。当前 PAT 只有 `repo` 作用域，GitHub 拒绝推送 workflow 文件；需换成含 `workflow` 作用域的令牌，或直接在 GitHub 网页端创建该文件。仓库还需在 Settings→Secrets→Actions 配置 CLOUDFLARE_API_TOKEN 与 CLOUDFLARE_ACCOUNT_ID 才会真正自动部署。
-  - 后端仍是 Express+SQLite，需另有一台公网服务器并把 Pages 的 BACKEND_ORIGIN 指向它，否则线上 /api 不可用（前端可正常打开）。
 
 [Project Knowledge Summary]
 - Date: 2026-09-23
-- Context: Discovered by Agent while deploying the frontend to Cloudflare Pages with an Account API Token
+- Context: Discovered by Agent while deploying the frontend to Cloudflare Pages and packaging the backend for public deployment
 - Category: Operations & Deployment / Troubleshooting & Debugging / Environment Configuration
 - Instructions:
-  - Cloudflare 新版凭据前缀：`cfat_` = Account API Token、`cfut_` = User API Token、`cfk_` = Global API Key，格式均为 `前缀 + 40 位 + 8 位校验和`（共 53 位）。校验 Account Token 用账户级 `GET /accounts/{id}/tokens/verify`（active）；用户级 `/user/tokens/verify` 对它返回 Invalid API Token，不代表无效，且 verify 不校验账户归属。
-  - Pages 接口对权限缺失的 Account Token 返回 `Authentication error [code: 10000]`（账户资料接口缺权限是 9109）；部署 Pages 需令牌含 `Account · Cloudflare Pages · Edit`。仅 Workers 权限时 `wrangler pages deploy` 会在 `/accounts/{id}/pages/projects/{name}` 处报 10000，且 wrangler 用 `/user/tokens/verify` 兜底会出现二次 `fetch failed`（假象）。
-  - 2026-09-24 已用含 Pages Edit 的 Account Token 部署成功：`CLOUDFLARE_API_TOKEN=... CLOUDFLARE_ACCOUNT_ID=2e33f078edc00ade4b25e61526d6f544 wrangler pages deploy --branch main`（自动读 wrangler.toml 的 pages_build_output_dir=client/dist，Functions 与 _headers 一并上传）。线上生产地址 https://aihospital-eq8.pages.dev 。令牌保存在 /root/.cloudflare-token（600）。
-  - 沙箱与 webfetch 都无法访问 *.pages.dev，验证部署只能走 Cloudflare API（`/accounts/{id}/pages/projects/aihospital` 的 canonical_deployment）。
-  - 线上 /api 仍指向占位 BACKEND_ORIGIN=https://api.aihospital.com，在前端可正常打开，但问诊接口不可用；需公网后端服务器后再改 Pages 环境变量。
+  - Cloudflare 新版凭据前缀：`cfat_`=Account API Token、`cfut_`=User API Token、`cfk_`=Global API Key。校验 Account Token 用账户级 `GET /accounts/{id}/tokens/verify`（用户级 verify 对它返回 Invalid 属正常）。部署 Pages 需 `Account · Cloudflare Pages · Edit`，权限不足返回 10000（账户资料为 9109）。可用令牌存 /root/.cloudflare-token（600）。
+  - Pages 部署命令：`CLOUDFLARE_API_TOKEN=... CLOUDFLARE_ACCOUNT_ID=2e33f078edc00ade4b25e61526d6f544 wrangler pages deploy --branch main`（读 wrangler.toml 的 pages_build_output_dir=client/dist）。线上生产地址 https://aihospital-eq8.pages.dev 。沙箱与 webfetch 都访问不了 *.pages.dev，验证部署只能走 Cloudflare API 的 canonical_deployment。
+  - 该账号现有 zone：chacha.asia、daqi.asia、daqi.site、kvisa.cloud、liangdu.asia（均 active）、studyinchina.com（pending）；没有 aihospital.com，故 canonical/sitemap 里的 aihospital.com 无法绑定，需先在该账号添加并激活该域名。
+  - 后端可单进程对外提供整站：`node server/index.js` 同时托管 client/dist、/admin、/api 与 SEO 文件，只需暴露一个 PORT（默认 3001）。已提供 Dockerfile / docker-compose.yml / .dockerignore；数据目录用 `AIHOSPITAL_DATA_DIR` 指向挂载卷（默认 <root>/data）。
+  - 环境变量一键配默认模型：`USER_LLM_API_KEY`/`USER_LLM_BASE_URL`/`USER_LLM_MODEL` 首次建库写入预置行 `DeepSeek V4-Pro`；无任何启用模型时自动启用它（优先带 Key 那行）。其余模型在 /admin 逐个配。`.env.example` 已与代码实际读取变量对齐（PORT、LLM_TIMEOUT_MS、MAX_CONCURRENT_LLM、AIHOSPITAL_DATA_DIR、ADMIN_USERNAME、ADMIN_PASSWORD）。
+  - 线上 /api 仍指向占位 BACKEND_ORIGIN=https://api.aihospital.com，前端可打开但问诊不可用；需公网后端后再改 Pages 环境变量。
