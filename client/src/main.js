@@ -128,7 +128,7 @@ function homeView() {
         </p>
         <h3>在线健康服务</h3>
         <p>
-          除预问诊外，平台还提供 AI 慢病管理月度套餐、体检报告解读等服务。进入服务购买页选择服务并下单，支持支付宝或微信在线支付，支付成功后即时开通；也可由客服电话确认后付款。注册会员还可使用账户余额支付并管理健康档案与历史记录。
+          除预问诊外，平台还提供 AI 慢病管理月度套餐、体检报告解读等服务。进入服务购买页选择服务并下单，支持支付宝或微信在线支付，支付成功后即时开通；也可选择线下付款，下单后客服会及时与您联系确认。注册会员还可使用账户余额支付并管理健康档案与历史记录。
         </p>
         <h3>常见问题</h3>
         <dl class="faq-list">
@@ -137,7 +137,7 @@ function homeView() {
           <dt>AI 问诊结果可以代替医生诊断吗？</dt>
           <dd>不能。本系统为 AI 辅助预问诊，所有输出仅供参考，不能替代执业医师的诊断与治疗。如出现胸痛、呼吸困难、意识改变、大出血等急危情况，请立即拨打 120 或前往急诊。</dd>
           <dt>如何购买服务并支付？</dt>
-          <dd>在服务购买页选择服务并下单，支持支付宝/微信在线支付并即时开通，也可由客服电话确认后付款。</dd>
+          <dd>在服务购买页选择服务并下单，支持支付宝/微信在线支付并即时开通，也可选择线下付款，下单后客服会及时与您联系确认。</dd>
           <dt>上传的病历与报告如何使用？</dt>
           <dd>上传材料用于存档，便于医生或客服查看并据此安排解读与随访，支持图片与 PDF，单个文件不超过 6MB。</dd>
         </dl>
@@ -156,7 +156,7 @@ function drawConsultPicker() {
   const list = document.getElementById("ca-list");
   if (!list) return;
   const tip = document.getElementById("ca-tip");
-  if (tip) tip.textContent = consultFiles.length ? `已选择 ${consultFiles.length} 份，提交问诊后自动归档到本次记录` : "";
+  if (tip) tip.textContent = consultFiles.length ? `已选择 ${consultFiles.length} 份，提交问诊后自动归档到本次记录` : "尚未选择材料，可点击上方按钮添加（选填）";
   if (!consultFiles.length) {
     list.innerHTML = "";
     return;
@@ -455,7 +455,7 @@ function servicesView() {
     <div class="container">
       <div class="hero services-hero">
         <h1>服务购买</h1>
-        <p>浏览并选择所需的健康服务，可选择支付宝 / 微信在线支付，支付成功后即时开通；也可由客服电话确认付款</p>
+        <p>浏览并选择所需的健康服务，可选择支付宝 / 微信在线支付，支付成功后即时开通；也可选择线下付款，客服会及时与您联系确认付款</p>
         <div class="notice">在线支付以实际可用渠道为准；未登录用户选择在线支付时需填写下单手机号</div>
       </div>
       <div class="services-grid" id="services-grid"><div class="loading-inline">加载中…</div></div>
@@ -564,16 +564,15 @@ function openBuyDialog({ id, name, price, unit, needsDoc }) {
   const qtyEl = document.getElementById("bf-qty");
   const totalEl = document.getElementById("bf-total");
   const contact = document.getElementById("bf-contact");
+  const phoneEl = document.getElementById("bf-phone");
   const payopts = document.getElementById("bf-payopts");
   const submitBtn = document.getElementById("bf-submit");
   const errEl = document.getElementById("bf-error");
   const memberLine = document.getElementById("bf-member-line");
   const memberTxt = document.getElementById("bf-member-txt");
 
-  const total = () => {
-    const q = Math.max(1, Math.min(99, Number(qtyEl.value) || 1));
-    return unitPrice * q;
-  };
+  const clampQty = () => Math.max(1, Math.min(99, Number(qtyEl.value) || 1));
+  const total = () => unitPrice * clampQty();
 
   function paintModes() {
     if (memberValid) {
@@ -588,12 +587,14 @@ function openBuyDialog({ id, name, price, unit, needsDoc }) {
         payMode = "balance";
         submitBtn.textContent = "免费开通";
         contact.style.display = "none";
+        phoneEl.required = false;
         payopts.innerHTML = `<p class="buy-note">已登录会员：基础/免费档直接为您开通，无需填写联系方式。</p>`;
         return;
       }
       payMode = "offline";
       submitBtn.textContent = "免费开通";
       contact.style.display = "";
+      phoneEl.required = true;
       payopts.innerHTML = "";
       return;
     }
@@ -606,6 +607,7 @@ function openBuyDialog({ id, name, price, unit, needsDoc }) {
     }
     const contactNeeded = payMode === "offline" || (isOnlineMode(payMode) && !memberValid);
     contact.style.display = contactNeeded ? "" : "none";
+    phoneEl.required = contactNeeded;
     payopts.innerHTML = modes
       .map(
         (m) => `<p class="buy-opt"><label><input type="radio" name="paymode" value="${m.value}" ${payMode === m.value ? "checked" : ""} ${m.disabled ? "disabled" : ""} />${m.label}</label></p>`
@@ -617,6 +619,7 @@ function openBuyDialog({ id, name, price, unit, needsDoc }) {
         payMode = r.value;
         const need = payMode === "offline" || (isOnlineMode(payMode) && !memberValid);
         contact.style.display = need ? "" : "none";
+        phoneEl.required = need;
         submitBtn.textContent = submitLabel(payMode);
       })
     );
@@ -678,8 +681,15 @@ function openBuyDialog({ id, name, price, unit, needsDoc }) {
   document.getElementById("buy-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     errEl.textContent = "";
-    submitBtn.disabled = true;
     const oldText = submitBtn.textContent;
+    if (contact.style.display !== "none") {
+      const pv = (phoneEl.value || "").trim();
+      if (!/^1[3-9]\d{9}$/.test(pv)) {
+        errEl.textContent = "请填写正确的 11 位手机号";
+        return;
+      }
+    }
+    submitBtn.disabled = true;
     submitBtn.textContent = "提交中…";
 
     const authHeaders = () => {
@@ -709,7 +719,7 @@ function openBuyDialog({ id, name, price, unit, needsDoc }) {
           hint: `「${name}」需要病历 / 检验 / 报告材料，可在此上传（可多份），客服将据此安排解读或随访。`,
         });
       }
-      document.getElementById("buy-done").addEventListener("click", () => (mask.hidden = true));
+      document.getElementById("buy-done").addEventListener("click", closeDialog);
     };
     const renderPurchasePay = (pay) => {
       const phone = (document.getElementById("bf-phone").value || "").trim();
@@ -745,7 +755,7 @@ function openBuyDialog({ id, name, price, unit, needsDoc }) {
         return false;
       };
       document.getElementById("buy-recheck").addEventListener("click", check);
-      document.getElementById("buy-done").addEventListener("click", () => (mask.hidden = true));
+      document.getElementById("buy-done").addEventListener("click", closeDialog);
       if (payTimer) clearInterval(payTimer);
       payTimer = setInterval(() => {
         if (!document.getElementById("buy-qr")) {
@@ -761,7 +771,7 @@ function openBuyDialog({ id, name, price, unit, needsDoc }) {
       if (memberValid && payMode === "balance") {
         const data = await memberUI.memberApi("/pay", {
           method: "POST",
-          body: { serviceId: Number(id), qty: Number(qtyEl.value) || 1, note: document.getElementById("bf-note").value.trim() },
+          body: { serviceId: Number(id), qty: clampQty(), note: document.getElementById("bf-note").value.trim() },
         });
         purchaseId = data.purchaseId;
         body.innerHTML = `
@@ -782,7 +792,7 @@ function openBuyDialog({ id, name, price, unit, needsDoc }) {
             hint: `「${name}」需要病历 / 检验 / 报告材料，可在此上传（可多份），客服将据此安排解读或随访。`,
           });
         }
-        document.getElementById("buy-done").addEventListener("click", () => (mask.hidden = true));
+        document.getElementById("buy-done").addEventListener("click", closeDialog);
       } else {
         const res = await fetch("/api/purchase", {
           method: "POST",
@@ -791,7 +801,7 @@ function openBuyDialog({ id, name, price, unit, needsDoc }) {
             serviceId: Number(id),
             name: document.getElementById("bf-name").value.trim(),
             phone: document.getElementById("bf-phone").value.trim(),
-            qty: Number(qtyEl.value) || 1,
+            qty: clampQty(),
             note: document.getElementById("bf-note").value.trim(),
           }),
         });
@@ -826,7 +836,7 @@ function openBuyDialog({ id, name, price, unit, needsDoc }) {
               hint: `「${name}」需要病历 / 检验 / 报告材料，可在此上传（可多份），客服将据此安排解读或随访。`,
             });
           }
-          document.getElementById("buy-done").addEventListener("click", () => (mask.hidden = true));
+          document.getElementById("buy-done").addEventListener("click", closeDialog);
         }
       }
       submitBtn.disabled = false;
@@ -939,7 +949,9 @@ async function renderChannelModels() {
       el.innerHTML = `<span class="model-dot" style="background:#16a34a"></span>${text}`;
     });
   } catch {
-    /* 拉取失败保持默认文案即可 */
+    document.querySelectorAll("[data-level-model]").forEach((el) => {
+      el.innerHTML = `<span class="model-dot" style="background:#9ca3af"></span>模型状态暂时无法获取`;
+    });
   }
 }
 
@@ -1000,6 +1012,7 @@ function bindForm(level) {
     }
     state.formData = data;
     app.innerHTML = loadingView();
+    bindHeader();
     try {
       const res = await fetch(`${API}/consult`, {
         method: "POST",
@@ -1085,16 +1098,19 @@ function loadResultDocs() {
   const render = (rows) => {
     grid.innerHTML = rows.length ? rows.map((a) => att.docCardHtml(a)).join("") : '<p class="muted">尚未上传材料</p>';
   };
+  const renderErr = () => {
+    grid.innerHTML = '<p class="att-err">材料列表读取失败，请刷新或稍后重试</p>';
+  };
   att
     .loadAttachments("consult", rid)
     .then(render)
-    .catch(() => render([]));
+    .catch(renderErr);
   att.mountUploader(up, {
     target: "consult",
     id: rid,
     list: false,
     hint: "补充上传病历卡、检验单、报告单、影像等材料，将归入本次问诊记录，供医师与后台核对。",
-    onChanged: () => att.loadAttachments("consult", rid).then(render).catch(() => render([])),
+    onChanged: () => att.loadAttachments("consult", rid).then(render).catch(renderErr),
   });
 }
 

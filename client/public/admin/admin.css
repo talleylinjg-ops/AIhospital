@@ -40,8 +40,11 @@ button { font-family: inherit; }
 .btn-primary:hover { filter: brightness(1.08); }
 .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--ink-2); }
 .btn-ghost:hover { background: #f3f4f6; }
-.btn-outline { background: transparent; border: 1px solid rgba(255,255,255,0.4); color: #fff; padding: 7px 14px; border-radius: 8px; font-size: 13px; cursor: pointer; }
-.btn-outline:hover { background: rgba(255,255,255,0.12); }
+.btn-outline { background: #fff; border: 1px solid var(--border); color: var(--ink-2); padding: 7px 14px; border-radius: 8px; font-size: 13px; cursor: pointer; }
+.btn-outline:hover { background: #f3f4f6; color: var(--ink); }
+.btn-outline.active { background: var(--primary-light); border-color: var(--primary); color: var(--primary-dark); font-weight: 700; }
+.btn-outline:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn-outline:disabled:hover { background: #fff; color: var(--ink-2); }
 
 /* ===== 整体布局（WP 风格） ===== */
 .admin-layout { display: flex; min-height: 100vh; }
@@ -73,11 +76,15 @@ button { font-family: inherit; }
 .topbar-date { font-size: 13px; color: var(--ink-3); }
 .content { padding: 22px 24px; }
 
+.nav-ico { display: none; font-size: 16px; font-weight: 700; }
+
 @media (max-width: 860px) {
   .sidebar { width: 64px; }
   .sidebar-brand { padding: 16px 10px; justify-content: center; }
   .sidebar-brand > div:last-child, .sidebar-sub { display: none; }
-  .nav-item { justify-content: center; padding: 12px; font-size: 0; }
+  .nav-item { justify-content: center; padding: 12px; }
+  .nav-item .nav-label { display: none; }
+  .nav-ico { display: inline; }
   .content { padding: 16px; }
 }
 

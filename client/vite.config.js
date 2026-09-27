@@ -1,4 +1,9 @@
 import { defineConfig } from "vite";
+import { copyFileSync, mkdirSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, resolve } from "node:path";
+
+const clientRoot = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   server: {
@@ -25,6 +30,14 @@ export default defineConfig({
           }
           next();
         });
+      },
+    },
+    {
+      name: "publish-shared-config-for-admin",
+      closeBundle() {
+        const outDir = resolve(clientRoot, "dist/src");
+        mkdirSync(outDir, { recursive: true });
+        copyFileSync(resolve(clientRoot, "src/form-config.js"), resolve(outDir, "form-config.js"));
       },
     },
   ],

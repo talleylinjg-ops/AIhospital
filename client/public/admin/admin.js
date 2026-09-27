@@ -233,10 +233,11 @@ async function renderMembers() {
 async function loadMembers(next) {
   const body = document.getElementById("members-body");
   try {
+    if (next) pages.members += 1;
     const params = new URLSearchParams({ page: pages.members, pageSize: 20, keyword: filters.memberKeyword });
     const data = await api(`/api/admin/customers?${params}`);
     const totalPages = Math.max(1, Math.ceil(data.total / data.pageSize));
-    if (next && pages.members < totalPages) pages.members += 1;
+    if (pages.members > totalPages) pages.members = totalPages;
     document.getElementById("member-total").textContent = `共 ${data.total} 位会员`;
     document.getElementById("mpage-info").textContent = `第 ${pages.members} / ${totalPages} 页`;
     document.getElementById("mprev-btn").disabled = pages.members <= 1;
@@ -476,6 +477,7 @@ async function renderRecords() {
 async function loadRecords(next) {
   const body = document.getElementById("records-body");
   try {
+    if (next) pages.records += 1;
     const params = new URLSearchParams({
       page: pages.records,
       pageSize: 20,
@@ -485,7 +487,7 @@ async function loadRecords(next) {
     });
     const data = await api(`/api/admin/records?${params}`);
     const totalPages = Math.max(1, Math.ceil(data.total / data.pageSize));
-    if (next && pages.records < totalPages) pages.records += 1;
+    if (pages.records > totalPages) pages.records = totalPages;
     document.getElementById("total-label").textContent = `共 ${data.total} 条`;
     document.getElementById("page-info").textContent = `第 ${pages.records} / ${totalPages} 页`;
     document.getElementById("prev-btn").disabled = pages.records <= 1;
@@ -560,10 +562,11 @@ async function renderPurchases() {
 async function loadPurchases(next) {
   const body = document.getElementById("purchases-body");
   try {
+    if (next) pages.purchases += 1;
     const params = new URLSearchParams({ page: pages.purchases, pageSize: 20, keyword: filters.purchaseKeyword, status: filters.purchaseStatus });
     const data = await api(`/api/admin/purchases?${params}`);
     const totalPages = Math.max(1, Math.ceil(data.total / data.pageSize));
-    if (next && pages.purchases < totalPages) pages.purchases += 1;
+    if (pages.purchases > totalPages) pages.purchases = totalPages;
     document.getElementById("purchase-total").textContent = `共 ${data.total} 条`;
     document.getElementById("ppage-info").textContent = `第 ${pages.purchases} / ${totalPages} 页`;
     document.getElementById("pprev-btn").disabled = pages.purchases <= 1;
@@ -1030,7 +1033,7 @@ async function renderSettings() {
           <div class="setting-item"><span class="k">会员总数</span><span class="v">${stats.customers} 位</span></div>
           <div class="setting-item"><span class="k">服务项目</span><span class="v">${stats.services} 个</span></div>
           <div class="setting-item"><span class="k">购买记录</span><span class="v">${stats.purchaseCount} 单 · 已收 ${money(stats.purchaseTotal)}</span></div>
-          <div class="setting-item"><span class="k">数据存储</span><span class="v">SQLite · /workspace/data/</span></div>
+          <div class="setting-item"><span class="k">数据存储</span><span class="v">SQLite 本地存储</span></div>
         </div>
         <div class="panel">
           <h3>就诊通道</h3>

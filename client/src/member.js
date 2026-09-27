@@ -652,8 +652,8 @@ async function renderAccount(el) {
       const confirm = document.getElementById("pw-new2").value;
       if (newPassword.length < 6) return flash("pw-error", "新密码至少 6 位", false);
       if (newPassword !== confirm) return flash("pw-error", "两次输入的新密码不一致", false);
-      const r = await memberApi("/password", { method: "PUT", body: { oldPassword, newPassword } });
-      persistAuth({ token: saveToken, member: r.ok ? saved : saved });
+      await memberApi("/password", { method: "PUT", body: { oldPassword, newPassword } });
+      persistAuth({ token: saveToken, member: saved });
       flash("pw-error", "密码修改成功，下次登录请使用新密码", true);
       document.getElementById("pw-old").value = "";
       document.getElementById("pw-new").value = "";
