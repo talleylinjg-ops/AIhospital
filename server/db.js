@@ -190,9 +190,19 @@ function migrate() {
     if (!existsService.get(s.name)) seedService.run(s.name, s.price, s.unit, s.description);
   }
 
+  // 慢病管理套餐（幂等；年度排在月度之前展示）
+  const chronicSeed = [
+    { name: "AI 慢病管理年度套餐", price: 999.5, unit: "年", description: "全年慢病随访 + 报告解读 + 用药与生活方式指导", sort: 9 },
+    { name: "AI 慢病管理月度套餐", price: 99.9, unit: "月", description: "慢病随访 + 报告解读", sort: 10 },
+  ];
+  const seedServiceSort = db.prepare("INSERT INTO services (name, price, unit, description, active, sort_order) VALUES (?, ?, ?, ?, 1, ?)");
+  for (const s of chronicSeed) {
+    if (!existsService.get(s.name)) seedServiceSort.run(s.name, s.price, s.unit, s.description, s.sort);
+  }
+
   // 需要上传报告/病历材料的服务项目标记（幂等，按名称匹配）
   const docServiceSeed = db.prepare("UPDATE services SET needs_doc = 1 WHERE name = ?");
-  for (const n of ["AI 慢病管理月度套餐", "体检报告解读"]) docServiceSeed.run(n);
+  for (const n of ["AI 慢病管理年度套餐", "AI 慢病管理月度套餐", "体检报告解读"]) docServiceSeed.run(n);
 
   // 附件索引
   db.exec(`
