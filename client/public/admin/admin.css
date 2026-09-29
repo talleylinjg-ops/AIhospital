@@ -25,7 +25,7 @@ button { font-family: inherit; }
 [hidden] { display: none !important; }
 
 .login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #0a5f66, #1495a0); padding: 20px; }
-.login-card { width: 380px; background: #fff; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.25); padding: 36px; }
+.login-card { width: 380px; max-width: 100%; background: #fff; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.25); padding: 36px; }
 .login-brand { font-size: 22px; font-weight: 800; color: var(--primary-dark); margin-bottom: 6px; }
 .login-card h2 { font-size: 18px; margin-top: 12px; }
 .login-card .sub { font-size: 13px; color: var(--ink-3); margin: 6px 0 20px; }
@@ -219,7 +219,7 @@ tbody tr:last-child td { border-bottom: none; }
 .settings-grid .wide { grid-column: 1 / -1; }
 .badge-muted { display: inline-block; padding: 3px 10px; border-radius: 999px; background: #e0f2fe; color: #0369a1; font-size: 12px; font-weight: 700; }
 .llm-list { display: flex; flex-direction: column; gap: 14px; margin-top: 10px; }
-.llm-group { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 8px; }
+.llm-group { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr)); gap: 8px; }
 .llm-group-title { font-size: 13px; font-weight: 700; color: var(--primary-dark); display: flex; align-items: center; gap: 8px; padding: 4px 0; border-bottom: 2px solid var(--primary-light); grid-column: 1 / -1; }
 .llm-group-count { font-weight: 400; font-size: 12px; color: var(--ink-3); }
 .llm-item { display: flex; flex-direction: column; gap: 8px; border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }

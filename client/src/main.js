@@ -17,6 +17,30 @@ const state = {
   attachWarn: "",
 };
 
+/* 结果页刷新后仍可回看：本次会话内暂存最近一次问诊结果 */
+const LAST_RESULT_KEY = "mh_last_result";
+function saveLastResult(level, result, recordId) {
+  try {
+    sessionStorage.setItem(LAST_RESULT_KEY, JSON.stringify({ level, result, recordId }));
+  } catch {
+    /* 隐私模式等场景忽略 */
+  }
+}
+function restoreLastResult() {
+  try {
+    const raw = sessionStorage.getItem(LAST_RESULT_KEY);
+    if (!raw) return false;
+    const d = JSON.parse(raw);
+    if (!d || !d.result) return false;
+    state.level = d.level;
+    state.result = d.result;
+    state.consultRecordId = d.recordId || null;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 const API = "/api";
 
 /* 头部导航按钮文字：前四通道显示名称（危重症按钮取 4 字短称），其余显示 tag */
@@ -881,6 +905,7 @@ function render() {
     app.innerHTML = `${header()}<div class="container">${memberUI.loginView()}</div>${footer()}`;
     memberUI.bindLogin();
   } else if (hash.startsWith("#/result")) {
+    if (!state.result) restoreLastResult();
     app.innerHTML = resultView();
     bindResult();
   } else if (hash.startsWith("#/error")) {
@@ -972,7 +997,6 @@ function markInvalid(missingLabels) {
 }
 
 function bindForm(level) {
-  bindHeader();
   if (memberUI.hasMember()) {
     const { name, phone } = memberUI.memberNamePhone();
     const nEl = document.querySelector('[data-field="name"]');
@@ -1016,6 +1040,7 @@ function bindForm(level) {
       state.result = json.result;
       state.consultRecordId = json.recordId || null;
       state.attachWarn = "";
+      saveLastResult(level, json.result, state.consultRecordId);
       if (state.consultRecordId && consultFiles.length) {
         try {
           await att.uploadAttachments("consult", state.consultRecordId, consultFiles);
@@ -1107,7 +1132,6 @@ function loadResultDocs() {
 }
 
 function bindResult() {
-  bindHeader();
   loadResultDocs();
   const sel = document.getElementById("compare-select");
   const btn = document.getElementById("compare-btn");
@@ -1152,7 +1176,6 @@ function bindResult() {
 }
 
 function bindBack() {
-  bindHeader();
   const back = document.getElementById("back-btn");
   if (back) back.addEventListener("click", () => (location.hash = "#/"));
 }
