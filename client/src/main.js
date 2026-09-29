@@ -524,7 +524,7 @@ async function bindServices() {
       )
     );
   } catch (err) {
-    grid.innerHTML = `<div class="loading-inline">${esc(err.message || "服务加载失败，请稍后重试")}</div>`;
+    grid.innerHTML = `<div class="loading-inline">${esc(netErrorText(err) || "服务加载失败，请稍后重试")}</div>`;
   }
 }
 
@@ -766,7 +766,7 @@ function openBuyDialog({ id, name, price, unit, needsDoc }) {
           }
           document.getElementById("buy-pay-error").textContent = "尚未收到付款，请完成扫码支付后重试。";
         } catch (ex) {
-          document.getElementById("buy-pay-error").textContent = ex.message;
+          document.getElementById("buy-pay-error").textContent = netErrorText(ex);
         }
         return false;
       };
@@ -858,7 +858,7 @@ function openBuyDialog({ id, name, price, unit, needsDoc }) {
       submitBtn.disabled = false;
       submitBtn.textContent = oldText;
     } catch (err) {
-      errEl.textContent = err.message;
+      errEl.textContent = netErrorText(err);
       submitBtn.disabled = false;
       submitBtn.textContent = oldText;
     }
