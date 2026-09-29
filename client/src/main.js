@@ -2,20 +2,12 @@ import { LEVEL_META, SECTIONS, FIELDS, isRequired, getRequiredFields, validate }
 import QRCode from "qrcode";
 import * as memberUI from "./member.js";
 import * as att from "./attachments.js";
+import { netErrorText } from "./net.js";
 
 const app = document.getElementById("app");
 
 const esc = (s) =>
   String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-
-/* 把浏览器网络层报错翻译成面向用户的中文提示 */
-const netErrorText = (err) => {
-  const m = String((err && err.message) || err || "");
-  if (/Failed to fetch|NetworkError|Load failed|fetch failed|ECONNREFUSED|network/i.test(m)) {
-    return "无法连接问诊服务，请检查网络后重试";
-  }
-  return m || "网络异常，请重试";
-};
 
 const state = {
   level: null,

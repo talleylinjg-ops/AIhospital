@@ -24,12 +24,25 @@ const filters = {
   purchaseKeyword: "", purchaseStatus: "",
 };
 
+const netErrText = (err) => {
+  const m = String((err && err.message) || err || "");
+  if (/Failed to fetch|NetworkError|Load failed|fetch failed|ECONNREFUSED|network/i.test(m)) {
+    return "无法连接服务，请检查网络后重试";
+  }
+  return m || "请求失败";
+};
+
 async function api(path, opts = {}) {
   const headers = { ...(opts.headers || {}) };
   const token = getToken();
   if (token) headers.Authorization = `Bearer ${token}`;
   if (opts.body) headers["Content-Type"] = "application/json";
-  const res = await fetch(path, { ...opts, headers });
+  let res;
+  try {
+    res = await fetch(path, { ...opts, headers });
+  } catch {
+    throw new Error("无法连接服务，请检查网络后重试");
+  }
   const json = await res.json().catch(() => ({}));
   if (!res.ok) {
     if (res.status === 401) {
@@ -55,11 +68,15 @@ function showApp() {
 }
 function bindLogin() {
   const errEl = document.getElementById("login-error");
-  document.getElementById("login-form").addEventListener("submit", async (e) => {
+  const form = document.getElementById("login-form");
+  const submitBtn = form.querySelector('button[type="submit"]');
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
+    if (submitBtn.disabled) return;
     errEl.textContent = "正在登录…";
     const username = document.getElementById("username").value.trim();
     const password = document.getElementById("password").value.trim();
+    submitBtn.disabled = true;
     try {
       const res = await fetch("/api/admin/login", {
         method: "POST",
@@ -73,7 +90,9 @@ function bindLogin() {
       showApp();
       switchView("dashboard");
     } catch (err) {
-      errEl.textContent = "登录失败：" + err.message;
+      errEl.textContent = "登录失败：" + netErrText(err);
+    } finally {
+      submitBtn.disabled = false;
     }
   });
 }
@@ -675,7 +694,7 @@ async function openPurchaseForm(presetCustomerId) {
           body: JSON.stringify({
             customerId: Number(mask.querySelector("#pf-customer").value),
             serviceId: Number(serviceSel.value),
-            qty: Number(qtyInput.value) || 1,
+            qty: Math.max(1, Math.min(999, Number(qtyInput.value) || 1)),
             status: mask.querySelector("#pf-status").value,
             note: mask.querySelector("#pf-note").value.trim(),
           }),
@@ -785,7 +804,7 @@ async function serviceForm(id) {
     try {
       const payload = {
         name: mask.querySelector("#sf-name").value.trim(),
-        price: Number(mask.querySelector("#sf-price").value) || 0,
+        price: Math.max(0, Number(mask.querySelector("#sf-price").value) || 0),
         unit: mask.querySelector("#sf-unit").value.trim() || "次",
         description: mask.querySelector("#sf-desc").value.trim(),
         active: mask.querySelector("#sf-active").checked ? 1 : 0,

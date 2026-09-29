@@ -1,6 +1,7 @@
 import { LEVEL_META, FIELDS } from "./form-config.js";
 import QRCode from "qrcode";
 import * as att from "./attachments.js";
+import { netErrorText } from "./net.js";
 
 /* ===== 会员会话存储 ===== */
 const TOKEN_KEY = "mh_token";
@@ -140,12 +141,17 @@ export function bindLogin() {
       bindAuthForm(mode);
     })
   );
-  document.getElementById("a-submit").addEventListener("click", async () => {
+  const submitEl = document.getElementById("a-submit");
+  submitEl.addEventListener("click", async () => {
+    if (submitEl.disabled) return;
     errEl.textContent = "";
     const phone = phoneEl.value.trim();
     const password = passwordEl.value;
     if (!/^1\d{10}$/.test(phone)) return (errEl.textContent = "请输入 11 位大陆手机号");
     if (password.length < 6) return (errEl.textContent = "密码至少 6 位");
+    const oldLabel = submitEl.textContent;
+    submitEl.disabled = true;
+    submitEl.textContent = "处理中…";
     try {
       const data =
         mode === "register"
@@ -154,7 +160,10 @@ export function bindLogin() {
       persistAuth({ token: data.token, member: data.member });
       location.hash = "#/member";
     } catch (err) {
-      errEl.textContent = err.message;
+      errEl.textContent = netErrorText(err);
+    } finally {
+      submitEl.disabled = false;
+      submitEl.textContent = oldLabel;
     }
   });
   phoneEl.addEventListener("keydown", (e) => e.key === "Enter" && document.getElementById("a-submit").click());
@@ -209,7 +218,7 @@ async function loadContent(tab) {
       await renderOverview(el);
     }
   } catch (err) {
-    el.innerHTML = `<div class="error-box"><h3>加载失败</h3><p>${esc(err.message)}</p></div>`;
+    el.innerHTML = `<div class="error-box"><h3>加载失败</h3><p>${esc(netErrorText(err))}</p></div>`;
   }
 }
 
@@ -343,7 +352,7 @@ async function renderHealth(el) {
       err.textContent = "健康档案已保存";
       err.style.color = "var(--primary)";
     } catch (ex) {
-      err.textContent = ex.message;
+      err.textContent = netErrorText(ex);
       err.style.color = "var(--danger)";
     }
   });
@@ -404,7 +413,7 @@ async function renderRecords(el) {
             hint: "本次问诊的病历 / 检验单 / 报告等材料，可继续补充上传。",
           });
         } catch (err) {
-          box.innerHTML = `<p class="error">${esc(err.message)}</p>`;
+          box.innerHTML = `<p class="error">${esc(netErrorText(err))}</p>`;
         }
       } else {
         box.hidden = true;
@@ -497,7 +506,7 @@ async function renderOrders(el) {
       }
       renderRechargeQr(res, channels.find((c) => c.id === res.channel));
     } catch (ex) {
-      err.textContent = ex.message;
+      err.textContent = netErrorText(ex);
     } finally {
       btn.disabled = false;
       btn.textContent = "立即充值";
@@ -535,7 +544,7 @@ function renderRechargeQr(res, channel) {
       }
       document.getElementById("rc-pay-error").textContent = "尚未收到付款，请完成扫码支付后重试。";
     } catch (ex) {
-      document.getElementById("rc-pay-error").textContent = ex.message;
+      document.getElementById("rc-pay-error").textContent = netErrorText(ex);
     }
     return false;
   };
@@ -642,7 +651,7 @@ async function renderAccount(el) {
       flash("ac-error", "资料已保存", true);
       document.getElementById("ac-cur1").value = "";
     } catch (err) {
-      flash("ac-error", err.message, false);
+      flash("ac-error", netErrorText(err), false);
     }
   });
   document.getElementById("pw-save").addEventListener("click", async () => {
@@ -659,7 +668,7 @@ async function renderAccount(el) {
       document.getElementById("pw-new").value = "";
       document.getElementById("pw-new2").value = "";
     } catch (err) {
-      flash("pw-error", err.message, false);
+      flash("pw-error", netErrorText(err), false);
     }
   });
   document.getElementById("logout-btn").addEventListener("click", async () => {
