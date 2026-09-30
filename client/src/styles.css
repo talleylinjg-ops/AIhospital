@@ -265,6 +265,8 @@ body {
 .geo-content h2 { font-size: 22px; color: var(--ink-1, #111827); margin: 0 0 12px; }
 .geo-content h3 { font-size: 16.5px; color: var(--ink-1, #111827); margin: 26px 0 8px; }
 .geo-content p { margin: 0 0 10px; }
+.geo-content .geo-steps { margin: 4px 0 0; padding-left: 22px; }
+.geo-content .geo-steps li { margin: 4px 0; }
 .geo-content .faq-list { margin: 4px 0 0; }
 .geo-content .faq-list dt { font-weight: 700; color: var(--ink-1, #111827); margin-top: 14px; }
 .geo-content .faq-list dd { margin: 4px 0 0; }

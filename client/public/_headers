@@ -6,8 +6,20 @@
   Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
   X-XSS-Protection: 0
 
+/
+  Cache-Control: public, max-age=0, must-revalidate
+
+/index.html
+  Cache-Control: public, max-age=0, must-revalidate
+
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
+
+/admin
+  X-Robots-Tag: noindex, nofollow
+
+/admin/*
+  X-Robots-Tag: noindex, nofollow
 
 /robots.txt
   Cache-Control: public, max-age=3600
@@ -17,3 +29,12 @@
 
 /llms.txt
   Cache-Control: public, max-age=3600
+
+/llms-full.txt
+  Cache-Control: public, max-age=3600
+
+/og-cover.png
+  Cache-Control: public, max-age=86400
+
+/favicon.svg
+  Cache-Control: public, max-age=604800

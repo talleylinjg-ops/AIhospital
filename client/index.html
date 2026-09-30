@@ -14,10 +14,13 @@
       content="AI医院,AI问诊,在线问诊,智能分诊,预问诊,健康咨询,慢病管理,体检报告解读,妇幼保健,中医问诊,眼科,口腔,在线健康服务"
     />
     <meta name="author" content="大气AI医院" />
+    <meta name="application-name" content="大气AI医院" />
     <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
     <meta name="theme-color" content="#0e7c86" />
     <meta name="format-detection" content="telephone=no" />
     <link rel="canonical" href="https://aihospital.com/" />
+    <link rel="alternate" type="text/plain" href="https://aihospital.com/llms.txt" title="llms.txt" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
@@ -30,8 +33,10 @@
     />
     <meta property="og:url" content="https://aihospital.com/" />
     <meta property="og:image" content="https://aihospital.com/og-cover.png" />
+    <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="大气AI医院：AI 智能预问诊、分诊与在线健康服务" />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
@@ -41,6 +46,7 @@
       content="8 条就诊通道的 AI 智能预问诊与分诊，在线获得分诊建议与就医指引，并支持健康服务在线购买。"
     />
     <meta name="twitter:image" content="https://aihospital.com/og-cover.png" />
+    <meta name="twitter:image:alt" content="大气AI医院：AI 智能预问诊、分诊与在线健康服务" />
 
     <link rel="stylesheet" href="/src/styles.css" />
 
@@ -52,7 +58,15 @@
             "@type": "MedicalClinic",
             "@id": "https://aihospital.com/#organization",
             "name": "大气AI医院",
+            "alternateName": "大气AI医院 · 智能预问诊与分诊",
             "url": "https://aihospital.com/",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://aihospital.com/og-cover.png",
+              "width": 1200,
+              "height": 630
+            },
+            "image": "https://aihospital.com/og-cover.png",
             "description": "基于大模型的 AI 智能预问诊与分诊平台，覆盖 8 条就诊通道，提供分诊建议、就医指引与在线健康服务。",
             "medicalSpecialty": [
               "PrimaryCare",
@@ -64,8 +78,22 @@
               "Dentistry"
             ],
             "areaServed": { "@type": "Country", "name": "中国" },
+            "knowsAbout": [
+              "AI 预问诊",
+              "智能分诊",
+              "就医指引",
+              "慢病管理",
+              "体检报告解读",
+              "妇幼保健",
+              "中医辨证",
+              "眼科问诊",
+              "口腔问诊"
+            ],
             "availableService": [
               { "@type": "MedicalTherapy", "name": "AI 智能预问诊与分诊" },
+              { "@type": "Service", "name": "会员服务 · 月付会员" },
+              { "@type": "Service", "name": "会员服务 · 年付会员" },
+              { "@type": "MedicalTherapy", "name": "AI 慢病管理年度套餐" },
               { "@type": "MedicalTherapy", "name": "AI 慢病管理月度套餐" },
               { "@type": "MedicalTest", "name": "体检报告解读" }
             ]
@@ -85,7 +113,139 @@
             "name": "大气AI医院 · 智能预问诊、分诊与在线健康服务",
             "isPartOf": { "@id": "https://aihospital.com/#website" },
             "about": { "@id": "https://aihospital.com/#organization" },
+            "breadcrumb": { "@id": "https://aihospital.com/#breadcrumb" },
+            "primaryImageOfPage": { "@id": "https://aihospital.com/#primaryimage" },
             "inLanguage": "zh-CN"
+          },
+          {
+            "@type": "ImageObject",
+            "@id": "https://aihospital.com/#primaryimage",
+            "url": "https://aihospital.com/og-cover.png",
+            "width": 1200,
+            "height": 630
+          },
+          {
+            "@type": "BreadcrumbList",
+            "@id": "https://aihospital.com/#breadcrumb",
+            "itemListElement": [
+              { "@type": "ListItem", "position": 1, "name": "首页", "item": "https://aihospital.com/" },
+              { "@type": "ListItem", "position": 2, "name": "服务购买", "item": "https://aihospital.com/#/services" }
+            ]
+          },
+          {
+            "@type": "HowTo",
+            "@id": "https://aihospital.com/#howto",
+            "name": "如何在大气AI医院完成一次 AI 预问诊",
+            "description": "选择就诊通道、填写完整病史并提交，即可获得分诊建议与就医指引。",
+            "totalTime": "PT5M",
+            "step": [
+              {
+                "@type": "HowToStep",
+                "position": 1,
+                "name": "选择就诊通道",
+                "text": "根据症状与情况选择轻微快诊、中等症状、危重症、日常保健、妇幼保健、中医、眼科或口腔通道。"
+              },
+              {
+                "@type": "HowToStep",
+                "position": 2,
+                "name": "填写完整病史",
+                "text": "按通道要求如实填写必填病史项，包括现病史、既往史、用药过敏史等。"
+              },
+              {
+                "@type": "HowToStep",
+                "position": 3,
+                "name": "提交并等待分析",
+                "text": "提交后由大模型进行分析，给出分诊建议、可能病因鉴别与就医指引。"
+              },
+              {
+                "@type": "HowToStep",
+                "position": 4,
+                "name": "按需上传材料",
+                "text": "可上传病历、检验单、报告单等材料用于存档，便于后续解读与随访，支持图片与 PDF。"
+              }
+            ]
+          },
+          {
+            "@type": "ItemList",
+            "@id": "https://aihospital.com/#services",
+            "name": "在线健康服务",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "item": {
+                  "@type": "Service",
+                  "name": "会员服务 · 月付会员",
+                  "description": "AI 健康问诊每月给定额流量",
+                  "offers": {
+                    "@type": "Offer",
+                    "price": "9.9",
+                    "priceCurrency": "CNY",
+                    "url": "https://aihospital.com/#/services"
+                  }
+                }
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "item": {
+                  "@type": "Service",
+                  "name": "会员服务 · 年付会员",
+                  "description": "AI 健康问诊每年给定额流量",
+                  "offers": {
+                    "@type": "Offer",
+                    "price": "99.9",
+                    "priceCurrency": "CNY",
+                    "url": "https://aihospital.com/#/services"
+                  }
+                }
+              },
+              {
+                "@type": "ListItem",
+                "position": 3,
+                "item": {
+                  "@type": "Service",
+                  "name": "AI 慢病管理年度套餐",
+                  "description": "全年慢病随访 + 报告解读 + 用药与生活方式指导",
+                  "offers": {
+                    "@type": "Offer",
+                    "price": "999.5",
+                    "priceCurrency": "CNY",
+                    "url": "https://aihospital.com/#/services"
+                  }
+                }
+              },
+              {
+                "@type": "ListItem",
+                "position": 4,
+                "item": {
+                  "@type": "Service",
+                  "name": "AI 慢病管理月度套餐",
+                  "description": "慢病随访 + 报告解读",
+                  "offers": {
+                    "@type": "Offer",
+                    "price": "99.9",
+                    "priceCurrency": "CNY",
+                    "url": "https://aihospital.com/#/services"
+                  }
+                }
+              },
+              {
+                "@type": "ListItem",
+                "position": 5,
+                "item": {
+                  "@type": "Service",
+                  "name": "体检报告解读",
+                  "description": "上传体检报告，获得逐项解读与建议",
+                  "offers": {
+                    "@type": "Offer",
+                    "price": "9.9",
+                    "priceCurrency": "CNY",
+                    "url": "https://aihospital.com/#/services"
+                  }
+                }
+              }
+            ]
           },
           {
             "@type": "FAQPage",
@@ -117,10 +277,26 @@
               },
               {
                 "@type": "Question",
+                "name": "使用大气AI医院需要注册或付费吗？",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "AI 智能预问诊可直接使用；注册会员后可管理健康档案、查看问诊与消费记录并使用余额支付。慢病管理、体检报告解读等在线健康服务为付费项目，单独下单购买。"
+                }
+              },
+              {
+                "@type": "Question",
                 "name": "如何购买健康服务并支付？",
                 "acceptedAnswer": {
                   "@type": "Answer",
                   "text": "进入服务购买页选择服务并下单，支持支付宝或微信在线支付，支付成功后即时开通；也可选择线下付款，下单后客服会及时与您联系确认。"
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "支持哪些支付方式？",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "支持支付宝与微信在线支付，支付成功后即时开通；也支持线下付款，下单后客服会及时与您联系确认。注册会员还可使用账户余额支付。"
                 }
               },
               {
@@ -143,7 +319,11 @@
       <h1>大气AI医院 · 智能预问诊、分诊与在线健康服务</h1>
       <p>
         大气AI医院提供 AI 智能预问诊与分诊服务，覆盖轻微快诊、中等症状、危重症、日常保健、妇幼保健、中医、眼科、口腔共 8
-        条就诊通道。选择通道并填写完整病史后，系统会给出分诊建议与就医指引，并支持慢病管理、体检报告解读等健康服务在线购买与支付宝/微信在线支付。
+        条就诊通道。选择通道并填写完整病史后，系统会给出分诊建议与就医指引。
+      </p>
+      <p>
+        在线健康服务包括会员服务（月付 9.9 元/月、年付 99.9 元/年）、AI 慢病管理年度套餐、AI 慢病管理月度套餐与体检报告解读，
+        支持支付宝或微信在线支付并即时开通，也可选择线下付款，价格以服务购买页为准。
       </p>
       <p>
         请启用 JavaScript 以获得完整体验。急危重症请立即拨打 120 或前往急诊；本系统输出仅供参考，不能替代执业医师的诊断与治疗。

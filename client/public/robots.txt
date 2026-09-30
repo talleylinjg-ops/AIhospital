@@ -1,9 +1,10 @@
 # 大气AI医院 robots.txt
-# 允许搜索引擎与生成式 AI 抓取公开内容，禁止抓取管理后台
+# 允许搜索引擎与生成式 AI 检索公开内容，禁止抓取管理后台与接口
 
 User-agent: *
 Allow: /
 Disallow: /admin
+Disallow: /admin/
 Disallow: /api/
 
 # 生成式引擎（GEO）显式允许
@@ -19,13 +20,25 @@ Allow: /
 User-agent: ClaudeBot
 Allow: /
 
-User-agent: Claude-Web
+User-agent: Claude-User
+Allow: /
+
+User-agent: Claude-SearchBot
 Allow: /
 
 User-agent: PerplexityBot
 Allow: /
 
+User-agent: Perplexity-User
+Allow: /
+
 User-agent: Google-Extended
+Allow: /
+
+User-agent: Google-CloudVertexBot
+Allow: /
+
+User-agent: Applebot
 Allow: /
 
 User-agent: Applebot-Extended
@@ -34,10 +47,46 @@ Allow: /
 User-agent: Bytespider
 Allow: /
 
+User-agent: Amazonbot
+Allow: /
+
+User-agent: meta-externalagent
+Allow: /
+
+User-agent: FacebookBot
+Allow: /
+
 User-agent: cohere-ai
 Allow: /
 
 User-agent: YouBot
 Allow: /
+
+User-agent: MistralAI-User
+Allow: /
+
+User-agent: DuckAssistBot
+Allow: /
+
+User-agent: PanguBot
+Allow: /
+
+User-agent: PetalBot
+Allow: /
+
+User-agent: Diffbot
+Allow: /
+
+User-agent: Timpibot
+Allow: /
+
+User-agent: iaskspider
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+# 内容使用信号：允许检索、允许作为 AI 生成输入、允许训练
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
 
 Sitemap: https://aihospital.com/sitemap.xml
