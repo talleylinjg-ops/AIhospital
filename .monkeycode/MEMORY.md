@@ -144,6 +144,6 @@ Entries discovered by the Agent during task execution should follow this format:
   - 该账号现有 zone：chacha.asia、daqi.asia、daqi.site、kvisa.cloud、liangdu.asia（均 active）、studyinchina.com（pending）；没有 aihospital.com，故 canonical/sitemap 里的 aihospital.com 无法绑定，需先在该账号添加并激活该域名。
   - 后端可单进程对外提供整站：`node server/index.js` 同时托管 client/dist、/admin、/api 与 SEO 文件，只需暴露一个 PORT（默认 3001）。已提供 Dockerfile / docker-compose.yml / .dockerignore；数据目录用 `AIHOSPITAL_DATA_DIR` 指向挂载卷（默认 <root>/data）。
   - 环境变量一键配默认模型：`USER_LLM_API_KEY`/`USER_LLM_BASE_URL`/`USER_LLM_MODEL` 首次建库写入预置行 `DeepSeek V4-Pro`；无任何启用模型时自动启用它（优先带 Key 那行）。其余模型在 /admin 逐个配。`.env.example` 已与代码实际读取变量对齐（PORT、LLM_TIMEOUT_MS、MAX_CONCURRENT_LLM、AIHOSPITAL_DATA_DIR、ADMIN_USERNAME、ADMIN_PASSWORD）。
-  - 线上 /api 仍指向占位 BACKEND_ORIGIN=https://api.aihospital.com，前端可打开但问诊不可用；需公网后端后再改 Pages 环境变量。
+  - 线上 /api 仍指向占位 BACKEND_ORIGIN=https://api.aihospital.com，前端可打开但问诊不可用；需公网后端后再改 Pages 环境变量。核对静态站与预览站一致性：前端源码与资源无差异，可见差异全部来自后端接口（首页通道模型状态、服务列表、登录/会员/后台），后端上线后即一致。
   - 静态部署（Pages）下 /admin 依赖 dist/src/form-config.js：client/vite.config.js 的 publish-shared-config-for-admin 插件在构建时把 client/src/form-config.js 复制到 dist/src；缺此文件时 admin.js 的 `../src/form-config.js` 会 404，导致后台整页空白（仅本地 `node server/index.js` 因额外托管 /src 而正常）。
   - admin 资源以 `?v=` 查询参数缓存，改动 client/public/admin 下任意文件后需同步 bump client/public/admin/index.html 里的版本号（当前 20260927c），并重新 `npm run build --workspace client`。
