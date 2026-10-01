@@ -46,6 +46,7 @@ body {
   font-family: inherit; transition: background 0.15s, color 0.15s, border-color 0.15s; white-space: nowrap; flex: 0 0 auto;
 }
 .nav-level-btn:hover { background: rgba(255,255,255,0.16); }
+.nav-level-btn:focus-visible, .nav-services:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .nav-level-btn.active { background: #fff; color: var(--lv-color, var(--primary)); border-color: #fff; font-weight: 700; }
 @media (max-width: 900px) { .nav-services:not(.nav-member):not(.nav-auth) { display: none; } }
 @media (max-width: 720px) {
@@ -87,6 +88,7 @@ body {
   display: flex; flex-direction: column; gap: 10px;
 }
 .level-card:hover { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(15, 42, 58, 0.14); }
+.level-card:focus-visible { outline: 3px solid var(--primary, #0e7c86); outline-offset: 3px; }
 .level-tag {
   display: inline-block; align-self: flex-start; padding: 3px 12px; border-radius: 999px;
   font-size: 13px; font-weight: 700; color: #fff;

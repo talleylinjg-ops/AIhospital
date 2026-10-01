@@ -57,7 +57,7 @@ function header(showLevels = true) {
   const renderLevelBtn = ([key, m]) => {
     const active = state.level === key ? " active" : "";
     const text = NAV_SHORT[key] || m.tag;
-    return `<button class="nav-level-btn${active}" data-nav-level="${key}" title="${esc(m.name)}" style="--lv-color:${m.color};--nav-color:${NAV_TEXT_COLOR[key] || m.color}">${esc(text)}</button>`;
+    return `<button class="nav-level-btn${active}" data-nav-level="${key}" title="${esc(m.name)}" aria-pressed="${active ? "true" : "false"}" style="--lv-color:${m.color};--nav-color:${NAV_TEXT_COLOR[key] || m.color}">${esc(text)}</button>`;
   };
   const entries = Object.entries(LEVEL_META);
   /* 固定两行：第 1 行 L1-L4（快诊/门诊/急诊/保健），自 L5 妇幼起排到第 2 行 */
@@ -78,7 +78,7 @@ function header(showLevels = true) {
       </div>
       <div class="header-right">
         ${showLevels ? `<nav class="nav-levels">${levelButtons}</nav>` : ""}
-        <a class="nav-services${state.route === "services" ? " active" : ""}" href="#/services">服务购买</a>
+        <a class="nav-services${state.route === "services" ? " active" : ""}" href="#/services"${state.route === "services" ? ' aria-current="page"' : ""}>服务购买</a>
         ${memberUI.headerChip()}
       </div>
     </div>
@@ -106,7 +106,7 @@ function homeView() {
     .map(([key, m]) => {
       const reqCount = getRequiredFields(key).length;
       return `
-      <div class="level-card" data-level="${key}">
+      <div class="level-card" data-level="${key}" role="button" tabindex="0" aria-label="${esc(m.name)}：${esc(m.subtitle)}">
         <span class="level-tag" style="background:${m.color}">${esc(m.tag)}</span>
         <div class="level-title">${esc(m.name)}</div>
         <div class="level-sub">${esc(m.subtitle)}</div>
@@ -558,16 +558,16 @@ function openBuyDialog({ id, name, price, unit, needsDoc }) {
     </div>
     ${needsDoc ? `<p class="buy-note">该服务需要提供相关病历 / 检验 / 报告材料，下单成功后可直接上传，客服将据此安排解读或随访。</p>` : ""}
     <form class="buy-form" id="buy-form">
-      <label>数量</label>
-      <input id="bf-qty" type="number" min="1" max="99" value="1" required />
+      <label for="bf-qty">数量</label>
+      <input id="bf-qty" type="number" min="1" max="99" value="1" inputmode="numeric" required />
       <div id="bf-payopts"></div>
       <div id="bf-contact">
-        <label>您的姓名</label>
-        <input id="bf-name" type="text" maxlength="50" placeholder="用于客服联系与建档" value="${esc(acc.name)}" />
-        <label>手机号 <i>*</i></label>
-        <input id="bf-phone" type="tel" maxlength="20" placeholder="请填写手机号" value="${esc(acc.phone)}" required />
+        <label for="bf-name">您的姓名</label>
+        <input id="bf-name" type="text" maxlength="50" autocomplete="name" placeholder="用于客服联系与建档" value="${esc(acc.name)}" />
+        <label for="bf-phone">手机号 <i>*</i></label>
+        <input id="bf-phone" type="tel" maxlength="20" autocomplete="tel" inputmode="tel" placeholder="请填写手机号" value="${esc(acc.phone)}" required />
       </div>
-      <label>备注（选填）</label>
+      <label for="bf-note">备注（选填）</label>
       <input id="bf-note" type="text" maxlength="300" placeholder="如期望的就诊时间等" />
       <div class="buy-total">应付金额：<b id="bf-total"></b></div>
       <div class="error" id="bf-error"></div>
@@ -942,9 +942,16 @@ function bindHeader() {
 
 function bindHome() {
   document.querySelectorAll(".level-card").forEach((card) => {
-    card.addEventListener("click", () => {
+    const go = () => {
       state.level = card.dataset.level;
       location.hash = `#/form/${state.level}`;
+    };
+    card.addEventListener("click", go);
+    card.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        go();
+      }
     });
   });
   renderChannelModels();
@@ -954,7 +961,9 @@ function bindHome() {
 async function renderChannelModels() {
   try {
     const res = await fetch(`${API}/status`);
+    if (!res.ok) throw new Error("status " + res.status);
     const json = await res.json();
+    if (!json || !json.llm) throw new Error("status 数据异常");
     const models = {};
     for (const s of json?.llm?.scene_models || []) models[s.scene] = s;
     document.querySelectorAll("[data-level-model]").forEach((el) => {
@@ -1056,7 +1065,7 @@ function bindForm(level) {
         try {
           await att.uploadAttachments("consult", state.consultRecordId, consultFiles);
         } catch (upErr) {
-          state.attachWarn = `材料归档失败：${upErr.message}（可在结果页重新上传）`;
+          state.attachWarn = `材料归档失败：${netErrorText(upErr)}（可在结果页重新上传）`;
         } finally {
           consultFiles = [];
         }
