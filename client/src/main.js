@@ -1046,6 +1046,26 @@ function bindForm(level) {
       }
       return;
     }
+    const ageVal = String(data.age ?? "").trim();
+    if (ageVal !== "" && (!/^\d{1,3}$/.test(ageVal) || Number(ageVal) > 120)) {
+      alert("年龄请填写 0-120 之间的数字");
+      const el = document.querySelector('[data-field="age"]');
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        el.focus();
+      }
+      return;
+    }
+    const phoneVal = String(data.phone ?? "").trim();
+    if (phoneVal && !/^1[3-9]\d{9}$/.test(phoneVal)) {
+      alert("手机号格式不正确，请填写 11 位大陆手机号，或留空");
+      const el = document.querySelector('[data-field="phone"]');
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        el.focus();
+      }
+      return;
+    }
     state.formData = data;
     app.innerHTML = loadingView();
     bindHeader();
