@@ -12,7 +12,7 @@
     "dev": "concurrently -n server,client -c blue,green \"npm run dev:server\" \"npm run dev:client\"",
     "dev:server": "node server/index.js",
     "dev:client": "npm run dev --workspace client",
-    "build": "node scripts/gen-model-fallback.mjs && npm run build --workspace client",
+    "build": "npm run build --workspace client",
     "start": "node server/index.js"
   },
   "devDependencies": {

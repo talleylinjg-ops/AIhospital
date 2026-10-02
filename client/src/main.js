@@ -3,7 +3,6 @@ import QRCode from "qrcode";
 import * as memberUI from "./member.js";
 import * as att from "./attachments.js";
 import { netErrorText } from "./net.js";
-import MODEL_FALLBACK from "./model-fallback.js";
 
 const app = document.getElementById("app");
 
@@ -97,10 +96,6 @@ function footer() {
 }
 
 /* ===== Views ===== */
-/* 就诊通道 → 路由场景：L5 妇幼独用 maternal；L6 中医复用保健组；L7 眼科/L8 口腔复用门诊组 */
-const CHANNEL_SCENE = { L1: "fast", L2: "clinic", L3: "emergency", L4: "wellness", L5: "maternal", L6: "wellness", L7: "clinic", L8: "clinic" };
-/* 复用他组场景的通道：标注实际承接的评估组 */
-const SHARED_GROUP = { L6: { scene: "wellness", group: "保健" }, L7: { scene: "clinic", group: "门诊" }, L8: { scene: "clinic", group: "门诊" } };
 
 function homeView() {
   const cards = Object.entries(LEVEL_META)
@@ -112,7 +107,6 @@ function homeView() {
         <div class="level-title">${esc(m.name)}</div>
         <div class="level-sub">${esc(m.subtitle)}</div>
         <div class="level-desc">${esc(m.desc)}</div>
-        <div class="level-model" data-level-model="${key}"><span class="model-dot" style="background:${m.color}"></span>模型配置读取中…</div>
         <div class="level-required">必填项：<b>${reqCount}</b> 项 · 完整病史表单共 ${FIELDS.length} 项</div>
       </div>`;
     })
@@ -425,8 +419,8 @@ function resultView() {
       : "";
 
   const channelTag = (LEVEL_META[state.level] && LEVEL_META[state.level].tag) || (r.route && r.route.scene_label) || "";
-  const modelInfo = r.provider
-    ? `<div class="model-tag">分析模型：${esc(r.provider)}${r.model ? ` · ${esc(r.model)}` : ""}${channelTag ? ` <span class="badge-muted">${esc(channelTag)}通道</span>` : ""}${r.route && r.route.fallback_used ? ` <span class="badge-muted">已自动切换备用模型</span>` : ""}${r.route && r.route.degraded ? ` <span class="badge-warn">该通道未专属配置，已用可用模型兜底</span>` : ""}</div>`
+  const routeTag = (channelTag || r.route?.fallback_used || r.route?.degraded)
+    ? `<div class="route-tag">${channelTag ? `<span class="badge-muted">${esc(channelTag)}通道</span>` : ""}${r.route?.fallback_used ? ` <span class="badge-muted">已自动切换备用模型</span>` : ""}${r.route?.degraded ? ` <span class="badge-warn">该通道未专属配置，已用可用模型兜底</span>` : ""}</div>`
     : "";
 
   return `
@@ -437,7 +431,7 @@ function resultView() {
         <span class="risk-badge risk-${riskClass}">${esc(r.risk_level)}</span>
         ${confidence}
       </div>
-      ${modelInfo}
+      ${routeTag}
       ${redFlag}
       <div class="block">
         <h3><span class="ico" style="background:var(--primary)">1</span>关键信息汇总</h3>
@@ -463,14 +457,6 @@ function resultView() {
       <div class="block" id="record-docs-block">
         <h3><span class="ico" style="background:var(--primary)">附</span>本记录附件（病历 / 检验 / 报告）</h3>
         <div id="record-docs-body"></div>
-      </div>
-      <div class="block" id="compare-block">
-        <h3><span class="ico" style="background:var(--amber)">6</span>换一个模型对比分析</h3>
-        <div class="compare-row">
-          <select id="compare-select"><option value="">加载模型列表…</option></select>
-          <button class="btn btn-primary" id="compare-btn" disabled>对比分析</button>
-        </div>
-        <div id="compare-result"></div>
       </div>
     </div>
     ${footer()}`;
@@ -919,7 +905,7 @@ function render() {
   } else if (hash.startsWith("#/result")) {
     if (!state.result) restoreLastResult();
     app.innerHTML = resultView();
-    bindResult();
+    loadResultDocs();
   } else if (hash.startsWith("#/error")) {
     const msg = decodeURIComponent(hash.slice(7));
     app.innerHTML = errorView(msg);
@@ -955,53 +941,6 @@ function bindHome() {
       }
     });
   });
-  renderChannelModels();
-}
-
-/* 首页就诊通道卡片展示各通道当前承接模型（来自 /api/status，保证与后台配置一致） */
-function paintChannelModels(models) {
-  document.querySelectorAll("[data-level-model]").forEach((el) => {
-    const lv = el.dataset.levelModel;
-    const info = models[CHANNEL_SCENE[lv]];
-    const channelName = LEVEL_META[lv]?.tag || "";
-    if (!info || !info.configured || !info.primary) {
-      const shared = SHARED_GROUP[lv];
-      const text = shared
-        ? `${shared.group}评估组模型未启用，将使用已启用模型兜底`
-        : `${channelName}通道推荐模型未启用，将使用已启用模型兜底`;
-      el.innerHTML = `<span class="model-dot" style="background:#9ca3af"></span>${text}`;
-      return;
-    }
-    const backupNote = info.backups > 0 ? ` +${info.backups} 备用` : "";
-    const shared = SHARED_GROUP[lv];
-    const text = shared
-      ? `${channelName}通道（${shared.group}模型组承接）· ${esc(info.primary)}${backupNote}`
-      : `${channelName}模型：${esc(info.primary)}${backupNote}`;
-    el.innerHTML = `<span class="model-dot" style="background:#16a34a"></span>${text}`;
-  });
-}
-
-async function renderChannelModels() {
-  try {
-    const res = await fetch(`${API}/status`);
-    if (!res.ok) throw new Error("status " + res.status);
-    const json = await res.json();
-    if (!json || !json.llm) throw new Error("status 数据异常");
-    const models = {};
-    for (const s of json?.llm?.scene_models || []) models[s.scene] = s;
-    paintChannelModels(models);
-  } catch {
-    /* 接口不可达（如静态站后端未上线）：用构建期快照兜底展示模型名称 */
-    const models = {};
-    for (const s of MODEL_FALLBACK || []) models[s.scene] = s;
-    if (!Object.keys(models).length) {
-      document.querySelectorAll("[data-level-model]").forEach((el) => {
-        el.innerHTML = `<span class="model-dot" style="background:#9ca3af"></span>模型状态暂时无法获取`;
-      });
-      return;
-    }
-    paintChannelModels(models);
-  }
 }
 
 function collectForm(level) {
@@ -1109,48 +1048,6 @@ function bindForm(level) {
   });
 }
 
-function renderCompareResult(json) {
-  const el = document.getElementById("compare-result");
-  if (!el) return;
-  if (!json.ok) {
-    el.innerHTML = `<p class="compare-error">${esc(json.error || "对比分析失败，请重试")}</p>`;
-    return;
-  }
-  const r = json.result || {};
-  const riskClass = r.risk_level === "立即急诊" ? "急诊" : r.risk_level === "建议尽快门诊" ? "门诊" : "无需";
-  const diff = (r.differential || [])
-    .slice()
-    .sort((a, b) => (PROB_ORDER[a.probability] ?? 9) - (PROB_ORDER[b.probability] ?? 9))
-    .map(
-      (d, i) => `
-      <div class="diff-item">
-        <span class="diff-rank">${i + 1}</span>
-        <div class="diff-body">
-          <div class="diff-name">${esc(d.disease)}${d.probability ? `<span class="prob">可能性：${esc(d.probability)}</span>` : ""}</div>
-          <div class="diff-reason">${esc(d.reason)}</div>
-        </div>
-      </div>`
-    )
-    .join("");
-  const flags = (r.red_flags || []).map((f) => `<li>${esc(f)}</li>`).join("");
-  el.innerHTML = `
-    <div class="compare-result-box">
-      ${r.provider ? `<div class="model-tag">分析模型：${esc(r.provider)}${r.model ? ` · ${esc(r.model)}` : ""}</div>` : ""}
-      <div class="result-head">
-        <span class="risk-badge risk-${riskClass}">${esc(r.risk_level)}</span>
-        ${typeof r.confidence === "number" ? `<div class="confidence">置信度：<b>${Math.round(r.confidence * 100)}%</b></div>` : ""}
-      </div>
-      ${flags ? `<div class="red-flag"><h3>⚠ 红色危险警示</h3><ul>${flags}</ul></div>` : ""}
-      <h4>关键信息汇总</h4>
-      <p>${esc(r.key_findings)}</p>
-      ${r.risk_reason ? `<p style="margin-top:10px;color:var(--ink-2);font-size:13px"><b>危险依据：</b>${esc(r.risk_reason)}</p>` : ""}
-      <h4>鉴别诊断列表</h4>
-      ${diff || "<p style='color:var(--ink-3)'>暂无</p>"}
-      ${(r.uncertainties || []).length ? `<h4>最大不确定点</h4><ul class="list-plain">${r.uncertainties.map((u) => `<li>${esc(u)}</li>`).join("")}</ul>` : ""}
-      ${(r.recommended_exams || []).length ? `<h4>推荐检查项目</h4><ul class="list-plain">${r.recommended_exams.map((e) => `<li>[${esc(e.priority)}] ${esc(e.item)} — ${esc(e.reason)}</li>`).join("")}</ul>` : ""}
-    </div>`;
-}
-
 function loadResultDocs() {
   const box = document.getElementById("record-docs-body");
   const rid = state.consultRecordId;
@@ -1180,50 +1077,6 @@ function loadResultDocs() {
     list: false,
     hint: "补充上传病历卡、检验单、报告单、影像等材料，将归入本次问诊记录，供医师与后台核对。",
     onChanged: () => att.loadAttachments("consult", rid).then(render).catch(renderErr),
-  });
-}
-
-function bindResult() {
-  loadResultDocs();
-  const sel = document.getElementById("compare-select");
-  const btn = document.getElementById("compare-btn");
-  if (!sel || !btn) return;
-  fetch(`${API}/providers`)
-    .then((res) => res.json())
-    .then((json) => {
-      const list = (json.providers || []).filter((p) => !state.result || !state.result.provider || state.result.provider !== p.name);
-      if (!list.length) {
-        sel.innerHTML = `<option value="">暂无其他可用模型</option>`;
-        return;
-      }
-      sel.innerHTML = `<option value="">选择要对比的模型…</option>${list
-        .map((p) => `<option value="${p.id}">${esc(p.name)} · ${esc(p.model)}</option>`)
-        .join("")}`;
-      btn.disabled = false;
-    })
-    .catch(() => {
-      sel.innerHTML = `<option value="">模型列表加载失败</option>`;
-    });
-  btn.addEventListener("click", async () => {
-    if (!sel.value) return alert("请先选择要对比的模型");
-    btn.disabled = true;
-    btn.textContent = "对比中…";
-    const el = document.getElementById("compare-result");
-    if (el) el.innerHTML = `<p class="loading-inline">正在调用所选模型分析，请稍候…</p>`;
-    try {
-      const res = await fetch(`${API}/compare`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ providerId: Number(sel.value), level: state.level, formData: state.formData }),
-      });
-      const json = await res.json();
-      renderCompareResult(json);
-    } catch (err) {
-      if (el) el.innerHTML = `<p class="compare-error">${esc(netErrorText(err))}</p>`;
-    } finally {
-      btn.disabled = false;
-      btn.textContent = "对比分析";
-    }
   });
 }
 

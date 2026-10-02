@@ -101,11 +101,6 @@ body {
   border-top: 1px dashed var(--border); padding-top: 10px;
 }
 .level-required b { color: var(--primary); }
-.level-model {
-  font-size: 12px; color: var(--ink-2); display: inline-flex; align-items: center; gap: 6px;
-  background: #f8fafc; border: 1px solid var(--border); border-radius: 999px; padding: 4px 12px; width: fit-content;
-}
-.model-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
 
 /* ===== Page nav ===== */
 .page-nav { display: flex; align-items: center; gap: 10px; padding: 20px 0 4px; }
@@ -201,15 +196,9 @@ body {
 .red-flag ul { padding-left: 20px; }
 .red-flag li { margin: 6px 0; font-size: 14px; }
 
-.model-tag { display: inline-flex; align-items: center; gap: 6px; background: var(--card); border: 1px solid var(--border); border-radius: 999px; padding: 6px 14px; font-size: 12px; color: var(--ink-2); margin-bottom: 16px; }
-.model-tag .badge-muted { display: inline-block; padding: 2px 8px; border-radius: 999px; background: #e0f2fe; color: #0369a1; font-size: 11px; font-weight: 600; }
-.model-tag .badge-warn { display: inline-block; padding: 2px 8px; border-radius: 999px; background: #fef3c7; color: #b45309; font-size: 11px; font-weight: 600; }
-.compare-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-.compare-row select { flex: 1; min-width: 220px; }
-.compare-result-box { margin-top: 16px; padding: 16px; border: 1px dashed var(--border); border-radius: 10px; background: var(--card); }
-.compare-result-box h4 { font-size: 14px; margin: 14px 0 8px; color: var(--ink-1); }
-.compare-result-box h4:first-of-type { margin-top: 8px; }
-.compare-error { color: var(--danger); font-size: 13px; margin-top: 10px; }
+.route-tag { display: inline-flex; align-items: center; gap: 6px; background: var(--card); border: 1px solid var(--border); border-radius: 999px; padding: 6px 14px; font-size: 12px; color: var(--ink-2); margin-bottom: 16px; }
+.route-tag .badge-muted { display: inline-block; padding: 2px 8px; border-radius: 999px; background: #e0f2fe; color: #0369a1; font-size: 11px; font-weight: 600; }
+.route-tag .badge-warn { display: inline-block; padding: 2px 8px; border-radius: 999px; background: #fef3c7; color: #b45309; font-size: 11px; font-weight: 600; }
 
 .diff-item { padding: 10px 0; border-bottom: 1px dashed var(--border); display: flex; gap: 10px; align-items: baseline; }
 .diff-item:last-child { border-bottom: none; }
