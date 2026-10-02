@@ -147,3 +147,4 @@ Entries discovered by the Agent during task execution should follow this format:
   - 线上 /api 仍指向占位 BACKEND_ORIGIN=https://api.aihospital.com，前端可打开但问诊不可用；需公网后端后再改 Pages 环境变量。核对静态站与预览站一致性：前端源码与资源无差异，可见差异全部来自后端接口（首页通道模型状态、服务列表、登录/会员/后台），后端上线后即一致。
   - 静态部署（Pages）下 /admin 依赖 dist/src/form-config.js：client/vite.config.js 的 publish-shared-config-for-admin 插件在构建时把 client/src/form-config.js 复制到 dist/src；缺此文件时 admin.js 的 `../src/form-config.js` 会 404，导致后台整页空白（仅本地 `node server/index.js` 因额外托管 /src 而正常）。
   - admin 资源以 `?v=` 查询参数缓存，改动 client/public/admin 下任意文件后需同步 bump client/public/admin/index.html 里的版本号（当前 20260927c），并重新 `npm run build --workspace client`。
+  - 根 `npm run build` 会先跑 scripts/gen-model-fallback.mjs，从后端 /api/status 抓取场景模型配置写入 client/src/model-fallback.js（首页模型名快照）；后端改模型配置后需重新构建部署，线上 Pages 无后端时首页展示该快照，快照为空才显示“模型状态暂时无法获取”；生成失败时保留旧快照，构建不因后端不可达而失败。
