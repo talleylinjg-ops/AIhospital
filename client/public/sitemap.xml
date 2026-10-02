@@ -3,24 +3,24 @@
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <!-- 前端为单页应用，主要入口为根路径；其余页面为哈希路由，不单独列出 -->
   <url>
-    <loc>https://aihospital.com/</loc>
-    <lastmod>2026-09-30</lastmod>
+    <loc>https://aihospital-eq8.pages.dev/</loc>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
     <image:image>
-      <image:loc>https://aihospital.com/og-cover.png</image:loc>
+      <image:loc>https://aihospital-eq8.pages.dev/og-cover.png</image:loc>
       <image:title>大气AI医院：AI 智能预问诊、分诊与在线健康服务</image:title>
     </image:image>
   </url>
   <url>
-    <loc>https://aihospital.com/llms.txt</loc>
-    <lastmod>2026-09-30</lastmod>
+    <loc>https://aihospital-eq8.pages.dev/llms.txt</loc>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://aihospital.com/llms-full.txt</loc>
-    <lastmod>2026-09-30</lastmod>
+    <loc>https://aihospital-eq8.pages.dev/llms-full.txt</loc>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
