@@ -3,6 +3,7 @@ import QRCode from "qrcode";
 import * as memberUI from "./member.js";
 import * as att from "./attachments.js";
 import { netErrorText } from "./net.js";
+import MODEL_FALLBACK from "./model-fallback.js";
 
 const app = document.getElementById("app");
 
@@ -958,6 +959,28 @@ function bindHome() {
 }
 
 /* 首页就诊通道卡片展示各通道当前承接模型（来自 /api/status，保证与后台配置一致） */
+function paintChannelModels(models) {
+  document.querySelectorAll("[data-level-model]").forEach((el) => {
+    const lv = el.dataset.levelModel;
+    const info = models[CHANNEL_SCENE[lv]];
+    const channelName = LEVEL_META[lv]?.tag || "";
+    if (!info || !info.configured || !info.primary) {
+      const shared = SHARED_GROUP[lv];
+      const text = shared
+        ? `${shared.group}评估组模型未启用，将使用已启用模型兜底`
+        : `${channelName}通道推荐模型未启用，将使用已启用模型兜底`;
+      el.innerHTML = `<span class="model-dot" style="background:#9ca3af"></span>${text}`;
+      return;
+    }
+    const backupNote = info.backups > 0 ? ` +${info.backups} 备用` : "";
+    const shared = SHARED_GROUP[lv];
+    const text = shared
+      ? `${channelName}通道（${shared.group}模型组承接）· ${esc(info.primary)}${backupNote}`
+      : `${channelName}模型：${esc(info.primary)}${backupNote}`;
+    el.innerHTML = `<span class="model-dot" style="background:#16a34a"></span>${text}`;
+  });
+}
+
 async function renderChannelModels() {
   try {
     const res = await fetch(`${API}/status`);
@@ -966,29 +989,18 @@ async function renderChannelModels() {
     if (!json || !json.llm) throw new Error("status 数据异常");
     const models = {};
     for (const s of json?.llm?.scene_models || []) models[s.scene] = s;
-    document.querySelectorAll("[data-level-model]").forEach((el) => {
-      const lv = el.dataset.levelModel;
-      const info = models[CHANNEL_SCENE[lv]];
-      const channelName = LEVEL_META[lv]?.tag || "";
-      if (!info || !info.configured || !info.primary) {
-        const shared = SHARED_GROUP[lv];
-        const text = shared
-          ? `${shared.group}评估组模型未启用，将使用已启用模型兜底`
-          : `${channelName}通道推荐模型未启用，将使用已启用模型兜底`;
-        el.innerHTML = `<span class="model-dot" style="background:#9ca3af"></span>${text}`;
-        return;
-      }
-      const backupNote = info.backups > 0 ? ` +${info.backups} 备用` : "";
-      const shared = SHARED_GROUP[lv];
-      const text = shared
-        ? `${channelName}通道（${shared.group}模型组承接）· ${esc(info.primary)}${backupNote}`
-        : `${channelName}模型：${esc(info.primary)}${backupNote}`;
-      el.innerHTML = `<span class="model-dot" style="background:#16a34a"></span>${text}`;
-    });
+    paintChannelModels(models);
   } catch {
-    document.querySelectorAll("[data-level-model]").forEach((el) => {
-      el.innerHTML = `<span class="model-dot" style="background:#9ca3af"></span>模型状态暂时无法获取`;
-    });
+    /* 接口不可达（如静态站后端未上线）：用构建期快照兜底展示模型名称 */
+    const models = {};
+    for (const s of MODEL_FALLBACK || []) models[s.scene] = s;
+    if (!Object.keys(models).length) {
+      document.querySelectorAll("[data-level-model]").forEach((el) => {
+        el.innerHTML = `<span class="model-dot" style="background:#9ca3af"></span>模型状态暂时无法获取`;
+      });
+      return;
+    }
+    paintChannelModels(models);
   }
 }
 
