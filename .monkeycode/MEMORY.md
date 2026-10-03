@@ -36,7 +36,7 @@ Entries discovered by the Agent during task execution should follow this format:
 - Context: Discovered by Agent while running AI 医院 web project preview
 - Category: Operations & Deployment / Environment Configuration
 - Instructions:
-  - 本项目启动方式：`./start.sh`（或分别 `node server/index.js` 后端 3001 + `npm run dev -w client` 前端 Vite 5173）；预览端口为 5173，前端 `/api` 反向代理到 3001。
+  - 本项目启动方式：生产单进程 `PORT=5173 node server/index.js`（同端口托管 client/dist + /api + /admin + SQLite，5173 预览隧道已切为此形态，2026-10-02 起 vite dev 不再常驻）；跑 E2E 时另起 `PORT=3001 node server/index.js` 即可（jsdom 直连 127.0.0.1:3001，无需 vite）。服务器一键部署：`bash scripts/deploy-server.sh`（手册 DEPLOY.md）。
   - 管理后台入口 `/admin`（独立页面），管理 API 在 `/api/admin/*`，问诊数据存 SQLite `/workspace/data/consultations.db`。
   - 后台为账号+密码登录（SQLite admin_users 表，scrypt 哈希）。首次启动自动创建默认账号 admin / ADMIN_PASSWORD（.env，当前 admin123456）。账号密码可在后台「系统设置」中修改；删除 data 目录会重置为 .env 默认密码。
   - 后台 CSS 有 `[hidden]{display:none!important}` 全局规则：任何带 hidden 属性的视图容器，其 class 不得再声明 display 覆盖，否则视图叠加显示（曾导致"登录成功但登录框仍在"的故障）。
