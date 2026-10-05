@@ -8,4 +8,4 @@ compatibility_flags = ["nodejs_compat"]
 # /api/* 由 functions/api/[[path]].js 反向代理到下列后端地址
 # 部署后请在 Cloudflare Pages 项目的环境变量中把 BACKEND_ORIGIN 改成真实后端域名
 [vars]
-BACKEND_ORIGIN = "https://api.aihospital.com"
+BACKEND_ORIGIN = "https://api.daqihospital.com"

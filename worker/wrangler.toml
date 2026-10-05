@@ -5,7 +5,7 @@ compatibility_date = "2026-09-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "aihospital"
-database_id = "PLACEHOLDER_AFTER_CREATE"
+database_id = "c0f0b608-2ded-489b-a514-4a432eb66b68"
 
 [[r2_buckets]]
 binding = "ATTACH"
