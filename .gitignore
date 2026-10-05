@@ -182,3 +182,6 @@ data/
 *.lz
 *.lzma
 *.iso
+.dev.vars
+worker/seed-local.sql
+worker/.wrangler/

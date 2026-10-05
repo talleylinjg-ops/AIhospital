@@ -1,0 +1,18 @@
+name = "aihospital-api"
+main = "src/index.js"
+compatibility_date = "2026-09-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "aihospital"
+database_id = "PLACEHOLDER_AFTER_CREATE"
+
+[[r2_buckets]]
+binding = "ATTACH"
+bucket_name = "aihospital-attachments"
+
+[vars]
+# 支付回调对外地址（部署后按实际域名修改）
+PUBLIC_BASE_URL = "https://aihospital-api.monkeycode-ai.workers.dev"
+
+# JWT_SECRET 用 `wrangler secret put JWT_SECRET` 配置，勿写入本文件
