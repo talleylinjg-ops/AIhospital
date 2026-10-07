@@ -11,8 +11,15 @@ database_id = "c0f0b608-2ded-489b-a514-4a432eb66b68"
 binding = "ATTACH"
 bucket_name = "aihospital-attachments"
 
+# 静态前端资产并入 Worker：/api/* 先走代码，其余由 assets 层直接服务（静态请求免费）
+[assets]
+directory = "../client/dist"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+run_worker_first = ["/api/*"]
+
 [vars]
 # 支付回调对外地址（部署后按实际域名修改）
-PUBLIC_BASE_URL = "https://aihospital-api.monkeycode-ai.workers.dev"
+PUBLIC_BASE_URL = "https://api.daqihospital.com"
 
 # JWT_SECRET 用 `wrangler secret put JWT_SECRET` 配置，勿写入本文件

@@ -4,7 +4,7 @@
 
 ## 一、平台简介
 
-大气AI医院（https://aihospital-eq8.pages.dev/）是一个基于大模型的 AI 智能预问诊与分诊平台。用户选择与自身情况相符的就诊通道并如实填写完整病史后，系统会给出分诊建议、可能病因鉴别与就医指引，帮助用户在就诊前理清思路、选择合适的科室与就医时机。
+大气AI医院（https://daqihospital.net/）是一个基于大模型的 AI 智能预问诊与分诊平台。用户选择与自身情况相符的就诊通道并如实填写完整病史后，系统会给出分诊建议、可能病因鉴别与就医指引，帮助用户在就诊前理清思路、选择合适的科室与就医时机。
 
 平台同时提供会员体系（手机号注册/登录、余额充值、健康档案、问诊与消费记录、账号与密码管理）、病历与报告材料上传归档，以及慢病管理、体检报告解读等在线健康服务。
 
@@ -37,12 +37,12 @@
 - AI 慢病管理月度套餐：99.90 元/月，慢病随访 + 报告解读。
 - 体检报告解读：9.90 元/次，上传体检报告获得逐项解读与建议。
 
-支付方式：支持支付宝或微信在线支付，支付成功后即时开通；也可选择线下付款，下单后客服会及时与您联系确认。注册会员还可使用账户余额支付。价格以服务购买页（https://aihospital-eq8.pages.dev/#/services）为准。
+支付方式：支持支付宝或微信在线支付，支付成功后即时开通；也可选择线下付款，下单后客服会及时与您联系确认。注册会员还可使用账户余额支付。价格以服务购买页（https://daqihospital.net/#/services）为准。
 
 ## 五、会员与账户
 
-- 注册/登录：使用手机号注册或登录会员（https://aihospital-eq8.pages.dev/#/login）。
-- 会员中心（https://aihospital-eq8.pages.dev/#/member）：健康档案、医疗记录、使用与充值记录、账号设置与密码管理。
+- 注册/登录：使用手机号注册或登录会员（https://daqihospital.net/#/login）。
+- 会员中心（https://daqihospital.net/#/member）：健康档案、医疗记录、使用与充值记录、账号设置与密码管理。
 - 材料管理：上传的病历与报告材料用于存档，便于医生或客服查看并据此安排解读与随访。
 
 ## 六、常见问题
@@ -78,10 +78,10 @@
 
 ## 八、页面索引
 
-- 首页 · 就诊通道：https://aihospital-eq8.pages.dev/
-- 服务购买：https://aihospital-eq8.pages.dev/#/services
-- 会员登录/注册：https://aihospital-eq8.pages.dev/#/login
-- 会员中心：https://aihospital-eq8.pages.dev/#/member
-- 抓取政策：https://aihospital-eq8.pages.dev/robots.txt
-- 站点地图：https://aihospital-eq8.pages.dev/sitemap.xml
-- 简明资料：https://aihospital-eq8.pages.dev/llms.txt
+- 首页 · 就诊通道：https://daqihospital.net/
+- 服务购买：https://daqihospital.net/#/services
+- 会员登录/注册：https://daqihospital.net/#/login
+- 会员中心：https://daqihospital.net/#/member
+- 抓取政策：https://daqihospital.net/robots.txt
+- 站点地图：https://daqihospital.net/sitemap.xml
+- 简明资料：https://daqihospital.net/llms.txt

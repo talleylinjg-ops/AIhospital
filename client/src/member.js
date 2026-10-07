@@ -70,7 +70,7 @@ export async function memberApi(path, { method = "GET", body } = {}) {
   const headers = { "Content-Type": "application/json" };
   const t = getToken();
   if (t) headers.Authorization = `Bearer ${t}`;
-  const res = await fetch(`/api/member${path}`, { method, headers, body: body !== undefined ? JSON.stringify(body) : undefined });
+  const res = await fetch(`${window.__API_ORIGIN__ || ""}/api/member${path}`, { method, headers, body: body !== undefined ? JSON.stringify(body) : undefined });
   const data = await res.json().catch(() => ({ error: "服务暂时不可用，请稍后重试" }));
   if (res.status === 401) {
     clearAuth();
@@ -433,7 +433,7 @@ async function renderOrders(el) {
   const [wallet, orders, pay] = await Promise.all([
     memberApi("/wallet"),
     memberApi("/orders"),
-    fetch("/api/pay/status").then((r) => r.json()).catch(() => ({ alipay: false, wechat: false })),
+    fetch(`${window.__API_ORIGIN__ || ""}/api/pay/status`).then((r) => r.json()).catch(() => ({ alipay: false, wechat: false })),
   ]);
   const channels = [];
   if (pay.alipay) channels.push({ id: "alipay", label: "支付宝" });

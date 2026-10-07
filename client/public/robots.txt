@@ -89,4 +89,4 @@ Allow: /
 # 内容使用信号：允许检索、允许作为 AI 生成输入、允许训练
 Content-Signal: search=yes, ai-input=yes, ai-train=yes
 
-Sitemap: https://aihospital-eq8.pages.dev/sitemap.xml
+Sitemap: https://daqihospital.net/sitemap.xml

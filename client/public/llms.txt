@@ -30,10 +30,10 @@
 - 注册用户可获得基础会员的免费 AI 问诊与报告额度；价格以服务购买页为准
 
 ## 主要页面
-- [首页 · 就诊通道](https://aihospital-eq8.pages.dev/): 了解平台并选择就诊通道
-- [服务购买](https://aihospital-eq8.pages.dev/#/services): 浏览并购买在线健康服务
-- [会员登录/注册](https://aihospital-eq8.pages.dev/#/login): 手机号注册或登录会员
-- [会员中心](https://aihospital-eq8.pages.dev/#/member): 健康档案、医疗记录、使用与充值记录、账号设置
+- [首页 · 就诊通道](https://daqihospital.net/): 了解平台并选择就诊通道
+- [服务购买](https://daqihospital.net/#/services): 浏览并购买在线健康服务
+- [会员登录/注册](https://daqihospital.net/#/login): 手机号注册或登录会员
+- [会员中心](https://daqihospital.net/#/member): 健康档案、医疗记录、使用与充值记录、账号设置
 
 ## 常见问题
 - 大气AI医院是什么？基于大模型的 AI 智能预问诊与分诊平台，提供分诊建议与就医指引，并提供在线健康服务。

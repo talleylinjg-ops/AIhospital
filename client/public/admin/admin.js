@@ -39,7 +39,7 @@ async function api(path, opts = {}) {
   if (opts.body) headers["Content-Type"] = "application/json";
   let res;
   try {
-    res = await fetch(path, { ...opts, headers });
+    res = await fetch((window.__API_ORIGIN__ || "") + path, { ...opts, headers });
   } catch {
     throw new Error("无法连接服务，请检查网络后重试");
   }
@@ -78,7 +78,7 @@ function bindLogin() {
     const password = document.getElementById("password").value.trim();
     submitBtn.disabled = true;
     try {
-      const res = await fetch("/api/admin/login", {
+      const res = await fetch((window.__API_ORIGIN__ || "") + "/api/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
@@ -321,13 +321,13 @@ async function openMember(id) {
       ? documents.map((d) => {
           const isImg = /^image\//.test(d.mime || "");
           const media = isImg
-            ? `<img src="/api/attachments/${d.id}/file" class="doc-thumb" loading="lazy" alt="" />`
+            ? `<img src="${window.__API_ORIGIN__ || ""}/api/attachments/${d.id}/file" class="doc-thumb" loading="lazy" alt="" />`
             : `<div class="doc-file">PDF</div>`;
           const src = d.consult_id ? `问诊 #${d.consult_id}` : d.purchase_id ? `订单 #${d.purchase_id}` : "材料库";
           return `<div class="doc-card" data-doc="${d.id}">
             ${media}
             <div class="doc-info"><b>${esc(d.label || "附件")}</b><span>${esc(d.kind || "其他")} · ${src} · ${esc((d.created_at || "").slice(0, 16))}</span></div>
-            <div class="doc-ops"><a href="/api/attachments/${d.id}/file" target="_blank" rel="noopener">查看</a><button class="doc-del" data-del="${d.id}">删除</button></div>
+            <div class="doc-ops"><a href="${window.__API_ORIGIN__ || ""}/api/attachments/${d.id}/file" target="_blank" rel="noopener">查看</a><button class="doc-del" data-del="${d.id}">删除</button></div>
           </div>`;
         }).join("")
       : `<p class="empty">暂无上传材料</p>`;

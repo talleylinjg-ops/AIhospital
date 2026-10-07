@@ -4,7 +4,7 @@ import { netErrorText } from "./net.js";
 export const DOC_KINDS = ["病历卡", "检验单", "报告单", "影像胶片", "处方", "其他"];
 export const DOC_ACCEPT = "image/png,image/jpeg,image/webp,image/gif,application/pdf";
 export const DOC_MAX_BYTES = 6 * 1024 * 1024;
-export const API_BASE = "/api";
+export const API_BASE = (window.__API_ORIGIN__ || "") + "/api";
 
 export function kindOptions(sel) {
   return DOC_KINDS.map((k) => `<option ${k === sel ? "selected" : ""}>${esc(k)}</option>`).join("");

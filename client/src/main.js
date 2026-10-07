@@ -41,7 +41,7 @@ function restoreLastResult() {
   }
 }
 
-const API = "/api";
+const API = (window.__API_ORIGIN__ || "") + "/api";
 
 /* 头部导航按钮文字：前四通道显示名称（危重症按钮取 4 字短称），其余显示 tag */
 const NAV_SHORT = { L1: "轻微快诊", L2: "中等症状", L3: "危重症", L4: "日常保健" };
@@ -489,7 +489,7 @@ function servicesView() {
 async function bindServices() {
   const grid = document.getElementById("services-grid");
   try {
-    const res = await fetch("/api/services");
+    const res = await fetch(`${API}/services`);
     const data = await res.json();
     if (!res.ok || !data.ok) throw new Error(data.error || "加载失败");
     const services = data.services || [];
@@ -669,7 +669,7 @@ function openBuyDialog({ id, name, price, unit, needsDoc }) {
   updateTotal();
 
   /* 读取可用在线支付渠道 */
-  fetch("/api/pay/status")
+  fetch(`${API}/pay/status`)
     .then((r) => r.json())
     .then((st) => {
       if (st && st.alipay) payChannels.push({ id: "alipay", label: "支付宝" });
@@ -756,7 +756,7 @@ function openBuyDialog({ id, name, price, unit, needsDoc }) {
       }
       const check = async () => {
         try {
-          const r = await fetch(`/api/purchase/${pay.orderId}/pay-status?phone=${encodeURIComponent(phone)}`, { headers: authHeaders() });
+          const r = await fetch(`${API}/purchase/${pay.orderId}/pay-status?phone=${encodeURIComponent(phone)}`, { headers: authHeaders() });
           const s = await r.json();
           if (r.ok && s.paid) {
             showPaid(pay.orderId, `订单 #${pay.orderId} 支付成功，服务已开通。`);
@@ -808,7 +808,7 @@ function openBuyDialog({ id, name, price, unit, needsDoc }) {
         }
         document.getElementById("buy-done").addEventListener("click", closeDialog);
       } else {
-        const res = await fetch("/api/purchase", {
+        const res = await fetch(`${API}/purchase`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -824,7 +824,7 @@ function openBuyDialog({ id, name, price, unit, needsDoc }) {
         purchaseId = data.orderId;
         if (isOnlineMode(payMode)) {
           const phone = document.getElementById("bf-phone").value.trim();
-          const pr = await fetch(`/api/purchase/${data.orderId}/pay`, {
+          const pr = await fetch(`${API}/purchase/${data.orderId}/pay`, {
             method: "POST",
             headers: { "Content-Type": "application/json", ...authHeaders() },
             body: JSON.stringify({ channel: payMode, phone }),

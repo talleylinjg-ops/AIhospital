@@ -3,6 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      // 生产域下 API 直连后端 Worker（Pages Functions 反代不可用时的兜底），其余环境走同源 /api
+      window.__API_ORIGIN__ = /(^|\.)daqihospital\.net$/.test(location.hostname)
+        ? "https://api.daqihospital.com"
+        : "";
+    </script>
 
     <title>大气AI医院 · 智能预问诊、分诊与在线健康服务</title>
     <meta
@@ -18,8 +24,8 @@
     <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
     <meta name="theme-color" content="#0e7c86" />
     <meta name="format-detection" content="telephone=no" />
-    <link rel="canonical" href="https://aihospital-eq8.pages.dev/" />
-    <link rel="alternate" type="text/plain" href="https://aihospital-eq8.pages.dev/llms.txt" title="llms.txt" />
+    <link rel="canonical" href="https://daqihospital.net/" />
+    <link rel="alternate" type="text/plain" href="https://daqihospital.net/llms.txt" title="llms.txt" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.json" />
@@ -33,8 +39,8 @@
       property="og:description"
       content="8 条就诊通道的 AI 智能预问诊与分诊，在线获得分诊建议与就医指引，并支持慢病管理、体检报告解读等健康服务在线购买。"
     />
-    <meta property="og:url" content="https://aihospital-eq8.pages.dev/" />
-    <meta property="og:image" content="https://aihospital-eq8.pages.dev/og-cover.png" />
+    <meta property="og:url" content="https://daqihospital.net/" />
+    <meta property="og:image" content="https://daqihospital.net/og-cover.png" />
     <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
@@ -47,7 +53,7 @@
       name="twitter:description"
       content="8 条就诊通道的 AI 智能预问诊与分诊，在线获得分诊建议与就医指引，并支持健康服务在线购买。"
     />
-    <meta name="twitter:image" content="https://aihospital-eq8.pages.dev/og-cover.png" />
+    <meta name="twitter:image" content="https://daqihospital.net/og-cover.png" />
     <meta name="twitter:image:alt" content="大气AI医院：AI 智能预问诊、分诊与在线健康服务" />
 
     <link rel="stylesheet" href="/src/styles.css" />
@@ -58,17 +64,17 @@
         "@graph": [
           {
             "@type": "MedicalClinic",
-            "@id": "https://aihospital-eq8.pages.dev/#organization",
+            "@id": "https://daqihospital.net/#organization",
             "name": "大气AI医院",
             "alternateName": "大气AI医院 · 智能预问诊与分诊",
-            "url": "https://aihospital-eq8.pages.dev/",
+            "url": "https://daqihospital.net/",
             "logo": {
               "@type": "ImageObject",
-              "url": "https://aihospital-eq8.pages.dev/og-cover.png",
+              "url": "https://daqihospital.net/og-cover.png",
               "width": 1200,
               "height": 630
             },
-            "image": "https://aihospital-eq8.pages.dev/og-cover.png",
+            "image": "https://daqihospital.net/og-cover.png",
             "description": "基于大模型的 AI 智能预问诊与分诊平台，覆盖 8 条就诊通道，提供分诊建议、就医指引与在线健康服务。",
             "medicalSpecialty": [
               "PrimaryCare",
@@ -102,41 +108,41 @@
           },
           {
             "@type": "WebSite",
-            "@id": "https://aihospital-eq8.pages.dev/#website",
-            "url": "https://aihospital-eq8.pages.dev/",
+            "@id": "https://daqihospital.net/#website",
+            "url": "https://daqihospital.net/",
             "name": "大气AI医院",
             "inLanguage": "zh-CN",
-            "publisher": { "@id": "https://aihospital-eq8.pages.dev/#organization" }
+            "publisher": { "@id": "https://daqihospital.net/#organization" }
           },
           {
             "@type": "WebPage",
-            "@id": "https://aihospital-eq8.pages.dev/#webpage",
-            "url": "https://aihospital-eq8.pages.dev/",
+            "@id": "https://daqihospital.net/#webpage",
+            "url": "https://daqihospital.net/",
             "name": "大气AI医院 · 智能预问诊、分诊与在线健康服务",
-            "isPartOf": { "@id": "https://aihospital-eq8.pages.dev/#website" },
-            "about": { "@id": "https://aihospital-eq8.pages.dev/#organization" },
-            "breadcrumb": { "@id": "https://aihospital-eq8.pages.dev/#breadcrumb" },
-            "primaryImageOfPage": { "@id": "https://aihospital-eq8.pages.dev/#primaryimage" },
+            "isPartOf": { "@id": "https://daqihospital.net/#website" },
+            "about": { "@id": "https://daqihospital.net/#organization" },
+            "breadcrumb": { "@id": "https://daqihospital.net/#breadcrumb" },
+            "primaryImageOfPage": { "@id": "https://daqihospital.net/#primaryimage" },
             "inLanguage": "zh-CN"
           },
           {
             "@type": "ImageObject",
-            "@id": "https://aihospital-eq8.pages.dev/#primaryimage",
-            "url": "https://aihospital-eq8.pages.dev/og-cover.png",
+            "@id": "https://daqihospital.net/#primaryimage",
+            "url": "https://daqihospital.net/og-cover.png",
             "width": 1200,
             "height": 630
           },
           {
             "@type": "BreadcrumbList",
-            "@id": "https://aihospital-eq8.pages.dev/#breadcrumb",
+            "@id": "https://daqihospital.net/#breadcrumb",
             "itemListElement": [
-              { "@type": "ListItem", "position": 1, "name": "首页", "item": "https://aihospital-eq8.pages.dev/" },
-              { "@type": "ListItem", "position": 2, "name": "服务购买", "item": "https://aihospital-eq8.pages.dev/#/services" }
+              { "@type": "ListItem", "position": 1, "name": "首页", "item": "https://daqihospital.net/" },
+              { "@type": "ListItem", "position": 2, "name": "服务购买", "item": "https://daqihospital.net/#/services" }
             ]
           },
           {
             "@type": "HowTo",
-            "@id": "https://aihospital-eq8.pages.dev/#howto",
+            "@id": "https://daqihospital.net/#howto",
             "name": "如何在大气AI医院完成一次 AI 预问诊",
             "description": "选择就诊通道、填写完整病史并提交，即可获得分诊建议与就医指引。",
             "totalTime": "PT5M",
@@ -169,7 +175,7 @@
           },
           {
             "@type": "ItemList",
-            "@id": "https://aihospital-eq8.pages.dev/#services",
+            "@id": "https://daqihospital.net/#services",
             "name": "在线健康服务",
             "itemListElement": [
               {
@@ -183,7 +189,7 @@
                     "@type": "Offer",
                     "price": "9.90",
                     "priceCurrency": "CNY",
-                    "url": "https://aihospital-eq8.pages.dev/#/services"
+                    "url": "https://daqihospital.net/#/services"
                   }
                 }
               },
@@ -198,7 +204,7 @@
                     "@type": "Offer",
                     "price": "99.90",
                     "priceCurrency": "CNY",
-                    "url": "https://aihospital-eq8.pages.dev/#/services"
+                    "url": "https://daqihospital.net/#/services"
                   }
                 }
               },
@@ -213,7 +219,7 @@
                     "@type": "Offer",
                     "price": "999.50",
                     "priceCurrency": "CNY",
-                    "url": "https://aihospital-eq8.pages.dev/#/services"
+                    "url": "https://daqihospital.net/#/services"
                   }
                 }
               },
@@ -228,7 +234,7 @@
                     "@type": "Offer",
                     "price": "99.90",
                     "priceCurrency": "CNY",
-                    "url": "https://aihospital-eq8.pages.dev/#/services"
+                    "url": "https://daqihospital.net/#/services"
                   }
                 }
               },
@@ -243,7 +249,7 @@
                     "@type": "Offer",
                     "price": "9.90",
                     "priceCurrency": "CNY",
-                    "url": "https://aihospital-eq8.pages.dev/#/services"
+                    "url": "https://daqihospital.net/#/services"
                   }
                 }
               }
@@ -251,7 +257,7 @@
           },
           {
             "@type": "FAQPage",
-            "@id": "https://aihospital-eq8.pages.dev/#faq",
+            "@id": "https://daqihospital.net/#faq",
             "mainEntity": [
               {
                 "@type": "Question",
