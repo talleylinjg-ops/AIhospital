@@ -138,7 +138,7 @@ const CHRONIC_SEED = [
   { name: "AI 慢病管理年度套餐", price: 999.5, unit: "年", description: "全年慢病随访 + 报告解读 + 用药与生活方式指导", sort: 9 },
   { name: "AI 慢病管理月度套餐", price: 99.9, unit: "月", description: "慢病随访 + 报告解读", sort: 10 },
 ];
-const DOC_SERVICE_NAMES = ["AI 慢病管理年度套餐", "AI 慢病管理月度套餐", "体检报告解读"];
+const DOC_SERVICE_NAMES = ["AI 慢病管理年度套餐", "AI 慢病管理月度套餐"];
 
 let db = null;
 let initPromise = null;

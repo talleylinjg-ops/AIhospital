@@ -202,7 +202,7 @@ function migrate() {
 
   // 需要上传报告/病历材料的服务项目标记（幂等，按名称匹配）
   const docServiceSeed = db.prepare("UPDATE services SET needs_doc = 1 WHERE name = ?");
-  for (const n of ["AI 慢病管理年度套餐", "AI 慢病管理月度套餐", "体检报告解读"]) docServiceSeed.run(n);
+  for (const n of ["AI 慢病管理年度套餐", "AI 慢病管理月度套餐"]) docServiceSeed.run(n);
 
   // 附件索引
   db.exec(`
