@@ -110,3 +110,14 @@ Entries discovered by the Agent during task execution should follow this format:
   - Workers 免费日额度 10 万/天为**账号级共享**（账号内 16 个 Worker 分摊），耗尽返回 1027（workers.dev 纯文本/自定义域为 "temporarily rate limited" HTML 53KB，带 IE 条件注释易误判为旧站）；UTC 0（北京早 8 点）重置。用户已选等待重置。静态资产请求免费。
   - D1 aihospital c0f0b608-2ded-489b-a514-4a432eb66b68（APAC，165 条已导入，REST POST /accounts/{acc}/d1/database/{id}/query 逐条，`wrangler d1 execute --remote` 沙箱 fetch failed）；R2 aihospital-attachments；JWT_SECRET 已 wrangler secret put；seed-local.sql 含密钥已 gitignore。D1 exec 按行截断多行语句须按分号 batch；D1 本地不支持命名参数；datetime('now') 为 UTC 而 worker 用 nowSh() UTC+8。
   - 线上验证待额度重置后：api.daqihospital.com/api/status 应返回 JSON（智谱 GLM-4.5-Flash configured:true）、daqihospital.net 真实问诊、CORS 生效。沙箱实测可行 DoH：cloudflare-dns.com/dns-query。
+
+[Project Knowledge Summary]
+- Date: 2026-10-11
+- Context: Discovered by Agent while implementing L9 report-reading channel and diagnosing the .net domain outage
+- Category: Operations & Deployment / Troubleshooting & Debugging
+- Instructions:
+  - **DNS 事故待办（用户手动操作）**：2026-10-11 发现 .net zone（ef85c4f6…）裸域与 www 的 CNAME 记录已被删除（DoH 全网验证 A/AAAA/CNAME 均空），Pages 自定义域 daqihospital.net 显示 deactivated（www 显示 active 但同样无 DNS 记录）。两个 token（main cfat_ 与 /root/.dns-token）对 zone dns_records 均返回 10000，无法自愈；需用户在 CF Dashboard 重建两条 CNAME → aihospital-eq8.pages.dev（橙云）：daqihospital.net 与 www.daqihospital.net。
+  - L9 vision 链路：/api/consult 与 /api/compare 接受 attachments[{mime,dataBase64}]（限 2 张、image/*、base64 ≤8.1MB）；buildMessages 对 L9+图片走 OpenAI image_url 多模态格式；带图请求时模型名匹配 /4v|vl|vision/ 的提供商排链首（纯文本 glm-4.5-flash 会 400 code 1210）。glm-4v 系列 max_tokens 上限 1024（callProvider 已按模型名自适应）。GLM-4V-Flash（读图）已插入本地 SQLite 与远程 D1（id 43 本地/远程 last_row_id 未回显，scenes=clinic,emergency priority=2，与 GLM-4.5-Flash 共用 Key）。
+  - wrangler deploy/pages deploy 偶发 fetch failed（TypeError，几分钟内多次复现），直接重试即可成功；建议用 for i in 1 2 3 重试包装。
+  - D1 REST query 响应结构：顶层 {result:[{results:[…],meta:{changes,…}}]}，results 在 result[0].results；Grep 解析时勿用 j.result.results。
+  - 生产部署顺序备忘：npm run build → worker/ `wrangler@4 deploy`（assets 并入）→ 仓库根 `wrangler@4 pages deploy client/dist --project-name aihospital`（部署目录是 client/dist，绝不可 client/）。
