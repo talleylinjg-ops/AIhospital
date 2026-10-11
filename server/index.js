@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import "dotenv/config";
-import { callLLM, callLLMWithProvider, getLLMStatus } from "./llm.js";
+import { callLLM, callLLMWithProvider, getLLMStatus, callChat } from "./llm.js";
 import { retrieveGuidelines } from "./rag.js";
 import { LEVELS } from "./prompts.js";
 import { insertConsultation, listActiveServices, createGuestPurchase, listEnabledProviders } from "./db.js";
@@ -66,6 +66,11 @@ app.get("/api/status", (_req, res) => {
 
 app.post("/api/consult", async (req, res) => {
   const { level, formData } = req.body || {};
+  /* L9 报告解读：可选携带报告图片（base64），最多 2 张，单张原始 ≤6MB */
+  const rawAtt = Array.isArray(req.body?.attachments) ? req.body.attachments : [];
+  const attachments = rawAtt
+    .filter((a) => a && typeof a === "object" && /^image\/(png|jpeg|webp|gif)$/.test(a.mime) && typeof a.dataBase64 === "string" && a.dataBase64.length <= 8_100_000)
+    .slice(0, 2);
 
   if (!level || !LEVELS[level]) {
     return res.status(400).json({ error: "无效的分诊等级" });
@@ -79,7 +84,7 @@ app.post("/api/consult", async (req, res) => {
 
   await acquireSlot();
   try {
-    const result = await callLLM({ level, formData, ragContext });
+    const result = await callLLM({ level, formData, ragContext, attachments });
     let recordId = null;
     try {
       const ah = req.headers.authorization || "";
@@ -102,6 +107,21 @@ app.get("/api/services", (_req, res) => {
   res.json({ ok: true, services: listActiveServices() });
 });
 
+/* AI 客服「小气」（公开，多轮对话） */
+app.post("/api/chat", async (req, res) => {
+  const { messages } = req.body || {};
+  if (!Array.isArray(messages) || !messages.length) {
+    return res.status(400).json({ error: "缺少对话内容" });
+  }
+  try {
+    const data = await callChat(messages);
+    res.json({ ok: true, ...data });
+  } catch (err) {
+    const status = err.status && err.status >= 400 && err.status < 600 ? err.status : 500;
+    res.status(status).json({ error: err.message || "客服暂时不可用，请稍后重试" });
+  }
+});
+
 /* 已启用模型清单（前台"换模型对比"下拉用，不含任何密钥） */
 app.get("/api/providers", (_req, res) => {
   const providers = listEnabledProviders().map((p) => ({
@@ -122,12 +142,16 @@ app.post("/api/compare", async (req, res) => {
   if (!formData || typeof formData !== "object") return res.status(400).json({ error: "缺少病史表单数据" });
   if (!providerId) return res.status(400).json({ error: "缺少模型 ID" });
 
+  const rawAtt = Array.isArray(req.body?.attachments) ? req.body.attachments : [];
+  const attachments = rawAtt
+    .filter((a) => a && typeof a === "object" && /^image\/(png|jpeg|webp|gif)$/.test(a.mime) && typeof a.dataBase64 === "string" && a.dataBase64.length <= 8_100_000)
+    .slice(0, 2);
   const historyText = collectHistoryText(formData);
   const ragContext = retrieveGuidelines(historyText, 3);
 
   await acquireSlot();
   try {
-    const result = await callLLMWithProvider(providerId, { level, formData, ragContext });
+    const result = await callLLMWithProvider(providerId, { level, formData, ragContext, attachments });
     res.json({ ok: true, level, result });
   } catch (err) {
     const status = err.status && err.status >= 400 && err.status < 600 ? err.status : 500;

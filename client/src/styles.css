@@ -457,3 +457,97 @@ body {
 .att-err { color: #b45309; background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 8px 10px; font-size: 12.5px; margin: 0 0 10px; }
 .buy-success .att-zone { text-align: left; margin-top: 14px; }
 .buy-success .att-grid { grid-template-columns: 1fr; }
+
+/* ===== 移动端底部导航 tabbar ===== */
+.tabbar { display: none; }
+@media (max-width: 900px) {
+  .tabbar {
+    display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 900;
+    background: #fff; border-top: 1px solid var(--border);
+    box-shadow: 0 -4px 16px rgba(0,0,0,0.06);
+    padding: 4px 0 calc(4px + env(safe-area-inset-bottom, 0px));
+  }
+  .tab-item {
+    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 1px;
+    text-decoration: none; color: #6b7280; font-size: 11px; padding: 5px 0 3px;
+    border-radius: 10px; transition: color 0.15s, background 0.15s;
+  }
+  .tab-item .tab-ico { font-size: 20px; line-height: 1.2; }
+  .tab-item.active { color: var(--primary, #0e7c86); background: rgba(14,124,134,0.07); font-weight: 600; }
+  /* tabbar 占位：页面主体不被遮挡 */
+  body { padding-bottom: 62px; }
+  .site-footer { padding-bottom: 14px; }
+  /* 顶部导航在手机端隐藏通道按钮行（首页卡片直达），保留品牌与会员入口 */
+  .nav-levels { display: none; }
+}
+
+/* ===== 小气客服聊天 ===== */
+.chat-page { display: flex; flex-direction: column; min-height: calc(100vh - 220px); }
+.chat-header { display: flex; align-items: center; justify-content: space-between; margin: 18px 0 10px; }
+.chat-bot-badge { font-weight: 700; color: var(--primary-dark); font-size: 15px; }
+.chat-box {
+  flex: 1; overflow-y: auto; background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; gap: 12px;
+  min-height: 320px; max-height: 56vh;
+}
+.chat-row { display: flex; align-items: flex-end; gap: 8px; }
+.chat-row.me { justify-content: flex-end; }
+.chat-avatar {
+  width: 34px; height: 34px; border-radius: 50%; background: var(--primary, #0e7c86); color: #fff;
+  display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex: 0 0 auto;
+}
+.chat-bubble {
+  max-width: 78%; padding: 10px 14px; border-radius: 14px; font-size: 14px; line-height: 1.6;
+  background: #f3f4f6; color: var(--ink); white-space: pre-wrap; word-break: break-word;
+}
+.chat-row.me .chat-bubble { background: var(--primary, #0e7c86); color: #fff; border-bottom-right-radius: 4px; }
+.chat-row.bot .chat-bubble { border-bottom-left-radius: 4px; }
+.chat-typing { color: #9ca3af; }
+.chat-input-row { display: flex; gap: 8px; margin-top: 12px; }
+.chat-input-row input {
+  flex: 1; padding: 11px 14px; border: 1px solid var(--border); border-radius: 999px; font-size: 14px; outline: none;
+}
+.chat-input-row input:focus { border-color: var(--primary, #0e7c86); }
+.chat-disclaimer { margin: 10px 0 20px; font-size: 12px; color: #9ca3af; text-align: center; }
+
+/* ===== 健康监控页 ===== */
+.page-narrow { max-width: 860px; }
+.monitor-form-row { display: grid; grid-template-columns: 1.2fr 1.4fr 1fr auto; gap: 8px; align-items: center; }
+.monitor-form-row select, .monitor-form-row input {
+  padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; background: #fff;
+}
+.monitor-note { width: 100%; margin-top: 8px; padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; }
+@media (max-width: 720px) { .monitor-form-row { grid-template-columns: 1fr 1fr; } }
+.connect-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 12px; }
+@media (max-width: 720px) { .connect-grid { grid-template-columns: 1fr; } }
+.connect-card {
+  background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 14px;
+  display: flex; flex-direction: column; gap: 4px; font-size: 13px;
+}
+.connect-card b { color: var(--primary-dark); font-size: 14px; }
+.connect-card span { color: var(--ink-2); line-height: 1.7; }
+
+/* ===== 家庭成员 ===== */
+.family-toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.family-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; margin-bottom: 8px; background: #fff;
+}
+.family-row-main { display: flex; flex-direction: column; gap: 2px; }
+.family-row-main b { font-size: 15px; }
+.family-row-main .small { font-size: 12px; }
+.family-row-ops { display: flex; gap: 6px; flex: 0 0 auto; }
+@media (max-width: 640px) {
+  .family-row { flex-direction: column; align-items: stretch; }
+  .family-row-ops { justify-content: flex-end; }
+}
+.btn-sm { padding: 5px 12px; font-size: 13px; }
+.btn.danger { color: var(--danger); }
+
+/* ===== 报告解读（L9）上传区强化 ===== */
+#consult-attach-picker .att-row { flex-wrap: wrap; }
+@media (max-width: 900px) {
+  .chat-box { max-height: 62vh; }
+  .hero { padding: 24px 0 4px; }
+  .hero h1 { font-size: 24px; }
+}

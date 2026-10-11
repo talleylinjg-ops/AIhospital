@@ -2,7 +2,7 @@
 // 签名对齐 server/index.js（Express 版）；并发信号量省略（上游 429 透传给调用链主备切换）
 import { Hono } from "hono";
 import { initDb } from "./db.js";
-import { callLLM, callLLMWithProvider, getLLMStatus } from "./llm.js";
+import { callLLM, callLLMWithProvider, getLLMStatus, callChat } from "./llm.js";
 import { retrieveGuidelines } from "./rag.js";
 import { LEVELS } from "./prompts.js";
 import { insertConsultation, listActiveServices, createGuestPurchase, listEnabledProviders } from "./db.js";
@@ -42,7 +42,13 @@ app.get("/api/status", async (c) => {
 });
 
 app.post("/api/consult", async (c) => {
-  const { level, formData } = await c.req.json().catch(() => ({}));
+  const body = await c.req.json().catch(() => ({}));
+  const { level, formData } = body;
+  /* L9 报告解读：可选携带报告图片（base64），最多 2 张，单张原始 ≤6MB */
+  const rawAtt = Array.isArray(body?.attachments) ? body.attachments : [];
+  const attachments = rawAtt
+    .filter((a) => a && typeof a === "object" && /^image\/(png|jpeg|webp|gif)$/.test(a.mime) && typeof a.dataBase64 === "string" && a.dataBase64.length <= 8_100_000)
+    .slice(0, 2);
 
   if (!level || !LEVELS[level]) {
     return c.json({ error: "无效的分诊等级" }, 400);
@@ -55,7 +61,7 @@ app.post("/api/consult", async (c) => {
   const ragContext = retrieveGuidelines(historyText, 3);
 
   try {
-    const result = await callLLM({ level, formData, ragContext }, c.env);
+    const result = await callLLM({ level, formData, ragContext, attachments }, c.env);
     let recordId = null;
     try {
       const ah = c.req.header("Authorization") || "";
@@ -84,6 +90,21 @@ app.get("/api/services", async (c) => {
   return c.json({ ok: true, services: await listActiveServices() });
 });
 
+/* AI 客服「小气」（公开，多轮对话） */
+app.post("/api/chat", async (c) => {
+  const { messages } = await c.req.json().catch(() => ({}));
+  if (!Array.isArray(messages) || !messages.length) {
+    return c.json({ error: "缺少对话内容" }, 400);
+  }
+  try {
+    const data = await callChat(messages, c.env);
+    return c.json({ ok: true, ...data });
+  } catch (err) {
+    const status = err.status && err.status >= 400 && err.status < 600 ? err.status : 500;
+    return c.json({ error: err.message || "客服暂时不可用，请稍后重试" }, status);
+  }
+});
+
 /* 已启用模型清单（不含任何密钥） */
 app.get("/api/providers", async (c) => {
   const providers = (await listEnabledProviders()).map((p) => ({
@@ -99,16 +120,21 @@ app.get("/api/providers", async (c) => {
 
 /* 换模型对比分析（公开，不入库） */
 app.post("/api/compare", async (c) => {
-  const { providerId, level, formData } = await c.req.json().catch(() => ({}));
+  const body = await c.req.json().catch(() => ({}));
+  const { providerId, level, formData } = body;
   if (!LEVELS[level]) return c.json({ error: "无效的分诊等级" }, 400);
   if (!formData || typeof formData !== "object") return c.json({ error: "缺少病史表单数据" }, 400);
   if (!providerId) return c.json({ error: "缺少模型 ID" }, 400);
 
+  const rawAtt = Array.isArray(body?.attachments) ? body.attachments : [];
+  const attachments = rawAtt
+    .filter((a) => a && typeof a === "object" && /^image\/(png|jpeg|webp|gif)$/.test(a.mime) && typeof a.dataBase64 === "string" && a.dataBase64.length <= 8_100_000)
+    .slice(0, 2);
   const historyText = collectHistoryText(formData);
   const ragContext = retrieveGuidelines(historyText, 3);
 
   try {
-    const result = await callLLMWithProvider(providerId, { level, formData, ragContext }, c.env);
+    const result = await callLLMWithProvider(providerId, { level, formData, ragContext, attachments }, c.env);
     return c.json({ ok: true, level, result });
   } catch (err) {
     const status = err.status && err.status >= 400 && err.status < 600 ? err.status : 500;

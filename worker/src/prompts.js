@@ -53,6 +53,11 @@ export const LEVELS = {
     name: "口腔问诊",
     desc: "口腔、牙齿、牙周问题与口腔专科评估",
   },
+  L9: {
+    key: "L9",
+    name: "报告解读",
+    desc: "检验报告、体检报告、影像报告等医学报告的逐项解读",
+  },
 };
 
 const JSON_SCHEMA = `
@@ -134,6 +139,7 @@ function buildSystemPrompt(level, ragContext) {
     L6: "你正在进行【中医问诊】分诊与调理指导：请以中西医结合视角，运用中医辨证论治思维（八纲辨证、脏腑辨证、气血津液辨证），结合四诊信息（患者未提供舌脉时须在 uncertainties 中如实说明，并建议线下中医师面诊察舌切脉）与体质辨识（九种体质），给出中医调护方案（起居、情志、饮食宜忌、可参考的中成药/经典方剂思路——须标注「需中医师辨证后开方，不替代处方」）。同时用西医视角评估是否存在必须西医干预的危险信号（如剧烈疼痛、进行性加重、器质性病变），出现时必须红色置顶并转对应专科。建议就诊科室指向「中医科 / 中西医结合科」，必要时注明对应的西医专科。",
     L7: "你正在评估【眼科】患者：请以眼科专科视角评估眼部症状。必须重点排查眼科急症——突发/进行性视力下降或视野缺损、剧烈眼痛伴头痛恶心、急性闭角型青光眼征象、眼外伤/化学伤、眼前固定黑影/闪光感（警惕视网膜脱离）、角膜白斑或穿孔——出现时一律红色置顶并建议尽快就诊眼科急诊。就诊科室指向「眼科」。描述症状位置使用「左眼/右眼/双眼」口径，建议检查需符合眼科常规（视力、裂隙灯、眼压、眼底、OCT、视野等），并给出眼部居家护理与用眼卫生建议。",
     L8: "你正在评估【口腔】患者：请以口腔科专科视角评估口腔症状。重点排查口腔急症——剧烈牙痛伴面部肿胀发热（间隙感染）、颌面部外伤、下颌骨折、拔牙后出血不止、口腔内迅速增大的肿物——出现时红色置顶并建议尽快就诊口腔科/口腔急诊。就诊科室指向「口腔科」。建议检查符合口腔常规（曲面断层片/根尖片、牙周探查等），给出口腔卫生维护、饮食宜忌与就医时机建议。涉及用药时标注「仅供参考，需由医生处方」并避开常用致敏药物。",
+    L9: "你正在进行【医学报告解读】（检验报告/体检报告/影像报告等）：请以检验医学科+全科医生视角，对报告中的指标逐项解读。规则：1) 逐项列出报告中的关键指标，标注每个指标的正常参考区间、实测值与升降箭头，明确指出哪些异常、偏离程度（轻度/中度/重度）；2) 对异常指标给出最常见的原因（结合患者填写的主诉与基础信息），区分为「需复查随访」「建议门诊进一步检查」「需尽快就诊」三档；3) 多个异常指标之间的关联性分析（如血脂+血糖+血压提示代谢综合征方向）；4) 影像报告须解释影像学结论中的专业术语；5) 明确标注「报告解读仅供参考，异常指标请携带报告原件到对应科室就诊」；6) 若用户上传了报告图片但你无法读取图像内容，必须在 uncertainties 中说明「未能读取图片内容，请手动抄录关键指标数值」，并基于文字描述解读；7) 报告缺失关键信息（如未提供参考区间）时如实说明。",
   };
 
   const ragBlock = ragContext && ragContext.length
@@ -174,10 +180,25 @@ ${historyText}
 请基于以上信息执行严谨临床推理，严格按系统要求的 JSON 格式输出，逐条回应每一项病史字段，缺一不可。`;
 }
 
-export function buildMessages({ level, formData, ragContext }) {
+export function buildMessages({ level, formData, ragContext, attachments }) {
+  const userContent = buildUserPrompt(level, formData);
+  /* L9 报告解读：附报告图片时走 vision 多模态格式（text + image_url），供支持读图的模型逐项解读 */
+  const images = Array.isArray(attachments)
+    ? attachments.filter((a) => a && /^image\/(png|jpeg|webp|gif)$/.test(a.mime) && a.dataBase64).slice(0, 2)
+    : [];
+  if (level === "L9" && images.length) {
+    const content = [{ type: "text", text: userContent }];
+    for (const img of images) {
+      content.push({ type: "image_url", image_url: { url: `data:${img.mime};base64,${img.dataBase64}` } });
+    }
+    return [
+      { role: "system", content: buildSystemPrompt(level, ragContext) },
+      { role: "user", content },
+    ];
+  }
   return [
     { role: "system", content: buildSystemPrompt(level, ragContext) },
-    { role: "user", content: buildUserPrompt(level, formData) },
+    { role: "user", content: userContent },
   ];
 }
 

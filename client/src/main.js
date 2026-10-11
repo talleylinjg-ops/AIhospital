@@ -49,7 +49,7 @@ const NAV_SHORT = { L1: "轻微快诊", L2: "中等症状", L3: "危重症", L4:
 /* 导航未激活文字用通道色相（比 LEVEL_META.color 提亮一档，保证在深青 header 上可读）；激活态仍用原色 */
 const NAV_TEXT_COLOR = {
   L1: "#2dd4bf", L2: "#fbbf24", L3: "#f87171", L4: "#4ade80",
-  L5: "#f472b6", L6: "#a78bfa", L7: "#22d3ee", L8: "#fbbf24",
+  L5: "#f472b6", L6: "#a78bfa", L7: "#22d3ee", L8: "#fbbf24", L9: "#60a5fa",
 };
 
 /* ===== Header ===== */
@@ -128,42 +128,7 @@ function homeView() {
         </div>
         <a class="btn btn-primary" href="#/services">进入服务购买</a>
       </div>
-      <section class="geo-content">
-        <h2>关于大气AI医院</h2>
-        <p>
-          大气AI医院是基于大模型的 AI 智能预问诊与分诊平台。选择与您情况相符的就诊通道并填写完整病史后，系统会给出分诊建议、可能病因鉴别与就医指引，帮助您在就诊前理清思路、选择合适的科室与就医时机。
-        </p>
-        <h3>8 条就诊通道</h3>
-        <p>
-          平台提供轻微快诊、中等症状、危重症、日常保健、妇幼保健、中医、眼科、口腔共 8 条通道。每条通道有各自的必填病史项与评估重点，例如妇幼保健会额外关注孕产与哺乳情况，中医与口腔通道会聚焦相应症状。
-        </p>
-        <h3>AI 预问诊流程</h3>
-        <ol class="geo-steps">
-          <li>选择与您情况相符的就诊通道</li>
-          <li>如实填写该通道要求的完整病史</li>
-          <li>提交后由大模型分析，给出分诊建议与就医指引</li>
-          <li>按需上传病历、检验单、报告单等材料用于存档与后续解读</li>
-        </ol>
-        <h3>在线健康服务</h3>
-        <p>
-          除预问诊外，平台还提供会员服务与慢病管理等服务：月付会员 9.90 元/月、年付会员 99.90 元/年，AI 慢病管理年度套餐 999.50 元/年、月度套餐 99.90 元/月，具体价格以服务购买页为准。进入服务购买页选择服务并下单，支持支付宝或微信在线支付，支付成功后即时开通；也可选择线下付款，下单后客服会及时与您联系确认。注册会员还可使用账户余额支付并管理健康档案与历史记录。
-        </p>
-        <h3>常见问题</h3>
-        <dl class="faq-list">
-          <dt>大气AI医院是什么？</dt>
-          <dd>基于大模型的 AI 智能预问诊与分诊平台，提供分诊建议与就医指引，并提供慢病管理等在线健康服务。</dd>
-          <dt>系统包含哪些就诊通道？</dt>
-          <dd>轻微快诊、中等症状、危重症、日常保健、妇幼保健、中医、眼科、口腔，共 8 条，不同通道对应不同的必填病史项与评估重点。</dd>
-          <dt>AI 问诊结果可以代替医生诊断吗？</dt>
-          <dd>不能。本系统为 AI 辅助预问诊，所有输出仅供参考，不能替代执业医师的诊断与治疗。如出现胸痛、呼吸困难、意识改变、大出血等急危情况，请立即拨打 120 或前往急诊。</dd>
-          <dt>使用需要注册或付费吗？</dt>
-          <dd>AI 智能预问诊可直接使用；注册会员后可管理健康档案、查看问诊与消费记录并使用余额支付。慢病管理等在线健康服务为付费项目，单独下单购买。</dd>
-          <dt>如何购买服务并支付？</dt>
-          <dd>在服务购买页选择服务并下单，支持支付宝/微信在线支付并即时开通，也可选择线下付款，下单后客服会及时与您联系确认。</dd>
-          <dt>上传的病历与报告如何使用？</dt>
-          <dd>上传材料用于存档，便于医生或客服查看并据此安排解读与随访，支持图片与 PDF，单个文件不超过 6MB。</dd>
-        </dl>
-      </section>
+
     </div>
     ${footer()}`;
 }
@@ -208,14 +173,17 @@ function drawConsultPicker() {
   );
 }
 
-function bindConsultPicker() {
+function bindConsultPicker(level) {
   const box = document.getElementById("consult-attach-picker");
   if (!box) return;
+  const isL9 = level === "L9";
   box.innerHTML = `
     <div class="att-row">
       <select id="ca-kind">${att.kindOptions(consultFileKind)}</select>
-      <button type="button" class="btn-outline" id="ca-add">选择病历 / 报告文件…</button>
-      <input type="file" id="ca-input" accept="${att.DOC_ACCEPT}" multiple hidden />
+      <button type="button" class="btn-outline" id="ca-add">${isL9 ? "拍照 / 扫一扫上传报告" : "选择病历 / 报告文件…"}</button>
+      ${isL9 ? `<button type="button" class="btn-outline" id="ca-add-plain">从相册选择</button>` : ""}
+      <input type="file" id="ca-input" accept="${isL9 ? "image/png,image/jpeg,image/webp,image/gif" : att.DOC_ACCEPT}" multiple hidden ${isL9 ? 'capture="environment"' : ""} />
+      ${isL9 ? `<input type="file" id="ca-input-plain" accept="${att.DOC_ACCEPT}" multiple hidden />` : ""}
       <span class="muted att-tip" id="ca-tip"></span>
     </div>
     <div id="ca-list"></div>`;
@@ -225,10 +193,7 @@ function bindConsultPicker() {
     consultFiles.forEach((f) => (f.kind = consultFileKind));
     drawConsultPicker();
   });
-  box.querySelector("#ca-add").addEventListener("click", () => box.querySelector("#ca-input").click());
-  box.querySelector("#ca-input").addEventListener("change", (e) => {
-    const picked = Array.from(e.target.files || []);
-    e.target.value = "";
+  const handleFiles = (picked) => {
     for (const file of picked) {
       if (!file) continue;
       if (file.size > att.DOC_MAX_BYTES) {
@@ -243,7 +208,21 @@ function bindConsultPicker() {
       consultFiles.push({ file, kind: consultFileKind });
     }
     drawConsultPicker();
+  };
+  box.querySelector("#ca-add").addEventListener("click", () => box.querySelector("#ca-input").click());
+  if (isL9) box.querySelector("#ca-add-plain").addEventListener("click", () => box.querySelector("#ca-input-plain").click());
+  box.querySelector("#ca-input").addEventListener("change", (e) => {
+    const picked = Array.from(e.target.files || []);
+    e.target.value = "";
+    handleFiles(picked);
   });
+  if (isL9) {
+    box.querySelector("#ca-input-plain").addEventListener("change", (e) => {
+      const picked = Array.from(e.target.files || []);
+      e.target.value = "";
+      handleFiles(picked);
+    });
+  }
 }
 
 function formView(level) {
@@ -880,6 +859,154 @@ function errorView(msg) {
     ${footer()}`;
 }
 
+/* ===== 移动端底部导航（≤900px 显示） ===== */
+function tabbar() {
+  const active = (prefix) =>
+    (prefix === "#/" ? location.hash === "#/" || location.hash === "" : location.hash.startsWith(prefix)) ? " active" : "";
+  return `
+  <nav class="tabbar" aria-label="底部导航">
+    <a href="#/chat" class="tab-item${active("#/chat")}"><span class="tab-ico">💬</span><span>小气</span></a>
+    <a href="#/monitor" class="tab-item${active("#/monitor")}"><span class="tab-ico">📈</span><span>监控</span></a>
+    <a href="#/services" class="tab-item${active("#/services")}"><span class="tab-ico">🛒</span><span>服务</span></a>
+    <a href="#/member" class="tab-item${active("#/member")}"><span class="tab-ico">👤</span><span>我的</span></a>
+  </nav>`;
+}
+
+function renderTabbar() {
+  const old = document.querySelector(".tabbar");
+  if (old) old.remove();
+  document.body.insertAdjacentHTML("beforeend", tabbar());
+}
+
+/* ===== 健康监控页（移动端底部「监控」入口） ===== */
+function monitorPageView() {
+  const logged = memberUI.hasMember();
+  return `
+    ${header(false)}
+    <div class="container page-narrow">
+      <div class="hero">
+        <h1>健康监控</h1>
+        <p>体重 · 血压 · 血糖 · 心率 · 睡眠 · 经期 · 饮食，记录与追踪您的健康指标</p>
+      </div>
+      ${
+        logged
+          ? `<div id="monitor-page-body"><div class="loading-inline">加载中…</div></div>`
+          : `<div class="error-box"><h3>请先登录</h3><p>登录后即可记录健康指标、查看趋势并管理家庭成员。</p><a class="btn btn-primary" href="#/login" style="margin-top:14px;display:inline-block">去登录 / 注册</a></div>`
+      }
+    </div>
+    ${footer()}`;
+}
+
+async function bindMonitorPage() {
+  if (!memberUI.hasMember()) return;
+  const body = document.getElementById("monitor-page-body");
+  try {
+    await memberUI.renderMonitor(body);
+  } catch (err) {
+    body.innerHTML = `<div class="error-box"><h3>加载失败</h3><p>${esc(netErrorText(err))}</p></div>`;
+  }
+}
+
+/* ===== AI 客服「小气」（移动端底部入口） ===== */
+const CHAT_HISTORY_KEY = "xiaoqi_chat_history";
+
+function loadChatHistory() {
+  try {
+    const arr = JSON.parse(localStorage.getItem(CHAT_HISTORY_KEY) || "[]");
+    return Array.isArray(arr) ? arr.slice(-30) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveChatHistory(list) {
+  try {
+    localStorage.setItem(CHAT_HISTORY_KEY, JSON.stringify(list.slice(-30)));
+  } catch {
+    /* 存储失败静默 */
+  }
+}
+
+function chatBubble(m) {
+  if (m.role === "user") return `<div class="chat-row me"><div class="chat-bubble">${esc(m.content)}</div></div>`;
+  return `<div class="chat-row bot"><div class="chat-avatar">小气</div><div class="chat-bubble">${esc(m.content)}</div></div>`;
+}
+
+function chatPageView() {
+  const history = loadChatHistory();
+  const initMsg = { role: "assistant", content: "您好，我是大气AI医院的智能客服小气。可以帮您：解答平台使用与服务购买问题、根据您的症状推荐合适的就诊通道、引导您补充病史信息提升问诊准确率。请问有什么可以帮您？" };
+  const list = history.length ? history : [initMsg];
+  if (!history.length) saveChatHistory(list);
+  return `
+    ${header(false)}
+    <div class="container page-narrow chat-page">
+      <div class="chat-header">
+        <div class="chat-bot-badge">小气 · 大气AI医院客服</div>
+        <button type="button" class="btn btn-ghost btn-sm" id="chat-clear">清空对话</button>
+      </div>
+      <div class="chat-box" id="chat-box">${list.map(chatBubble).join("")}</div>
+      <form class="chat-input-row" id="chat-form">
+        <input id="chat-input" placeholder="描述您的症状或想咨询的问题…" maxlength="2000" autocomplete="off" />
+        <button type="submit" class="btn btn-primary" id="chat-send">发送</button>
+      </form>
+      <div class="chat-disclaimer">AI 客服回复仅供参考，不能替代执业医师诊断。急危重症请立即拨打 120。</div>
+    </div>
+    ${footer()}`;
+}
+
+function bindChatPage() {
+  const box = document.getElementById("chat-box");
+  const input = document.getElementById("chat-input");
+  const sendBtn = document.getElementById("chat-send");
+  box.scrollTop = box.scrollHeight;
+
+  document.getElementById("chat-clear").addEventListener("click", () => {
+    localStorage.removeItem(CHAT_HISTORY_KEY);
+    location.reload();
+  });
+
+  document.getElementById("chat-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const text = input.value.trim();
+    if (!text || sendBtn.disabled) return;
+    const history = loadChatHistory();
+    history.push({ role: "user", content: text });
+    saveChatHistory(history);
+    box.insertAdjacentHTML("beforeend", chatBubble({ role: "user", content: text }));
+    input.value = "";
+    box.scrollTop = box.scrollHeight;
+
+    const waitingId = "chat-waiting-" + Date.now();
+    box.insertAdjacentHTML("beforeend", `<div class="chat-row bot" id="${waitingId}"><div class="chat-avatar">小气</div><div class="chat-bubble chat-typing">正在输入…</div></div>`);
+    box.scrollTop = box.scrollHeight;
+    sendBtn.disabled = true;
+
+    try {
+      const payload = history.map((m) => ({ role: m.role, content: m.content }));
+      const res = await fetch(`${API}/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: payload }),
+      });
+      const data = await res.json().catch(() => ({}));
+      document.getElementById(waitingId)?.remove();
+      const reply = res.ok && data.reply ? data.reply : data.error || "客服暂时不可用，请稍后重试";
+      history.push({ role: "assistant", content: reply });
+      saveChatHistory(history);
+      box.insertAdjacentHTML("beforeend", chatBubble({ role: "assistant", content: reply }));
+      box.scrollTop = box.scrollHeight;
+    } catch (err) {
+      document.getElementById(waitingId)?.remove();
+      const msg = netErrorText(err);
+      box.insertAdjacentHTML("beforeend", `<div class="chat-row bot"><div class="chat-bubble">${esc(msg)}</div></div>`);
+      box.scrollTop = box.scrollHeight;
+    } finally {
+      sendBtn.disabled = false;
+      input.focus();
+    }
+  });
+}
+
 /* ===== Router ===== */
 function render() {
   const hash = location.hash || "#/";
@@ -891,6 +1018,12 @@ function render() {
   } else if (hash.startsWith("#/services")) {
     app.innerHTML = servicesView();
     bindServices();
+  } else if (hash.startsWith("#/monitor")) {
+    app.innerHTML = monitorPageView();
+    bindMonitorPage();
+  } else if (hash.startsWith("#/chat")) {
+    app.innerHTML = chatPageView();
+    bindChatPage();
   } else if (hash.startsWith("#/member")) {
     const tab = memberUI.parseTab(hash);
     if (!memberUI.hasMember()) {
@@ -915,6 +1048,7 @@ function render() {
     bindHome();
   }
   bindHeader();
+  renderTabbar();
   window.scrollTo(0, 0);
 }
 
@@ -978,7 +1112,7 @@ function bindForm(level) {
   }
 
   const form = document.getElementById("consult-form");
-  bindConsultPicker();
+  bindConsultPicker(level);
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const data = collectForm(level);
@@ -995,6 +1129,13 @@ function bindForm(level) {
           el.focus();
         }
       }
+      return;
+    }
+    /* L9 报告解读：报告照片必传 */
+    if (level === "L9" && !consultFiles.length) {
+      const picker = document.getElementById("consult-attach-picker");
+      if (picker) picker.scrollIntoView({ behavior: "smooth", block: "center" });
+      alert("请先上传报告照片（可拍照 / 扫一扫 / 从相册选择），供 AI 逐项解读");
       return;
     }
     const ageVal = String(data.age ?? "").trim();
@@ -1024,7 +1165,7 @@ function bindForm(level) {
       const res = await fetch(`${API}/consult`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ level, formData: data }),
+        body: JSON.stringify({ level, formData: data, attachments: level === "L9" ? await readImageAttachments() : [] }),
       });
       const json = await res.json();
       if (!res.ok || !json.ok) throw new Error(json.error || "AI 服务返回异常");
@@ -1048,8 +1189,33 @@ function bindForm(level) {
   });
 }
 
-function loadResultDocs() {
-  const box = document.getElementById("record-docs-body");
+function readFileBase64(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => {
+      const s = String(r.result || "");
+      const idx = s.indexOf(",");
+      resolve(idx >= 0 ? s.slice(idx + 1) : s);
+    };
+    r.onerror = () => reject(new Error("图片读取失败"));
+    r.readAsDataURL(file);
+  });
+}
+
+async function readImageAttachments() {
+  const imgs = consultFiles.filter((f) => /^image\//.test(f.file.type)).slice(0, 2);
+  const out = [];
+  for (const { file } of imgs) {
+    try {
+      out.push({ mime: file.type, dataBase64: await readFileBase64(file) });
+    } catch (err) {
+      console.warn("报告图片读取失败，已跳过:", err.message);
+    }
+  }
+  return out;
+}
+
+function loadResultDocs() {  const box = document.getElementById("record-docs-body");
   const rid = state.consultRecordId;
   if (!box) return;
   if (!rid) {

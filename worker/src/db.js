@@ -127,6 +127,31 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_purchase_out_trade ON purchases(out_trade_
 CREATE INDEX IF NOT EXISTS idx_att_consult ON attachments(consult_id);
 CREATE INDEX IF NOT EXISTS idx_att_purchase ON attachments(purchase_id);
 CREATE INDEX IF NOT EXISTS idx_att_customer ON attachments(customer_id);
+CREATE TABLE IF NOT EXISTS family_members (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  customer_id INTEGER NOT NULL,
+  name TEXT NOT NULL,
+  relation TEXT NOT NULL DEFAULT '本人',
+  gender TEXT DEFAULT '',
+  birth_year INTEGER DEFAULT NULL,
+  note TEXT DEFAULT '',
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_family_customer ON family_members(customer_id);
+CREATE TABLE IF NOT EXISTS monitor_records (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  customer_id INTEGER NOT NULL,
+  member_id INTEGER DEFAULT NULL,
+  metric TEXT NOT NULL,
+  value_num REAL,
+  value_text TEXT DEFAULT '',
+  unit TEXT DEFAULT '',
+  extra TEXT DEFAULT '',
+  source TEXT NOT NULL DEFAULT '手动录入',
+  recorded_at TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_monitor_customer ON monitor_records(customer_id, metric, recorded_at);
 `;
 
 const MEMBER_SEED = [
@@ -1169,4 +1194,114 @@ export async function removeAttachment(id) {
   if (!row) throw new Error("附件不存在");
   await db.prepare("DELETE FROM attachments WHERE id = ?").bind(Number(id)).run();
   return row;
+}
+
+/* ===== 家庭成员管理 ===== */
+export async function listFamilyMembers(customerId) {
+  const r = await db
+    .prepare("SELECT id, name, relation, gender, birth_year, note FROM family_members WHERE customer_id = ?1 ORDER BY id")
+    .bind(Number(customerId))
+    .all();
+  return r.results || [];
+}
+
+export async function createFamilyMember(customerId, { name, relation, gender, birthYear, note } = {}) {
+  const n = String(name || "").trim();
+  if (!n) throw new Error("成员姓名不能为空");
+  const r = await db
+    .prepare("INSERT INTO family_members (customer_id, name, relation, gender, birth_year, note) VALUES (?1, ?2, ?3, ?4, ?5, ?6)")
+    .bind(
+      Number(customerId),
+      n.slice(0, 30),
+      String(relation || "本人").slice(0, 10),
+      String(gender || "").slice(0, 10),
+      birthYear ? Number(birthYear) || null : null,
+      String(note || "").slice(0, 200)
+    )
+    .run();
+  return { id: r.meta.last_row_id };
+}
+
+async function getFamilyMemberOwned(customerId, id) {
+  const r = await db.prepare("SELECT id, customer_id FROM family_members WHERE id = ?1").bind(Number(id)).all();
+  const row = (r.results || [])[0];
+  if (!row || row.customer_id !== Number(customerId)) throw new Error("家庭成员不存在");
+  return row;
+}
+
+export async function updateFamilyMember(customerId, id, patch = {}) {
+  await getFamilyMemberOwned(customerId, id);
+  await db
+    .prepare("UPDATE family_members SET name = ?1, relation = ?2, gender = ?3, birth_year = ?4, note = ?5 WHERE id = ?6 AND customer_id = ?7")
+    .bind(
+      String(patch.name ?? "").trim().slice(0, 30) || "成员",
+      String(patch.relation ?? "本人").slice(0, 10),
+      String(patch.gender ?? "").slice(0, 10),
+      patch.birthYear ? Number(patch.birthYear) || null : null,
+      String(patch.note ?? "").slice(0, 200),
+      Number(id),
+      Number(customerId)
+    )
+    .run();
+  return { id: Number(id) };
+}
+
+export async function deleteFamilyMember(customerId, id) {
+  await getFamilyMemberOwned(customerId, id);
+  await db.prepare("DELETE FROM family_members WHERE id = ?1 AND customer_id = ?2").bind(Number(id), Number(customerId)).run();
+  return { ok: true };
+}
+
+/* ===== 健康监控记录 ===== */
+const MONITOR_METRICS = new Set([
+  "weight", "blood_pressure", "blood_sugar", "heart_rate", "sleep", "steps",
+  "blood_lipid", "uric_acid", "body_fat", "temperature", "period", "diet",
+]);
+export function isValidMonitorMetric(m) {
+  return MONITOR_METRICS.has(String(m || ""));
+}
+
+export async function addMonitorRecord(customerId, { memberId, metric, valueNum, valueText, unit, extra, source, recordedAt } = {}) {
+  if (!isValidMonitorMetric(metric)) throw new Error("不支持的监测指标");
+  const at = String(recordedAt || "").trim() || nowSh();
+  const r = await db
+    .prepare("INSERT INTO monitor_records (customer_id, member_id, metric, value_num, value_text, unit, extra, source, recorded_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)")
+    .bind(
+      Number(customerId),
+      memberId ? Number(memberId) : null,
+      String(metric),
+      valueNum === undefined || valueNum === null || valueNum === "" ? null : Number(valueNum),
+      String(valueText || "").slice(0, 200),
+      String(unit || "").slice(0, 20),
+      String(extra || "").slice(0, 500),
+      String(source || "手动录入").slice(0, 30),
+      at
+    )
+    .run();
+  return { id: r.meta.last_row_id, recorded_at: at };
+}
+
+export async function listMonitorRecords(customerId, metric, limit = 30) {
+  if (metric) {
+    if (!isValidMonitorMetric(metric)) throw new Error("不支持的监测指标");
+    const r = await db
+      .prepare("SELECT id, member_id, metric, value_num, value_text, unit, extra, source, recorded_at FROM monitor_records WHERE customer_id = ?1 AND metric = ?2 ORDER BY recorded_at DESC, id DESC LIMIT ?3")
+      .bind(Number(customerId), String(metric), Math.min(Number(limit) || 30, 100))
+      .all();
+    return r.results || [];
+  }
+  const r = await db
+    .prepare("SELECT id, metric, value_num, value_text, unit, extra, source, recorded_at FROM monitor_records WHERE customer_id = ?1 ORDER BY recorded_at DESC, id DESC LIMIT 50")
+    .bind(Number(customerId))
+    .all();
+  return r.results || [];
+}
+
+export async function deleteMonitorRecord(customerId, id) {
+  const r = await db
+    .prepare("DELETE FROM monitor_records WHERE id = ?1 AND customer_id = ?2")
+    .bind(Number(id), Number(customerId))
+    .run();
+  if (!r.meta.changes) throw new Error("记录不存在");
+  return { ok: true };
 }

@@ -3,7 +3,7 @@ import { listProviderRowsForScene, listAllEnabledProviderRows, getLLMProviderRow
 
 const SCENE_LABELS = { fast: "快诊", clinic: "门诊", emergency: "急诊", wellness: "保健", maternal: "妇幼" };
 /* 就诊通道 → 路由场景：妇幼恒定 maternal；中医复用保健组；眼科/口腔复用门诊组 */
-const LEVEL_SCENES = { L1: "fast", L2: "clinic", L3: "emergency", L4: "wellness", L5: "maternal", L6: "wellness", L7: "clinic", L8: "clinic" };
+const LEVEL_SCENES = { L1: "fast", L2: "clinic", L3: "emergency", L4: "wellness", L5: "maternal", L6: "wellness", L7: "clinic", L8: "clinic", L9: "clinic" };
 const TIMEOUT_MS = Number(process.env.LLM_TIMEOUT_MS || 120000);
 
 /* 按就诊通道 + 疑难特征选择路由场景：妇幼通道恒定路由到妇幼垂直模型组 */
@@ -122,7 +122,8 @@ async function callProvider(config, messages, fallback) {
         messages,
         temperature: 0,
         response_format: { type: "json_object" },
-        max_tokens: 4096,
+        /* glm-4v 系列视觉模型 max_tokens 上限 1024 */
+        max_tokens: /4v|vision/i.test(config.model || "") ? 1024 : 4096,
       }),
       signal: controller.signal,
     });
@@ -154,13 +155,18 @@ async function callProvider(config, messages, fallback) {
 }
 
 /* 场景路由 + 主备链式调用：同场景内按优先级依次尝试，主模型失败自动切换备用 */
-export async function callLLM({ level, formData, ragContext }) {
+export async function callLLM({ level, formData, ragContext, attachments }) {
   const scene = resolveScene(level, formData);
   let chain = listProviderRowsForScene(scene).map(getConfigFromRow).filter(Boolean);
   let degraded = false;
   if (!chain.length) {
     chain = listAllEnabledProviderRows().map(getConfigFromRow).filter(Boolean);
     degraded = chain.length > 0;
+  }
+  /* 带图请求（L9 报告解读）：把读图模型（模型名含 4v / vl / vision）排到链首，避免纯文本模型先失败一轮 */
+  if (attachments?.length) {
+    const isVision = (c) => /4v|vl|vision/i.test(c.model || "");
+    chain = [...chain.filter(isVision), ...chain.filter((c) => !isVision(c))];
   }
 
   if (!chain.length) {
@@ -169,7 +175,7 @@ export async function callLLM({ level, formData, ragContext }) {
     throw new Error(`「${SCENE_LABELS[scene]}」通道下没有启用的模型，请在后台为该通道启用并配置模型`);
   }
 
-  const messages = buildMessages({ level, formData, ragContext });
+  const messages = buildMessages({ level, formData, ragContext, attachments });
   const fallback = buildDemoResult(level, formData);
   const errors = [];
   for (let i = 0; i < chain.length; i++) {
@@ -188,14 +194,63 @@ export async function callLLM({ level, formData, ragContext }) {
 }
 
 /* 指定模型调用（前台"换模型对比分析"用）：单模型，失败直接抛错 */
-export async function callLLMWithProvider(providerId, { level, formData, ragContext }) {
+export async function callLLMWithProvider(providerId, { level, formData, ragContext, attachments }) {
   const row = getLLMProviderRow(Number(providerId));
   const config = getConfigFromRow(row);
   if (!config) throw new Error("该模型未启用或未配置 Key/地址");
-  const messages = buildMessages({ level, formData, ragContext });
+  const messages = buildMessages({ level, formData, ragContext, attachments });
   const result = await callProvider(config, messages, buildDemoResult(level, formData));
   result.route = { scene: resolveScene(level, formData), used: config.providerName, fallback_used: false, manual: true };
   return result;
+}
+
+/* AI 客服「小气」：多轮纯文本对话，取快诊场景主备链 */
+export async function callChat(messages) {
+  let chain = listProviderRowsForScene("fast").map(getConfigFromRow).filter(Boolean);
+  if (!chain.length) chain = listAllEnabledProviderRows().map(getConfigFromRow).filter(Boolean);
+  if (!chain.length) throw new Error("当前没有启用的模型，请联系管理员配置");
+
+  const chatMessages = [
+    {
+      role: "system",
+      content:
+        "你是「小气」，大气AI医院的 AI 健康客服。你的任务：1) 以亲切、口语化的方式回答用户关于平台使用、服务购买、会员权益、健康常识的问题；2) 用户描述不适症状时，通过追问引导其补充关键信息（症状部位、持续时间、程度、伴随症状、基础病史等），帮助用户选择合适的就诊通道并提升预问诊准确率，但不给出诊断结论与用药建议；3) 涉及急危症状（胸痛、呼吸困难、大出血、意识改变等）必须立即提醒拨打 120 或前往急诊；4) 回答简洁（一般不超过 200 字），一次最多追问 2-3 个关键问题，避免审问感；5) 本系统输出仅供参考，不能替代执业医师诊断。",
+    },
+    ...messages.slice(-12).map((m) => ({ role: m.role === "assistant" ? "assistant" : "user", content: String(m.content || "").slice(0, 4000) })),
+  ];
+
+  const errors = [];
+  for (const config of chain) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+    try {
+      const res = await fetch(`${config.baseUrl}/chat/completions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${config.apiKey}` },
+        body: JSON.stringify({ model: config.model, messages: chatMessages, temperature: 0.6, max_tokens: 1024 }),
+        signal: controller.signal,
+      });
+      if (!res.ok) {
+        const errText = await res.text().catch(() => "");
+        errors.push(`[${config.providerName}] ${res.status}`);
+        continue;
+      }
+      const data = await res.json();
+      const content = data?.choices?.[0]?.message?.content || "";
+      if (!content.trim()) {
+        errors.push(`[${config.providerName}] 空回复`);
+        continue;
+      }
+      return { reply: content.trim(), provider: config.providerName };
+    } catch (err) {
+      errors.push(`[${config.providerName}] ${err.message}`);
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+  const e = new Error(`客服暂时不可用：${errors.join("；")}`);
+  e.status = 502;
+  throw e;
 }
 
 /* 用指定配置发送最小请求，验证 API Key 与连通性 */

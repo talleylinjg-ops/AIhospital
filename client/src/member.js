@@ -174,6 +174,8 @@ export function bindLogin() {
 const TABS = [
   { tab: "", label: "概览" },
   { tab: "profile", label: "健康档案" },
+  { tab: "family", label: "家庭成员" },
+  { tab: "monitor", label: "健康监控" },
   { tab: "records", label: "医疗记录" },
   { tab: "orders", label: "使用与充值" },
   { tab: "account", label: "账号设置" },
@@ -208,6 +210,10 @@ async function loadContent(tab) {
   try {
     if (tab === "profile") {
       await renderHealth(el);
+    } else if (tab === "family") {
+      await renderFamily(el);
+    } else if (tab === "monitor") {
+      await renderMonitor(el);
     } else if (tab === "records") {
       await renderRecords(el);
     } else if (tab === "orders") {
@@ -710,4 +716,219 @@ export async function prefillFormFromProfile() {
   } catch {
     /* 预填失败静默（如未登录/档案空） */
   }
+}
+
+/* ===== 家庭成员管理 ===== */
+const RELATIONS = ["本人", "父亲", "母亲", "配偶", "儿子", "女儿", "其他"];
+
+function familyRowHtml(m) {
+  return `
+    <div class="family-row" data-fid="${m.id}">
+      <div class="family-row-main">
+        <b>${esc(m.name)}</b>
+        <span class="muted">${esc(m.relation)}${m.gender ? " · " + esc(m.gender) : ""}${m.birth_year ? " · " + esc(m.birth_year) + "年生" : ""}</span>
+        ${m.note ? `<div class="muted small">${esc(m.note)}</div>` : ""}
+      </div>
+      <div class="family-row-ops">
+        <button type="button" class="btn btn-ghost btn-sm" data-fedit="${m.id}">编辑</button>
+        <button type="button" class="btn btn-ghost btn-sm danger" data-fdel="${m.id}">删除</button>
+      </div>
+    </div>`;
+}
+
+function familyFormHtml(m = {}) {
+  return `
+    <form id="family-form" class="section">
+      <div class="field"><label>姓名 *</label><input id="fam-name" maxlength="30" value="${esc(m.name || "")}" placeholder="成员姓名" /></div>
+      <div class="field"><label>关系</label>
+        <select id="fam-relation">${RELATIONS.map((r) => `<option value="${r}"${m.relation === r ? " selected" : ""}>${r}</option>`).join("")}</select>
+      </div>
+      <div class="field"><label>性别</label>
+        <select id="fam-gender"><option value=""${!m.gender ? " selected" : ""}>保密</option><option value="男"${m.gender === "男" ? " selected" : ""}>男</option><option value="女"${m.gender === "女" ? " selected" : ""}>女</option></select>
+      </div>
+      <div class="field"><label>出生年份</label><input id="fam-birth" type="number" min="1900" max="2026" value="${m.birth_year || ""}" placeholder="如 1985" /></div>
+      <div class="field"><label>备注</label><input id="fam-note" maxlength="200" value="${esc(m.note || "")}" placeholder="如：高血压，需定期随访" /></div>
+      <div class="error" id="fam-error"></div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">保存</button>
+        <button type="button" class="btn btn-ghost" id="fam-cancel">取消</button>
+      </div>
+    </form>`;
+}
+
+export async function renderFamily(el) {
+  const { items } = await memberApi("/family");
+  const list = items || [];
+  el.innerHTML = `
+    <div class="member-head"><h2>家庭成员</h2><p>维护本人与家庭成员的基础信息，便于问诊代填、健康监控归属与报告解读时区分对象。</p></div>
+    <div class="block">
+      <div class="family-toolbar"><span>共 ${list.length} 位成员</span><button type="button" class="btn btn-primary btn-sm" id="fam-add">+ 添加成员</button></div>
+      <div id="family-list">${list.length ? list.map(familyRowHtml).join("") : '<p class="muted">还没有添加成员，点击右上角「添加成员」开始。</p>'}</div>
+      <div id="family-form-slot"></div>
+    </div>`;
+
+  const slot = el.querySelector("#family-form-slot");
+  const bindForm = (m) => {
+    slot.innerHTML = familyFormHtml(m);
+    slot.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    slot.querySelector("#fam-cancel").addEventListener("click", () => (slot.innerHTML = ""));
+    slot.querySelector("#family-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const err = slot.querySelector("#fam-error");
+      const body = {
+        name: slot.querySelector("#fam-name").value.trim(),
+        relation: slot.querySelector("#fam-relation").value,
+        gender: slot.querySelector("#fam-gender").value,
+        birthYear: slot.querySelector("#fam-birth").value,
+        note: slot.querySelector("#fam-note").value.trim(),
+      };
+      try {
+        if (m.id) await memberApi(`/family/${m.id}`, { method: "PUT", body });
+        else await memberApi("/family", { method: "POST", body });
+        await renderFamily(el);
+      } catch (ex) {
+        err.textContent = netErrorText(ex);
+      }
+    });
+  };
+
+  el.querySelector("#fam-add").addEventListener("click", () => bindForm({}));
+  el.querySelectorAll("[data-fedit]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      const m = list.find((x) => String(x.id) === btn.getAttribute("data-fedit"));
+      if (m) bindForm(m);
+    })
+  );
+  el.querySelectorAll("[data-fdel]").forEach((btn) =>
+    btn.addEventListener("click", async () => {
+      if (!confirm("确定删除该成员？")) return;
+      try {
+        await memberApi(`/family/${btn.getAttribute("data-fdel")}`, { method: "DELETE" });
+        await renderFamily(el);
+      } catch (ex) {
+        alert(netErrorText(ex));
+      }
+    })
+  );
+}
+
+/* ===== 健康监控 ===== */
+const METRICS = [
+  { id: "weight", label: "体重", unit: "kg", ph: "如 65.5" },
+  { id: "body_fat", label: "体脂率", unit: "%", ph: "如 22.5" },
+  { id: "blood_pressure", label: "血压", unit: "mmHg", ph: "如 120/80", text: true },
+  { id: "blood_sugar", label: "血糖", unit: "mmol/L", ph: "如 5.6" },
+  { id: "blood_lipid", label: "血脂", unit: "", ph: "如 TC 4.8 / TG 1.5", text: true },
+  { id: "uric_acid", label: "尿酸", unit: "μmol/L", ph: "如 380" },
+  { id: "heart_rate", label: "心率", unit: "次/分", ph: "如 72" },
+  { id: "sleep", label: "睡眠时长", unit: "小时", ph: "如 7.5" },
+  { id: "steps", label: "步数", unit: "步", ph: "如 8000" },
+  { id: "temperature", label: "体温", unit: "℃", ph: "如 36.8" },
+  { id: "period", label: "经期", unit: "", ph: "如 开始 / 结束（备注天数）", text: true },
+  { id: "diet", label: "饮食", unit: "", ph: "如 早餐：燕麦+鸡蛋", text: true },
+];
+const MONITOR_HINTS = {
+  blood_sugar: "空腹血糖 3.9-6.1 mmol/L；餐后 2 小时 <7.8 mmol/L",
+  blood_pressure: "理想血压 <120/80 mmHg；≥140/90 为高血压（需复测确认）",
+  heart_rate: "静息心率正常 60-100 次/分",
+  weight: "BMI = 体重(kg) ÷ 身高²(m²)，正常 18.5-23.9",
+};
+
+export async function renderMonitor(el) {
+  el.innerHTML = `
+    <div class="member-head"><h2>健康监控</h2><p>记录并追踪体重、血压、血糖、心率、睡眠、经期等健康指标，支持手动录入与设备数据同步。</p></div>
+    <div class="block">
+      <h3>录入记录</h3>
+      <div class="monitor-form-row">
+        <select id="mon-metric">${METRICS.map((m) => `<option value="${m.id}" data-unit="${m.unit}">${m.label}</option>`).join("")}</select>
+        <input id="mon-value" placeholder="数值" />
+        <input id="mon-date" type="date" />
+        <button type="button" class="btn btn-primary" id="mon-save">记录</button>
+      </div>
+      <input id="mon-note" class="monitor-note" placeholder="备注（可选）：如 餐后 2 小时、晨起静息等" maxlength="200" />
+      <div class="error" id="mon-error"></div>
+      <p class="muted small" id="mon-hint"></p>
+    </div>
+    <div class="block">
+      <h3>最近记录</h3>
+      <div id="mon-list"><div class="loading-inline">加载中…</div></div>
+    </div>
+    <div class="block">
+      <h3>数据连接</h3>
+      <p class="muted">支持以下设备与应用的数据接入（当前版本支持手动录入与截图核对，自动同步陆续开通）：</p>
+      <div class="connect-grid">
+        <div class="connect-card"><b>智能硬件</b><span>体脂秤 · 手环 · 血糖仪 · 血压计</span></div>
+        <div class="connect-card"><b>健康应用</b><span>荣耀健康 · 华为运动健康 · 小米运动健康 · Apple 健康 · vivo 健康 · OPPO 健康 · 薄荷健康 · 高驰 · 佳明</span></div>
+        <div class="connect-card"><b>医疗器械</b><span>血糖仪 · 呼吸机 · 血压计 · 智能手表</span></div>
+      </div>
+    </div>`;
+
+  const metricSel = el.querySelector("#mon-metric");
+  const valueInput = el.querySelector("#mon-value");
+  const hintEl = el.querySelector("#mon-hint");
+  const errEl = el.querySelector("#mon-error");
+  const dateInput = el.querySelector("#mon-date");
+  dateInput.value = new Date(Date.now() + 8 * 3600e3).toISOString().slice(0, 10);
+
+  const syncHint = () => {
+    const m = METRICS.find((x) => x.id === metricSel.value);
+    valueInput.placeholder = m ? m.ph : "数值";
+    hintEl.textContent = MONITOR_HINTS[metricSel.value] || "";
+  };
+  metricSel.addEventListener("change", syncHint);
+  syncHint();
+
+  const loadList = async () => {
+    const box = el.querySelector("#mon-list");
+    const { items } = await memberApi("/monitor");
+    const arr = items || [];
+    box.innerHTML = arr.length
+      ? `<div class="mon-rows">${arr
+          .map((r) => {
+            const m = METRICS.find((x) => x.id === r.metric) || { label: r.metric, unit: r.unit };
+            return `<div class="mon-row"><span class="mon-metric">${esc(m.label)}</span><b>${esc(r.value_text || (r.value_num !== null && r.value_num !== undefined ? String(r.value_num) : "-"))}${r.unit ? " " + esc(r.unit) : ""}</b><span class="muted">${esc(r.recorded_at || "")}</span><button type="button" class="btn btn-ghost btn-sm" data-mdel="${r.id}">删</button></div>`;
+          })
+          .join("")}</div>`
+      : '<p class="muted">暂无记录，先在上方录入一条吧。</p>';
+    box.querySelectorAll("[data-mdel]").forEach((btn) =>
+      btn.addEventListener("click", async () => {
+        try {
+          await memberApi(`/monitor/${btn.getAttribute("data-mdel")}`, { method: "DELETE" });
+          await loadList();
+        } catch (ex) {
+          alert(netErrorText(ex));
+        }
+      })
+    );
+  };
+  await loadList();
+
+  el.querySelector("#mon-save").addEventListener("click", async () => {
+    errEl.textContent = "";
+    const metric = metricSel.value;
+    const raw = valueInput.value.trim();
+    const m = METRICS.find((x) => x.id === metric);
+    if (!raw) {
+      errEl.textContent = "请填写数值";
+      return;
+    }
+    const body = {
+      metric,
+      valueText: raw,
+      unit: m ? m.unit : "",
+      extra: el.querySelector("#mon-note").value.trim(),
+      recordedAt: dateInput.value ? `${dateInput.value} ${new Date().toTimeString().slice(0, 8)}` : "",
+      source: "手动录入",
+    };
+    if (!m.text && !Number.isNaN(Number(raw))) body.valueNum = Number(raw);
+    if (metric === "period") body.extra = (body.extra ? body.extra + "；" : "") + "经期事件";
+    try {
+      await memberApi("/monitor", { method: "POST", body });
+      valueInput.value = "";
+      el.querySelector("#mon-note").value = "";
+      await loadList();
+    } catch (ex) {
+      errEl.textContent = netErrorText(ex);
+    }
+  });
 }

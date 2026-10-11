@@ -18,6 +18,13 @@ import {
   getCustomerPurchases,
   createRechargeOrder,
   getRechargeOrder,
+  listFamilyMembers,
+  createFamilyMember,
+  updateFamilyMember,
+  deleteFamilyMember,
+  addMonitorRecord,
+  listMonitorRecords,
+  deleteMonitorRecord,
 } from "../db.js";
 import { paymentStatus, readPaySettings, alipayPrecreate, wechatNative } from "../pay.js";
 
@@ -231,6 +238,60 @@ router.get("/consults/:id", authMember, async (c) => {
 
 router.get("/orders", authMember, async (c) => {
   return c.json({ ok: true, items: await getCustomerPurchases(c.get("memberId")) });
+});
+
+/* ===== 家庭成员管理 ===== */
+router.get("/family", authMember, async (c) => {
+  return c.json({ ok: true, items: await listFamilyMembers(c.get("memberId")) });
+});
+
+router.post("/family", authMember, async (c) => {
+  try {
+    return c.json({ ok: true, ...(await createFamilyMember(c.get("memberId"), await c.req.json().catch(() => ({})))) });
+  } catch (err) {
+    return c.json({ error: err.message || "添加失败" }, 400);
+  }
+});
+
+router.put("/family/:id", authMember, async (c) => {
+  try {
+    return c.json({ ok: true, ...(await updateFamilyMember(c.get("memberId"), c.req.param("id"), await c.req.json().catch(() => ({})))) });
+  } catch (err) {
+    return c.json({ error: err.message || "更新失败" }, 400);
+  }
+});
+
+router.delete("/family/:id", authMember, async (c) => {
+  try {
+    return c.json({ ok: true, ...(await deleteFamilyMember(c.get("memberId"), c.req.param("id"))) });
+  } catch (err) {
+    return c.json({ error: err.message || "删除失败" }, 400);
+  }
+});
+
+/* ===== 健康监控记录 ===== */
+router.get("/monitor", authMember, async (c) => {
+  try {
+    return c.json({ ok: true, items: await listMonitorRecords(c.get("memberId"), c.req.query("metric"), c.req.query("limit")) });
+  } catch (err) {
+    return c.json({ error: err.message || "查询失败" }, 400);
+  }
+});
+
+router.post("/monitor", authMember, async (c) => {
+  try {
+    return c.json({ ok: true, ...(await addMonitorRecord(c.get("memberId"), await c.req.json().catch(() => ({})))) });
+  } catch (err) {
+    return c.json({ error: err.message || "记录失败" }, 400);
+  }
+});
+
+router.delete("/monitor/:id", authMember, async (c) => {
+  try {
+    return c.json({ ok: true, ...(await deleteMonitorRecord(c.get("memberId"), c.req.param("id"))) });
+  } catch (err) {
+    return c.json({ error: err.message || "删除失败" }, 400);
+  }
 });
 
 export default router;

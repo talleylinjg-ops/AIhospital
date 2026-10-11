@@ -125,6 +125,31 @@ function migrate() {
     created_at TEXT NOT NULL DEFAULT (datetime('now','localtime'))
   );
   CREATE UNIQUE INDEX IF NOT EXISTS idx_recharge_out_trade ON recharge_orders(out_trade_no);
+  CREATE TABLE IF NOT EXISTS family_members (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    customer_id INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    relation TEXT NOT NULL DEFAULT '本人',
+    gender TEXT DEFAULT '',
+    birth_year INTEGER DEFAULT NULL,
+    note TEXT DEFAULT '',
+    created_at TEXT NOT NULL DEFAULT (datetime('now','localtime'))
+  );
+  CREATE INDEX IF NOT EXISTS idx_family_customer ON family_members(customer_id);
+  CREATE TABLE IF NOT EXISTS monitor_records (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    customer_id INTEGER NOT NULL,
+    member_id INTEGER DEFAULT NULL,
+    metric TEXT NOT NULL,
+    value_num REAL,
+    value_text TEXT DEFAULT '',
+    unit TEXT DEFAULT '',
+    extra TEXT DEFAULT '',
+    source TEXT NOT NULL DEFAULT '手动录入',
+    recorded_at TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now','localtime'))
+  );
+  CREATE INDEX IF NOT EXISTS idx_monitor_customer ON monitor_records(customer_id, metric, recorded_at);
   `);
 
   // 兼容旧库：先补齐新增列，再建索引
@@ -1255,4 +1280,112 @@ export function removeAttachment(id) {
   if (!row) throw new Error("附件不存在");
   attDeleteStmt.run(Number(id));
   return row;
+}
+
+/* ===== 家庭成员管理 ===== */
+function nowLocal() {
+  return new Date(Date.now() + 8 * 3600e3).toISOString().slice(0, 19).replace("T", " ");
+}
+
+const familyInsertStmt = db.prepare(
+  "INSERT INTO family_members (customer_id, name, relation, gender, birth_year, note) VALUES (?, ?, ?, ?, ?, ?)"
+);
+const familyListStmt = db.prepare(
+  "SELECT id, name, relation, gender, birth_year, note FROM family_members WHERE customer_id = ? ORDER BY id"
+);
+const familyGetStmt = db.prepare("SELECT id, customer_id FROM family_members WHERE id = ?");
+const familyUpdateStmt = db.prepare(
+  "UPDATE family_members SET name = ?, relation = ?, gender = ?, birth_year = ?, note = ? WHERE id = ? AND customer_id = ?"
+);
+const familyDeleteStmt = db.prepare("DELETE FROM family_members WHERE id = ? AND customer_id = ?");
+
+export function listFamilyMembers(customerId) {
+  return familyListStmt.all(Number(customerId));
+}
+
+export function createFamilyMember(customerId, { name, relation, gender, birthYear, note } = {}) {
+  const n = String(name || "").trim();
+  if (!n) throw new Error("成员姓名不能为空");
+  const info = familyInsertStmt.run(
+    Number(customerId),
+    n.slice(0, 30),
+    String(relation || "本人").slice(0, 10),
+    String(gender || "").slice(0, 10),
+    birthYear ? Number(birthYear) || null : null,
+    String(note || "").slice(0, 200)
+  );
+  return { id: Number(info.lastInsertRowid) };
+}
+
+export function updateFamilyMember(customerId, id, patch = {}) {
+  const row = familyGetStmt.get(Number(id));
+  if (!row || row.customer_id !== Number(customerId)) throw new Error("家庭成员不存在");
+  familyUpdateStmt.run(
+    String(patch.name ?? "").trim().slice(0, 30) || "成员",
+    String(patch.relation ?? "本人").slice(0, 10),
+    String(patch.gender ?? "").slice(0, 10),
+    patch.birthYear ? Number(patch.birthYear) || null : null,
+    String(patch.note ?? "").slice(0, 200),
+    Number(id),
+    Number(customerId)
+  );
+  return { id: Number(id) };
+}
+
+export function deleteFamilyMember(customerId, id) {
+  const row = familyGetStmt.get(Number(id));
+  if (!row || row.customer_id !== Number(customerId)) throw new Error("家庭成员不存在");
+  familyDeleteStmt.run(Number(id), Number(customerId));
+  return { ok: true };
+}
+
+/* ===== 健康监控记录 ===== */
+const MONITOR_METRICS = new Set([
+  "weight", "blood_pressure", "blood_sugar", "heart_rate", "sleep", "steps",
+  "blood_lipid", "uric_acid", "body_fat", "temperature", "period", "diet",
+]);
+export function isValidMonitorMetric(m) {
+  return MONITOR_METRICS.has(String(m || ""));
+}
+
+const monitorInsertStmt = db.prepare(
+  "INSERT INTO monitor_records (customer_id, member_id, metric, value_num, value_text, unit, extra, source, recorded_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+);
+const monitorListStmt = db.prepare(
+  "SELECT id, member_id, metric, value_num, value_text, unit, extra, source, recorded_at FROM monitor_records WHERE customer_id = ? AND metric = ? ORDER BY recorded_at DESC, id DESC LIMIT ?"
+);
+const monitorRecentStmt = db.prepare(
+  "SELECT id, metric, value_num, value_text, unit, extra, source, recorded_at FROM monitor_records WHERE customer_id = ? ORDER BY recorded_at DESC, id DESC LIMIT 50"
+);
+const monitorDeleteStmt = db.prepare("DELETE FROM monitor_records WHERE id = ? AND customer_id = ?");
+
+export function addMonitorRecord(customerId, { memberId, metric, valueNum, valueText, unit, extra, source, recordedAt } = {}) {
+  if (!isValidMonitorMetric(metric)) throw new Error("不支持的监测指标");
+  const at = String(recordedAt || "").trim() || nowLocal();
+  const info = monitorInsertStmt.run(
+    Number(customerId),
+    memberId ? Number(memberId) : null,
+    String(metric),
+    valueNum === undefined || valueNum === null || valueNum === "" ? null : Number(valueNum),
+    String(valueText || "").slice(0, 200),
+    String(unit || "").slice(0, 20),
+    String(extra || "").slice(0, 500),
+    String(source || "手动录入").slice(0, 30),
+    at
+  );
+  return { id: Number(info.lastInsertRowid), recorded_at: at };
+}
+
+export function listMonitorRecords(customerId, metric, limit = 30) {
+  if (metric) {
+    if (!isValidMonitorMetric(metric)) throw new Error("不支持的监测指标");
+    return monitorListStmt.all(Number(customerId), String(metric), Math.min(Number(limit) || 30, 100));
+  }
+  return monitorRecentStmt.all(Number(customerId));
+}
+
+export function deleteMonitorRecord(customerId, id) {
+  const info = monitorDeleteStmt.run(Number(id), Number(customerId));
+  if (!info.changes) throw new Error("记录不存在");
+  return { ok: true };
 }

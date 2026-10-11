@@ -60,6 +60,13 @@ export const LEVEL_META = {
     subtitle: "牙痛 · 牙周 · 口腔溃疡",
     desc: "适合牙痛、牙龈出血、智齿、口腔溃疡、口臭等口腔问题。剧痛伴面部肿胀、颌面外伤等请优先急诊并尽快线下就医。",
   },
+  L9: {
+    name: "报告解读",
+    tag: "解读",
+    color: "#2563eb",
+    subtitle: "检验报告 · 体检报告 · 影像报告",
+    desc: "适合各类检验报告、体检报告、影像报告的解读：上传报告照片（手机端支持拍照/扫一扫），AI 逐项解读指标、标注异常并给出复查与就医建议。",
+  },
 };
 
 export const SECTIONS = [
@@ -141,6 +148,8 @@ const EXTRA_REQUIRED = {
   L6: new Set(["gender", "age", "is_emergency", "chief_complaint", "symptom_onset", "symptom_severity"]),
   L7: new Set(["gender", "age", "is_emergency", "chief_complaint", "symptom_onset", "symptom_severity"]),
   L8: new Set(["gender", "age", "is_emergency", "chief_complaint", "symptom_onset", "symptom_severity"]),
+  /* L9 报告解读：基础信息 + 关注问题 + 近期检查异常（报告内容主体靠拍照上传） */
+  L9: new Set(["gender", "age", "chief_complaint", "prior_exams"]),
 };
 
 export function getRequiredFields(level) {

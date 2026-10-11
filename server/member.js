@@ -17,6 +17,13 @@ import {
   getCustomerPurchases,
   createRechargeOrder,
   getRechargeOrder,
+  listFamilyMembers,
+  createFamilyMember,
+  updateFamilyMember,
+  deleteFamilyMember,
+  addMonitorRecord,
+  listMonitorRecords,
+  deleteMonitorRecord,
 } from "./db.js";
 import { paymentStatus, readPaySettings, alipayPrecreate, wechatNative } from "./pay.js";
 
@@ -227,6 +234,60 @@ router.get("/consults/:id", auth, (req, res) => {
 
 router.get("/orders", auth, (_req, res) => {
   res.json({ ok: true, items: getCustomerPurchases(_req.member.id) });
+});
+
+/* ===== 家庭成员管理 ===== */
+router.get("/family", auth, (req, res) => {
+  res.json({ ok: true, items: listFamilyMembers(req.member.id) });
+});
+
+router.post("/family", auth, (req, res) => {
+  try {
+    res.json({ ok: true, ...createFamilyMember(req.member.id, req.body || {}) });
+  } catch (err) {
+    res.status(400).json({ error: err.message || "添加失败" });
+  }
+});
+
+router.put("/family/:id", auth, (req, res) => {
+  try {
+    res.json({ ok: true, ...updateFamilyMember(req.member.id, req.params.id, req.body || {}) });
+  } catch (err) {
+    res.status(400).json({ error: err.message || "更新失败" });
+  }
+});
+
+router.delete("/family/:id", auth, (req, res) => {
+  try {
+    res.json({ ok: true, ...deleteFamilyMember(req.member.id, req.params.id) });
+  } catch (err) {
+    res.status(400).json({ error: err.message || "删除失败" });
+  }
+});
+
+/* ===== 健康监控记录 ===== */
+router.get("/monitor", auth, (req, res) => {
+  try {
+    res.json({ ok: true, items: listMonitorRecords(req.member.id, req.query.metric, req.query.limit) });
+  } catch (err) {
+    res.status(400).json({ error: err.message || "查询失败" });
+  }
+});
+
+router.post("/monitor", auth, (req, res) => {
+  try {
+    res.json({ ok: true, ...addMonitorRecord(req.member.id, req.body || {}) });
+  } catch (err) {
+    res.status(400).json({ error: err.message || "记录失败" });
+  }
+});
+
+router.delete("/monitor/:id", auth, (req, res) => {
+  try {
+    res.json({ ok: true, ...deleteMonitorRecord(req.member.id, req.params.id) });
+  } catch (err) {
+    res.status(400).json({ error: err.message || "删除失败" });
+  }
 });
 
 export default router;
