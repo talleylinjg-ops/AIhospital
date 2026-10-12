@@ -90,6 +90,8 @@ function footer() {
   <footer class="site-footer">
     <div class="container">
       <div class="strong">免责声明：本系统为 AI 辅助预问诊，所有输出仅供参考，不能替代执业医师的诊断与治疗。</div>
+      <div>互联网诊疗与处方服务由合作持牌互联网医院的备案执业医师提供，并经药师审方；依据监管规定，线上仅面向已在实体医院确诊的慢病复诊患者提供续方服务，首诊请前往实体医疗机构就诊。</div>
+      <div>药品及器械由合作医药供应链一件代发，处方药品类凭电子处方配送。</div>
       <div>如出现胸痛、呼吸困难、意识改变、大出血等急危情况，请立即拨打 120 或前往急诊。</div>
     </div>
   </footer>`;
@@ -124,9 +126,14 @@ function homeView() {
       <div class="services-entry">
         <div>
           <div class="services-entry-title">健康服务购买</div>
-          <div class="services-entry-sub">AI 慢病管理等服务项目，支持支付宝/微信在线支付，支付后即时开通</div>
+          <div class="services-entry-sub">AI 慢病管理、复诊续方（合作持牌互联网医院）、就医绿通等服务，支持支付宝/微信在线支付，支付后即时开通</div>
         </div>
         <a class="btn btn-primary" href="#/services">进入服务购买</a>
+      </div>
+      <div class="home-mode-strip">
+        <div><b>AI 预问诊</b><span>9 大通道完整病史采集，输出分诊与就医指引</span></div>
+        <div><b>复诊续方</b><span>合作持牌互联网医院医生复核 + 药师审方，慢病续方合规开药</span></div>
+        <div><b>医药商城</b><span>药品器械一件代发直邮，处方药凭电子处方配送</span></div>
       </div>
 
     </div>
@@ -390,6 +397,7 @@ function resultView() {
     ["生活禁忌与注意事项", plan.contraindications],
     ["用药参考（不替代处方）", plan.medication_reference],
     ["复诊时机", plan.follow_up],
+    ["处方服务说明", r.level === "L9" ? "" : "如需线上开具处方，须为您已在实体医院确诊的慢病复诊续方：完成本报告后可购买互联网诊疗服务，由合作持牌互联网医院医生复核、药师审方后开具电子处方，药品由合作医药供应链一件代发。首诊请前往实体医疗机构。"],
   ]
     .map(
       ([t, v]) =>
@@ -461,6 +469,21 @@ function servicesView() {
         <h1>服务购买</h1>
         <p>浏览并选择所需的健康服务，可选择支付宝 / 微信在线支付，支付成功后即时开通；也可选择线下付款，客服会及时与您联系确认付款</p>
         <div class="notice">在线支付以实际可用渠道为准；未登录用户选择在线支付时需填写下单手机号</div>
+      </div>
+      <div class="telemed-block">
+        <div class="telemed-card">
+          <b>互联网诊疗（复诊续方）</b>
+          <span>本平台的 AI 预问诊、健康档案与会员服务由大气 AI 医院提供；在线问诊、医生复核、电子处方与药师审方由<b>合作持牌互联网医院</b>的备案执业医师完成，处方归档与监管上报由合作方兜底。</span>
+          <span class="telemed-warn">合规提示：依据监管规定，线上仅面向已在实体医院确诊的慢病复诊患者提供续方服务；首次就诊请前往实体医疗机构，线上可先完成 AI 预问诊与健康咨询。</span>
+        </div>
+        <div class="telemed-card">
+          <b>医药商城（一件代发）</b>
+          <span>处方药、非处方药与人用器械由独立医药供应链一件代发直邮到家；处方药品类凭合作互联网医院开具的电子处方下单配送，全程可追溯。</span>
+        </div>
+        <div class="telemed-card">
+          <b>就医绿色通道（付费可选）</b>
+          <span>AI 线上评估提示重症或疑难情况时，可选购第三方就医服务平台提供的门诊绿通、专家预约、陪诊与代挂号服务，由持牌服务商承接，本平台提供渠道对接与订单跟进。</span>
+        </div>
       </div>
       <div class="services-grid" id="services-grid"><div class="loading-inline">加载中…</div></div>
     </div>

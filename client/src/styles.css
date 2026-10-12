@@ -560,3 +560,23 @@ body {
 }
 .att-zone-head.report-btn-row { justify-content: flex-start; }
 .att-zone-head.report-btn-row .att-status { flex-basis: 100%; }
+
+/* ===== 互联网诊疗 / 医药商城 / 绿通说明 ===== */
+.telemed-block { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 26px; }
+@media (max-width: 900px) { .telemed-block { grid-template-columns: 1fr; } }
+.telemed-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 16px 18px; display: flex; flex-direction: column; gap: 8px; font-size: 13px; line-height: 1.75;
+  box-shadow: var(--shadow);
+}
+.telemed-card > b { color: var(--primary-dark); font-size: 15px; }
+.telemed-card span { color: var(--ink-2); }
+.telemed-card .telemed-warn { color: var(--danger); background: var(--danger-light); border-radius: 8px; padding: 7px 10px; }
+.home-mode-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 0 0 34px; }
+@media (max-width: 900px) { .home-mode-strip { grid-template-columns: 1fr; } }
+.home-mode-strip > div {
+  background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 12px 15px;
+  display: flex; flex-direction: column; gap: 3px; font-size: 13px;
+}
+.home-mode-strip b { color: var(--primary-dark); font-size: 14px; }
+.home-mode-strip span { color: var(--ink-2); line-height: 1.7; }
