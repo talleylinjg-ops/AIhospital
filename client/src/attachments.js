@@ -122,12 +122,27 @@ export async function deleteMemberAttachment(id) {
  */
 export function mountUploader(el, opts = {}) {
   if (!el) return;
-  const o = Object.assign({ target: "member", list: true, deletable: false, kind: "报告单", hint: "" }, opts);
+  const o = Object.assign({ target: "member", list: true, deletable: false, kind: "报告单", hint: "", camera: false }, opts);
   const hint = o.hint
     ? `<p class="att-tip">${esc(o.hint)}</p>`
     : `<p class="att-tip">选择病历 / 检验单 / 报告单 / 影像等资料上传（jpg/png/webp/gif/pdf，单个不超过 6MB）。</p>`;
 
-  el.innerHTML = `
+  /* camera 模式（报告解读 L9）：统一双入口按钮，kind 固定「报告单」 */
+  el.innerHTML = o.camera
+    ? `
+    <div class="att-zone">
+      ${hint}
+      <div class="att-zone-head report-btn-row">
+        <button type="button" class="btn-outline report-btn att-add-btn">拍照 / 扫一扫上传报告</button>
+        <button type="button" class="btn-outline report-btn att-add-btn-plain">从相册选择</button>
+        <input class="att-file-input" type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple hidden capture="environment" />
+        <input class="att-file-input-plain" type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple hidden />
+        <span class="att-status muted"></span>
+      </div>
+      <div class="att-zone-err" hidden></div>
+      <div class="att-zone-list att-grid"></div>
+    </div>`
+    : `
     <div class="att-zone">
       ${hint}
       <div class="att-zone-head">
@@ -145,7 +160,9 @@ export function mountUploader(el, opts = {}) {
   const listEl = el.querySelector(".att-zone-list");
   const kindEl = el.querySelector(".att-kind-sel");
   const inputEl = el.querySelector(".att-file-input");
+  const plainEl = el.querySelector(".att-file-input-plain");
   const addBtn = el.querySelector(".att-add-btn");
+  const addPlainBtn = el.querySelector(".att-add-btn-plain");
 
   function err(text) {
     errEl.hidden = false;
@@ -178,14 +195,15 @@ export function mountUploader(el, opts = {}) {
   }
 
   addBtn.addEventListener("click", () => inputEl.click());
-  inputEl.addEventListener("change", async () => {
-    const files = Array.from(inputEl.files || []);
-    inputEl.value = "";
+  if (addPlainBtn && plainEl) addPlainBtn.addEventListener("click", () => plainEl.click());
+  const handleUpload = async (input) => {
+    const files = Array.from(input.files || []);
+    input.value = "";
     if (!files.length) return;
     errEl.hidden = true;
     let done = 0;
     let failed = 0;
-    const kind = kindEl.value || o.kind || "其他";
+    const kind = (kindEl ? kindEl.value : "") || o.kind || "其他";
     for (const file of files) {
       status(`正在上传（${done + failed + 1}/${files.length}）：${esc(file.name)}…`);
       try {
@@ -199,7 +217,9 @@ export function mountUploader(el, opts = {}) {
     status(done ? `已上传 ${done} 份` : "");
     await reload();
     if (o.onChanged) o.onChanged(done, failed);
-  });
+  };
+  inputEl.addEventListener("change", () => handleUpload(inputEl));
+  if (plainEl) plainEl.addEventListener("change", () => handleUpload(plainEl));
 
   reload();
 }

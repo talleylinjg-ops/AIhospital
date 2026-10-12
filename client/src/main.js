@@ -177,22 +177,33 @@ function bindConsultPicker(level) {
   const box = document.getElementById("consult-attach-picker");
   if (!box) return;
   const isL9 = level === "L9";
-  box.innerHTML = `
+  /* L9 报告解读：统一双入口（拍照 / 扫一扫 + 从相册选择），kind 固定「报告单」 */
+  box.innerHTML = isL9
+    ? `
+    <div class="report-btn-row">
+      <button type="button" class="btn-outline report-btn" id="ca-add">拍照 / 扫一扫上传报告</button>
+      <button type="button" class="btn-outline report-btn" id="ca-add-plain">从相册选择</button>
+      <input type="file" id="ca-input" accept="image/png,image/jpeg,image/webp,image/gif" multiple hidden capture="environment" />
+      <input type="file" id="ca-input-plain" accept="image/png,image/jpeg,image/webp,image/gif" multiple hidden />
+      <span class="muted att-tip" id="ca-tip"></span>
+    </div>
+    <div id="ca-list"></div>`
+    : `
     <div class="att-row">
       <select id="ca-kind">${att.kindOptions(consultFileKind)}</select>
-      <button type="button" class="btn-outline" id="ca-add">${isL9 ? "拍照 / 扫一扫上传报告" : "选择病历 / 报告文件…"}</button>
-      ${isL9 ? `<button type="button" class="btn-outline" id="ca-add-plain">从相册选择</button>` : ""}
-      <input type="file" id="ca-input" accept="${isL9 ? "image/png,image/jpeg,image/webp,image/gif" : att.DOC_ACCEPT}" multiple hidden ${isL9 ? 'capture="environment"' : ""} />
-      ${isL9 ? `<input type="file" id="ca-input-plain" accept="${att.DOC_ACCEPT}" multiple hidden />` : ""}
+      <button type="button" class="btn-outline" id="ca-add">选择病历 / 报告文件…</button>
+      <input type="file" id="ca-input" accept="${att.DOC_ACCEPT}" multiple hidden />
       <span class="muted att-tip" id="ca-tip"></span>
     </div>
     <div id="ca-list"></div>`;
   const kindSel = box.querySelector("#ca-kind");
-  kindSel.addEventListener("change", () => {
-    consultFileKind = kindSel.value;
-    consultFiles.forEach((f) => (f.kind = consultFileKind));
-    drawConsultPicker();
-  });
+  if (kindSel) {
+    kindSel.addEventListener("change", () => {
+      consultFileKind = kindSel.value;
+      consultFiles.forEach((f) => (f.kind = consultFileKind));
+      drawConsultPicker();
+    });
+  }
   const handleFiles = (picked) => {
     for (const file of picked) {
       if (!file) continue;
@@ -205,7 +216,7 @@ function bindConsultPicker(level) {
         alert(`「${file.name}」格式不支持，仅支持图片或 PDF`);
         continue;
       }
-      consultFiles.push({ file, kind: consultFileKind });
+      consultFiles.push({ file, kind: isL9 ? "报告单" : consultFileKind });
     }
     drawConsultPicker();
   };
@@ -1241,7 +1252,8 @@ function loadResultDocs() {  const box = document.getElementById("record-docs-bo
     target: "consult",
     id: rid,
     list: false,
-    hint: "补充上传病历卡、检验单、报告单、影像等材料，将归入本次问诊记录，供医师与后台核对。",
+    camera: state.level === "L9",
+    hint: state.level === "L9" ? "补充或重传报告照片（拍照 / 扫一扫 / 从相册选择），将归入本次问诊记录。" : "补充上传病历卡、检验单、报告单、影像等材料，将归入本次问诊记录，供医师与后台核对。",
     onChanged: () => att.loadAttachments("consult", rid).then(render).catch(renderErr),
   });
 }
