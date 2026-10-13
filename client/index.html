@@ -10,14 +10,14 @@
         : "";
     </script>
 
-    <title>大气AI医院 · 智能预问诊、分诊与在线健康服务</title>
+    <title>大气AI医院 · AI预问诊、报告解读与在线健康服务</title>
     <meta
       name="description"
-      content="大气AI医院提供 AI 智能预问诊与分诊：覆盖轻微快诊、中等症状、危重症、日常保健、妇幼保健、中医、眼科、口腔共 8 条就诊通道。在线填写病史即可获得分诊建议与就医指引，并支持慢病管理等健康服务在线购买，支付宝/微信在线支付即时开通。"
+      content="大气AI医院提供 AI 智能预问诊与分诊（9 条就诊通道）、体检报告拍照上传 AI 逐项解读、AI 健康客服小气免费咨询、家庭成员健康档案与健康监控。慢病复诊续方由合作持牌互联网医院医生复核、药师审方，药品器械一件代发。支持支付宝/微信在线支付。"
     />
     <meta
       name="keywords"
-      content="AI医院,AI问诊,在线问诊,智能分诊,预问诊,健康咨询,慢病管理,妇幼保健,中医问诊,眼科,口腔,在线健康服务"
+      content="AI医院,AI问诊,在线问诊,智能分诊,预问诊,体检报告解读,报告解读,AI读报告,健康咨询,慢病管理,复诊续方,互联网医院,妇幼保健,中医问诊,眼科,口腔,在线健康服务"
     />
     <meta name="author" content="大气AI医院" />
     <meta name="application-name" content="大气AI医院" />
@@ -25,6 +25,8 @@
     <meta name="theme-color" content="#0e7c86" />
     <meta name="format-detection" content="telephone=no" />
     <link rel="canonical" href="https://daqihospital.net/" />
+    <link rel="preconnect" href="https://api.daqihospital.com" crossorigin />
+    <link rel="dns-prefetch" href="https://api.daqihospital.com" />
     <link rel="alternate" type="text/plain" href="https://daqihospital.net/llms.txt" title="llms.txt" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -34,24 +36,24 @@
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="大气AI医院" />
     <meta property="og:locale" content="zh_CN" />
-    <meta property="og:title" content="大气AI医院 · 智能预问诊、分诊与在线健康服务" />
+    <meta property="og:title" content="大气AI医院 · AI预问诊、报告解读与在线健康服务" />
     <meta
       property="og:description"
-      content="8 条就诊通道的 AI 智能预问诊与分诊，在线获得分诊建议与就医指引，并支持慢病管理等健康服务在线购买。"
+      content="9 条就诊通道的 AI 智能预问诊与分诊；体检报告拍照上传，AI 逐项解读并给出就医建议；AI 健康客服免费咨询；慢病复诊续方由合作持牌互联网医院提供。"
     />
     <meta property="og:url" content="https://daqihospital.net/" />
     <meta property="og:image" content="https://daqihospital.net/og-cover.png" />
     <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="大气AI医院：AI 智能预问诊、分诊与在线健康服务" />
+    <meta property="og:image:alt" content="大气AI医院：AI 智能预问诊、报告解读与在线健康服务" />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="大气AI医院 · 智能预问诊、分诊与在线健康服务" />
+    <meta name="twitter:title" content="大气AI医院 · AI预问诊、报告解读与在线健康服务" />
     <meta
       name="twitter:description"
-      content="8 条就诊通道的 AI 智能预问诊与分诊，在线获得分诊建议与就医指引，并支持健康服务在线购买。"
+      content="9 条就诊通道的 AI 智能预问诊与分诊；体检报告拍照上传 AI 逐项解读；AI 健康客服免费咨询；健康服务在线购买。"
     />
     <meta name="twitter:image" content="https://daqihospital.net/og-cover.png" />
     <meta name="twitter:image:alt" content="大气AI医院：AI 智能预问诊、分诊与在线健康服务" />
@@ -66,7 +68,7 @@
             "@type": "MedicalClinic",
             "@id": "https://daqihospital.net/#organization",
             "name": "大气AI医院",
-            "alternateName": "大气AI医院 · 智能预问诊与分诊",
+            "alternateName": "大气AI医院 · AI预问诊与报告解读",
             "url": "https://daqihospital.net/",
             "logo": {
               "@type": "ImageObject",
@@ -75,7 +77,7 @@
               "height": 630
             },
             "image": "https://daqihospital.net/og-cover.png",
-            "description": "基于大模型的 AI 智能预问诊与分诊平台，覆盖 8 条就诊通道，提供分诊建议、就医指引与在线健康服务。",
+            "description": "基于大模型的 AI 健康服务平台：9 条就诊通道的智能预问诊与分诊、体检报告拍照上传逐项解读、AI 健康客服、家庭成员健康档案与健康监控，以及慢病管理等在线健康服务。",
             "medicalSpecialty": [
               "PrimaryCare",
               "Emergency",
@@ -83,25 +85,35 @@
               "Obstetric",
               "TraditionalChineseMedicine",
               "Ophthalmologic",
-              "Dentistry"
+              "Dentistry",
+              "MedicalLab"
             ],
             "areaServed": { "@type": "Country", "name": "中国" },
             "knowsAbout": [
               "AI 预问诊",
               "智能分诊",
+              "体检报告解读",
+              "检验报告解读",
+              "影像报告解读",
               "就医指引",
               "慢病管理",
+              "复诊续方",
               "妇幼保健",
               "中医辨证",
               "眼科问诊",
-              "口腔问诊"
+              "口腔问诊",
+              "健康数据监控",
+              "家庭健康档案"
             ],
             "availableService": [
               { "@type": "MedicalTherapy", "name": "AI 智能预问诊与分诊" },
+              { "@type": "MedicalTest", "name": "AI 报告解读（体检/检验/影像报告拍照上传）" },
+              { "@type": "Service", "name": "AI 健康客服「小气」（免费在线咨询）" },
               { "@type": "Service", "name": "会员服务 · 月付会员" },
               { "@type": "Service", "name": "会员服务 · 年付会员" },
               { "@type": "MedicalTherapy", "name": "AI 慢病管理年度套餐" },
-              { "@type": "MedicalTherapy", "name": "AI 慢病管理月度套餐" }
+              { "@type": "MedicalTherapy", "name": "AI 慢病管理月度套餐" },
+              { "@type": "Service", "name": "互联网诊疗复诊续方（合作持牌互联网医院）" }
             ]
           },
           {
@@ -149,7 +161,7 @@
                 "@type": "HowToStep",
                 "position": 1,
                 "name": "选择就诊通道",
-                "text": "根据症状与情况选择轻微快诊、中等症状、危重症、日常保健、妇幼保健、中医、眼科或口腔通道。"
+                "text": "根据症状与情况选择轻微快诊、中等症状、危重症、日常保健、妇幼保健、中医、眼科、口腔或报告解读通道；体检报告、检验报告与影像报告解读直接选「报告解读」。"
               },
               {
                 "@type": "HowToStep",
@@ -161,13 +173,13 @@
                 "@type": "HowToStep",
                 "position": 3,
                 "name": "提交并等待分析",
-                "text": "提交后由大模型进行分析，给出分诊建议、可能病因鉴别与就医指引。"
+                "text": "提交后由大模型进行分析，给出分诊建议、可能病因鉴别与就医指引；报告解读通道会对上传的报告逐项解读。"
               },
               {
                 "@type": "HowToStep",
                 "position": 4,
                 "name": "按需上传材料",
-                "text": "可上传病历、检验单、报告单等材料用于存档，便于后续解读与随访，支持图片与 PDF。"
+                "text": "可上传病历、检验单、报告单等材料用于存档，便于后续解读与随访，支持图片与 PDF；报告解读通道支持手机拍照或扫一扫上传报告照片。"
               }
             ]
           },
@@ -255,7 +267,39 @@
                 "name": "系统包含哪些就诊通道？",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "共 8 条通道：轻微快诊、中等症状、危重症、日常保健、妇幼保健、中医、眼科、口腔，不同通道对应不同的必填病史项与评估重点。"
+                  "text": "共 9 条通道：轻微快诊、中等症状、危重症、日常保健、妇幼保健、中医、眼科、口腔、报告解读，不同通道对应不同的必填病史项与评估重点。"
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "体检报告看不懂，怎么让 AI 帮忙解读？",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "在首页选择「报告解读」通道，用手机拍照或扫一扫上传报告（也可从相册选择），AI 会逐项列出指标的参考区间与实测值、标注异常与偏离程度、给出复查随访或就诊建议，并分析异常指标之间的关联。"
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "可以在网上开处方药吗？",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "依据监管规定，线上仅面向已在实体医院确诊的慢病复诊患者提供续方服务：由合作持牌互联网医院的备案执业医师复核、药师审方后开具电子处方，处方药由合作医药供应链凭处方一件代发配送。首次就诊请前往实体医疗机构，线上可先完成 AI 预问诊。"
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "AI 健康客服「小气」收费吗？",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "免费且无需登录。可直接咨询症状初步分析、就诊通道选择与平台使用问题；小气不给出诊断结论，急危情况会提示拨打 120。"
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "可以为家人管理健康档案吗？",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "可以。注册会员后在「我的 - 家庭成员」中添加成员（姓名、关系、性别、出生年份、备注），即可为家人分别记录健康数据与问诊信息；健康监控中心支持记录体重、血压、血糖、血脂等 12 类指标。"
                 }
               },
               {
@@ -307,14 +351,19 @@
   <body>
     <div id="app"></div>
     <noscript>
-      <h1>大气AI医院 · 智能预问诊、分诊与在线健康服务</h1>
+      <h1>大气AI医院 · AI预问诊、报告解读与在线健康服务</h1>
       <p>
-        大气AI医院提供 AI 智能预问诊与分诊服务，覆盖轻微快诊、中等症状、危重症、日常保健、妇幼保健、中医、眼科、口腔共 8
-        条就诊通道。选择通道并填写完整病史后，系统会给出分诊建议与就医指引。
+        大气AI医院提供 AI 智能预问诊与分诊服务，覆盖轻微快诊、中等症状、危重症、日常保健、妇幼保健、中医、眼科、口腔、报告解读共 9
+        条就诊通道。选择通道并填写完整病史后，系统会给出分诊建议与就医指引；体检报告、检验报告与影像报告可在「报告解读」通道拍照上传，由 AI
+        逐项解读指标并给出复查或就诊建议。
       </p>
       <p>
-        在线健康服务包括会员服务（月付 9.90 元/月、年付 99.90 元/年）、AI 慢病管理年度套餐与 AI 慢病管理月度套餐，
+        AI 健康客服「小气」免费提供在线健康咨询；会员中心支持健康档案、家庭成员管理、健康监控（体重、血压、血糖等 12
+        类指标）。在线健康服务包括会员服务（月付 9.90 元/月、年付 99.90 元/年）、AI 慢病管理年度套餐与 AI 慢病管理月度套餐，
         支持支付宝或微信在线支付并即时开通，也可选择线下付款，价格以服务购买页为准。
+      </p>
+      <p>
+        互联网诊疗与处方服务由合作持牌互联网医院提供，线上仅面向已在实体医院确诊的慢病复诊患者提供续方服务，首诊请前往实体医疗机构；处方药凭电子处方由合作医药供应链一件代发配送。
       </p>
       <p>
         请启用 JavaScript 以获得完整体验。急危重症请立即拨打 120 或前往急诊；本系统输出仅供参考，不能替代执业医师的诊断与治疗。
