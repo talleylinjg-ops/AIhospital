@@ -477,8 +477,22 @@ body {
   /* tabbar 占位：页面主体不被遮挡 */
   body { padding-bottom: 62px; }
   .site-footer { padding-bottom: 14px; }
-  /* 顶部导航在手机端隐藏通道按钮行（首页卡片直达），保留品牌与会员入口 */
-  .nav-levels { display: none; }
+  /* 移动端 header：LOGO（小图）+ 右侧 9 通道单行横向滚动 */
+  .header-inner { flex-wrap: wrap; row-gap: 6px; padding-top: 6px; }
+  .brand { flex: 0 0 auto; }
+  .brand-logo { height: 30px; }
+  .header-right { flex: 1 1 100%; }
+  .nav-levels {
+    display: flex; flex-direction: row; align-items: center;
+    overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none;
+    gap: 6px; padding-bottom: 2px;
+  }
+  .nav-levels::-webkit-scrollbar { display: none; }
+  /* 两行结构在移动端合并为单行（子元素直接参与 flex 滚动） */
+  .nav-levels .nav-level-row { display: contents; }
+  .nav-level-btn { padding: 4px 10px; font-size: 12px; }
+  .nav-level-btn .t-pc { display: none; }
+  .nav-level-btn .t-m { display: inline; }
 }
 
 /* ===== 小气客服聊天 ===== */
@@ -580,3 +594,33 @@ body {
 }
 .home-mode-strip b { color: var(--primary-dark); font-size: 14px; }
 .home-mode-strip span { color: var(--ink-2); line-height: 1.7; }
+
+/* ===== 品牌 LOGO（PC 大图 / 移动端由 picture source 切换小图） ===== */
+.brand-logo { height: 40px; width: auto; display: block; }
+.brand-badge { display: none; }
+
+/* 导航双端短称：PC 显示全称，移动端显示短称（≤900px 规则见上） */
+.nav-level-btn .t-m { display: none; }
+
+/* ===== 表单：必填信息置顶区 ===== */
+.section-required {
+  border: 1px solid rgba(14,124,134,0.35); background: #f0fafb;
+  border-radius: var(--radius); padding: 14px 16px; margin-bottom: 18px;
+}
+.section-required .section-title { color: var(--primary-dark); }
+.section-required .req-note { font-weight: 400; font-size: 12px; color: var(--ink-2); margin-left: 8px; }
+
+/* ===== 语音输入 ===== */
+.input-with-mic { position: relative; display: flex; align-items: stretch; }
+.input-with-mic input, .input-with-mic textarea { flex: 1; padding-right: 40px; }
+.mic-btn {
+  position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+  width: 30px; height: 30px; border-radius: 50%; border: none; cursor: pointer;
+  background: #e6f2f3; color: var(--primary, #0e7c86);
+  display: flex; align-items: center; justify-content: center; flex: 0 0 auto;
+  transition: background 0.15s, color 0.15s;
+}
+.input-with-mic textarea + .mic-btn { top: auto; bottom: 8px; transform: none; }
+.mic-btn:hover { background: #d3e9eb; }
+.mic-btn.listening { background: var(--danger); color: #fff; animation: micPulse 1.2s ease-in-out infinite; }
+@keyframes micPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }

@@ -43,8 +43,9 @@ function restoreLastResult() {
 
 const API = (window.__API_ORIGIN__ || "") + "/api";
 
-/* 头部导航按钮文字：前四通道显示名称（危重症按钮取 4 字短称），其余显示 tag */
+/* 头部导航按钮文字：PC 用全称/tag，移动端用 2 字短称 */
 const NAV_SHORT = { L1: "轻微快诊", L2: "中等症状", L3: "危重症", L4: "日常保健" };
+const MOBILE_NAV_SHORT = { L1: "轻微", L2: "中等", L3: "危重症", L4: "保健", L5: "妇幼", L6: "中医", L7: "眼科", L8: "口腔", L9: "解读" };
 
 /* 导航未激活文字用通道色相（比 LEVEL_META.color 提亮一档，保证在深青 header 上可读）；激活态仍用原色 */
 const NAV_TEXT_COLOR = {
@@ -57,23 +58,21 @@ function header(showLevels = true) {
   const renderLevelBtn = ([key, m]) => {
     const active = state.level === key ? " active" : "";
     const text = NAV_SHORT[key] || m.tag;
-    return `<button class="nav-level-btn${active}" data-nav-level="${key}" title="${esc(m.name)}" aria-pressed="${active ? "true" : "false"}" style="--lv-color:${m.color};--nav-color:${NAV_TEXT_COLOR[key] || m.color}">${esc(text)}</button>`;
+    const mText = MOBILE_NAV_SHORT[key] || m.tag;
+    return `<button class="nav-level-btn${active}" data-nav-level="${key}" title="${esc(m.name)}" aria-pressed="${active ? "true" : "false"}" style="--lv-color:${m.color};--nav-color:${NAV_TEXT_COLOR[key] || m.color}"><span class="t-pc">${esc(text)}</span><span class="t-m">${esc(mText)}</span></button>`;
   };
   const entries = Object.entries(LEVEL_META);
-  /* 固定两行：第 1 行 L1-L4（快诊/门诊/急诊/保健），自 L5 妇幼起排到第 2 行 */
-  const levelButtons = [entries.slice(0, 4), entries.slice(4)]
-    .map((row) => `<div class="nav-level-row">${row.map(renderLevelBtn).join("")}</div>`)
-    .join("");
+  /* PC 两行：L1-L4 / L5-L9；移动端由 CSS display:contents 合并为单行横向滚动 */
+  const levelButtons = `<div class="nav-level-row">${entries.slice(0, 4).map(renderLevelBtn).join("")}</div><div class="nav-level-row row-2">${entries.slice(4).map(renderLevelBtn).join("")}</div>`;
   return `
   <header class="site-header">
     <div class="container header-inner">
       <div class="brand">
-        <a href="#/" class="brand-link">
-          <div class="brand-badge">医</div>
-          <div>
-            <div>大气AI医院</div>
-            <div class="brand-sub">智能预问诊与分诊系统</div>
-          </div>
+        <a href="#/" class="brand-link" aria-label="大气AI医院首页">
+          <picture>
+            <source media="(max-width: 900px)" srcset="/logo-m.png" />
+            <img class="brand-logo" src="/logo.png" alt="大气AI医院" />
+          </picture>
         </a>
       </div>
       <div class="header-right">
@@ -250,50 +249,56 @@ function formView(level) {
     return;
   }
 
+  const renderField = (f) => {
+    const req = isRequired(f, level);
+    const val = state.formData[f.id] ?? "";
+    const optMark = req ? "" : `<span class="opt-mark">选填</span>`;
+    const reqMark = req ? '<span class="req">*</span>' : "";
+    const id = `f-${f.id}`;
+    /* 语音输入按钮（浏览器支持时由 bindForm 激活） */
+    const mic = f.type === "text" || f.type === "textarea" ? `<button type="button" class="mic-btn" data-mic="${f.id}" aria-label="语音输入" hidden><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2Z"/></svg></button>` : "";
+
+    let control = "";
+    if (f.type === "select") {
+      const opts = ['<option value="" disabled>请选择</option>']
+        .concat(f.options.map((o) => `<option ${val === o ? "selected" : ""}>${esc(o)}</option>`))
+        .join("");
+      control = `<select id="${id}" data-field="${f.id}">${opts}</select>`;
+    } else if (f.type === "radio") {
+      const radios = f.options
+        .map(
+          (o) =>
+            `<label><input type="radio" name="${f.id}" value="${esc(o)}" ${val === o ? "checked" : ""} data-field="${f.id}"/>${esc(o)}</label>`
+        )
+        .join("");
+      control = `<div class="radio-group" id="${id}">${radios}</div>`;
+    } else if (f.type === "number") {
+      control = `<div class="input-with-mic"><input id="${id}" type="number" data-field="${f.id}" placeholder="${esc(f.placeholder || "")}" value="${esc(val)}" inputmode="decimal" />${mic}</div>`;
+    } else if (f.type === "textarea") {
+      control = `<div class="input-with-mic"><textarea id="${id}" data-field="${f.id}" placeholder="${esc(f.placeholder || "")}">${esc(val)}</textarea>${mic}</div>`;
+    } else {
+      control = `<div class="input-with-mic"><input id="${id}" type="text" data-field="${f.id}" placeholder="${esc(f.placeholder || "")}" value="${esc(val)}" />${mic}</div>`;
+    }
+
+    return `
+      <div class="field" data-field-id="${f.id}">
+        <label for="${id}">${esc(f.label)}${reqMark}${optMark}</label>
+        ${control}
+      </div>`;
+  };
+
+  /* 必填项统一置顶（PC 与移动端一致），其余字段按原分区渲染 */
+  const requiredIds = new Set(getRequiredFields(level).map((f) => f.id));
+  const requiredSection = requiredIds.size
+    ? `<div class="section section-required"><div class="section-title">必填信息（请优先填写）<span class="req-note">共 ${requiredIds.size} 项，填完即可提交</span></div>${getRequiredFields(level).map(renderField).join("")}</div>`
+    : "";
+
   const sectionsHtml = SECTIONS.map((sec) => {
-    const fields = FIELDS.filter((f) => f.section === sec.id);
+    const fields = FIELDS.filter((f) => f.section === sec.id && !requiredIds.has(f.id));
     if (!fields.length) return "";
     const allRequired = fields.every((f) => isRequired(f, level));
     const sectionHasRequired = fields.some((f) => isRequired(f, level));
-
-    const fieldsHtml = fields
-      .map((f) => {
-        const req = isRequired(f, level);
-        const val = state.formData[f.id] ?? "";
-        const optMark = req ? "" : `<span class="opt-mark">选填</span>`;
-        const reqMark = req ? '<span class="req">*</span>' : "";
-        const id = `f-${f.id}`;
-
-        let control = "";
-        if (f.type === "select") {
-          const opts = ['<option value="" disabled>请选择</option>']
-            .concat(f.options.map((o) => `<option ${val === o ? "selected" : ""}>${esc(o)}</option>`))
-            .join("");
-          control = `<select id="${id}" data-field="${f.id}">${opts}</select>`;
-        } else if (f.type === "radio") {
-          const radios = f.options
-            .map(
-              (o) =>
-                `<label><input type="radio" name="${f.id}" value="${esc(o)}" ${val === o ? "checked" : ""} data-field="${f.id}"/>${esc(o)}</label>`
-            )
-            .join("");
-          control = `<div class="radio-group" id="${id}">${radios}</div>`;
-        } else if (f.type === "number") {
-          control = `<input id="${id}" type="number" data-field="${f.id}" placeholder="${esc(f.placeholder || "")}" value="${esc(val)}" />`;
-        } else if (f.type === "textarea") {
-          control = `<textarea id="${id}" data-field="${f.id}" placeholder="${esc(f.placeholder || "")}">${esc(val)}</textarea>`;
-        } else {
-          control = `<input id="${id}" type="text" data-field="${f.id}" placeholder="${esc(f.placeholder || "")}" value="${esc(val)}" />`;
-        }
-
-        return `
-          <div class="field" data-field-id="${f.id}">
-            <label for="${id}">${esc(f.label)}${reqMark}${optMark}</label>
-            ${control}
-          </div>`;
-      })
-      .join("");
-
+    const fieldsHtml = fields.map(renderField).join("");
     const optNote = allRequired ? "" : sectionHasRequired ? "" : `<span class="opt">(本部分选填)</span>`;
     return `<div class="section"><div class="section-title">${esc(sec.title)}${optNote}</div>${fieldsHtml}</div>`;
   }).join("");
@@ -309,10 +314,11 @@ function formView(level) {
       </div>
       <form id="consult-form" novalidate>
         <div class="attach-panel">
-          <div class="section-title">病历 / 检验 / 报告上传（选填）</div>
-          <p class="attach-note">支持上传病历卡、检验单、报告单、影像胶片或处方等（jpg/png/webp/gif/pdf，单个不超过 6MB）。材料将随本次问诊一并归档，供医师与后台快速核对。</p>
+          <div class="section-title">${level === "L9" ? "报告照片上传（必填）" : "病历 / 检验 / 报告上传（选填）"}</div>
+          <p class="attach-note">${level === "L9" ? "请拍照或扫一扫上传报告照片（可从相册选择，最多 2 张，单个不超过 6MB），AI 将对报告逐项解读；照片将随本次问诊一并归档。" : "支持上传病历卡、检验单、报告单、影像胶片或处方等（jpg/png/webp/gif/pdf，单个不超过 6MB）。材料将随本次问诊一并归档，供医师与后台快速核对。"}</p>
           <div id="consult-attach-picker"></div>
         </div>
+        ${requiredSection}
         ${sectionsHtml}
         <div class="form-actions">
           <button type="submit" class="btn btn-primary">提交 AI 问诊</button>
@@ -899,7 +905,7 @@ function tabbar() {
     (prefix === "#/" ? location.hash === "#/" || location.hash === "" : location.hash.startsWith(prefix)) ? " active" : "";
   return `
   <nav class="tabbar" aria-label="底部导航">
-    <a href="#/chat" class="tab-item${active("#/chat")}"><span class="tab-ico">💬</span><span>小气</span></a>
+    <a href="#/chat" class="tab-item${active("#/chat")}"><span class="tab-ico">💬</span><span>大气</span></a>
     <a href="#/monitor" class="tab-item${active("#/monitor")}"><span class="tab-ico">📈</span><span>监控</span></a>
     <a href="#/services" class="tab-item${active("#/services")}"><span class="tab-ico">🛒</span><span>服务</span></a>
     <a href="#/member" class="tab-item${active("#/member")}"><span class="tab-ico">👤</span><span>我的</span></a>
@@ -941,7 +947,7 @@ async function bindMonitorPage() {
   }
 }
 
-/* ===== AI 客服「小气」（移动端底部入口） ===== */
+/* ===== AI 客服「大气」（移动端底部入口） ===== */
 const CHAT_HISTORY_KEY = "xiaoqi_chat_history";
 
 function loadChatHistory() {
@@ -963,19 +969,19 @@ function saveChatHistory(list) {
 
 function chatBubble(m) {
   if (m.role === "user") return `<div class="chat-row me"><div class="chat-bubble">${esc(m.content)}</div></div>`;
-  return `<div class="chat-row bot"><div class="chat-avatar">小气</div><div class="chat-bubble">${esc(m.content)}</div></div>`;
+  return `<div class="chat-row bot"><div class="chat-avatar">大气</div><div class="chat-bubble">${esc(m.content)}</div></div>`;
 }
 
 function chatPageView() {
   const history = loadChatHistory();
-  const initMsg = { role: "assistant", content: "您好，我是大气AI医院的智能客服小气。可以帮您：解答平台使用与服务购买问题、根据您的症状推荐合适的就诊通道、引导您补充病史信息提升问诊准确率。请问有什么可以帮您？" };
+  const initMsg = { role: "assistant", content: "您好，我是大气AI医院的智能客服大气。可以帮您：解答平台使用与服务购买问题、根据您的症状推荐合适的就诊通道、引导您补充病史信息提升问诊准确率。请问有什么可以帮您？" };
   const list = history.length ? history : [initMsg];
   if (!history.length) saveChatHistory(list);
   return `
     ${header(false)}
     <div class="container page-narrow chat-page">
       <div class="chat-header">
-        <div class="chat-bot-badge">小气 · 大气AI医院客服</div>
+        <div class="chat-bot-badge">大气 · AI 健康助手</div>
         <button type="button" class="btn btn-ghost btn-sm" id="chat-clear">清空对话</button>
       </div>
       <div class="chat-box" id="chat-box">${list.map(chatBubble).join("")}</div>
@@ -1011,7 +1017,7 @@ function bindChatPage() {
     box.scrollTop = box.scrollHeight;
 
     const waitingId = "chat-waiting-" + Date.now();
-    box.insertAdjacentHTML("beforeend", `<div class="chat-row bot" id="${waitingId}"><div class="chat-avatar">小气</div><div class="chat-bubble chat-typing">正在输入…</div></div>`);
+    box.insertAdjacentHTML("beforeend", `<div class="chat-row bot" id="${waitingId}"><div class="chat-avatar">大气</div><div class="chat-bubble chat-typing">正在输入…</div></div>`);
     box.scrollTop = box.scrollHeight;
     sendBtn.disabled = true;
 
@@ -1135,6 +1141,57 @@ function markInvalid(missingLabels) {
   }
 }
 
+/* 语音输入（Web Speech API）：点击麦克风将识别文本追加到对应字段，安卓 Chrome / iOS Safari 可用 */
+function bindVoiceInputs() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  document.querySelectorAll(".mic-btn[data-mic]").forEach((btn) => {
+    if (!SR) return; /* 浏览器不支持则保持隐藏 */
+    btn.hidden = false;
+    const field = document.getElementById(`f-${btn.dataset.mic}`);
+    if (!field) return;
+    let rec = null;
+    btn.addEventListener("click", () => {
+      if (rec) {
+        rec.stop();
+        rec = null;
+        btn.classList.remove("listening");
+        return;
+      }
+      try {
+        rec = new SR();
+      } catch {
+        btn.hidden = true;
+        return;
+      }
+      rec.lang = "zh-CN";
+      rec.interimResults = false;
+      rec.continuous = false;
+      const startText = field.value ? field.value + " " : "";
+      rec.onresult = (e) => {
+        const text = Array.from(e.results)
+          .map((r) => r[0].transcript)
+          .join("")
+          .trim();
+        if (text) {
+          field.value = startText + text;
+          field.dispatchEvent(new Event("input", { bubbles: true }));
+          field.focus();
+        }
+      };
+      rec.onend = () => {
+        btn.classList.remove("listening");
+        rec = null;
+      };
+      rec.onerror = () => {
+        btn.classList.remove("listening");
+        rec = null;
+      };
+      btn.classList.add("listening");
+      rec.start();
+    });
+  });
+}
+
 function bindForm(level) {
   if (memberUI.hasMember()) {
     const { name, phone } = memberUI.memberNamePhone();
@@ -1147,6 +1204,7 @@ function bindForm(level) {
 
   const form = document.getElementById("consult-form");
   bindConsultPicker(level);
+  bindVoiceInputs();
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const data = collectForm(level);

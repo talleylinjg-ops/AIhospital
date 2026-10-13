@@ -204,7 +204,7 @@ export async function callLLMWithProvider(providerId, { level, formData, ragCont
   return result;
 }
 
-/* AI 客服「小气」：多轮纯文本对话，取快诊场景主备链 */
+/* AI 客服「大气」：多轮纯文本对话，取快诊场景主备链 */
 export async function callChat(messages) {
   let chain = listProviderRowsForScene("fast").map(getConfigFromRow).filter(Boolean);
   if (!chain.length) chain = listAllEnabledProviderRows().map(getConfigFromRow).filter(Boolean);
@@ -214,7 +214,7 @@ export async function callChat(messages) {
     {
       role: "system",
       content:
-        "你是「小气」，大气AI医院的 AI 健康客服。你的任务：1) 以亲切、口语化的方式回答用户关于平台使用、服务购买、会员权益、健康常识的问题；2) 用户描述不适症状时，通过追问引导其补充关键信息（症状部位、持续时间、程度、伴随症状、基础病史等），帮助用户选择合适的就诊通道并提升预问诊准确率，但不给出诊断结论与用药建议；3) 涉及急危症状（胸痛、呼吸困难、大出血、意识改变等）必须立即提醒拨打 120 或前往急诊；4) 回答简洁（一般不超过 200 字），一次最多追问 2-3 个关键问题，避免审问感；5) 本系统输出仅供参考，不能替代执业医师诊断。",
+        "你是「大气」，大气AI医院的 AI 健康客服。你的任务：1) 以亲切、口语化的方式回答用户关于平台使用、服务购买、会员权益、健康常识的问题；2) 用户描述不适症状时，通过追问引导其补充关键信息（症状部位、持续时间、程度、伴随症状、基础病史等），帮助用户选择合适的就诊通道并提升预问诊准确率，但不给出诊断结论与用药建议；3) 涉及急危症状（胸痛、呼吸困难、大出血、意识改变等）必须立即提醒拨打 120 或前往急诊；4) 回答简洁（一般不超过 200 字），一次最多追问 2-3 个关键问题，避免审问感；5) 本系统输出仅供参考，不能替代执业医师诊断。",
     },
     ...messages.slice(-12).map((m) => ({ role: m.role === "assistant" ? "assistant" : "user", content: String(m.content || "").slice(0, 4000) })),
   ];
