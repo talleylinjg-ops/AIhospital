@@ -85,7 +85,8 @@ export async function memberApi(path, { method = "GET", body } = {}) {
 export function headerChip() {
   const m = loadMember();
   if (!m) {
-    return `<a class="nav-services nav-auth" href="#/login">登录 / 注册</a>`;
+    /* 未登录：登录/注册上下两行小入口，为顶栏通道按钮让出横向空间 */
+    return `<div class="nav-auth-col"><a class="nav-services nav-auth" href="#/login">登录</a><a class="nav-services nav-auth" href="#/login">注册</a></div>`;
   }
   return `<a class="nav-services nav-member${location.hash.startsWith("#/member") ? " active" : ""}" href="#/member"><span class="member-dot"></span>会员中心</a>`;
 }
