@@ -62,8 +62,8 @@ function header(showLevels = true) {
     return `<button class="nav-level-btn${active}" data-nav-level="${key}" title="${esc(m.name)}" aria-pressed="${active ? "true" : "false"}" style="--lv-color:${m.color};--nav-color:${NAV_TEXT_COLOR[key] || m.color}"><span class="t-pc">${esc(text)}</span><span class="t-m">${esc(mText)}</span></button>`;
   };
   const entries = Object.entries(LEVEL_META);
-  /* PC 两行：L1-L4 / L5-L9；移动端由 CSS display:contents 合并为单行横向滚动 */
-  const levelButtons = `<div class="nav-level-row">${entries.slice(0, 4).map(renderLevelBtn).join("")}</div><div class="nav-level-row row-2">${entries.slice(4).map(renderLevelBtn).join("")}</div>`;
+  /* PC 与移动端均为单行：9 通道按钮一排（移动端横向滚动、短称），登录/会员入口固定右侧 */
+  const levelButtons = `<div class="nav-level-row">${entries.map(renderLevelBtn).join("")}</div>`;
   return `
   <header class="site-header">
     <div class="container header-inner">
@@ -77,7 +77,6 @@ function header(showLevels = true) {
       </div>
       ${showLevels ? `<nav class="nav-levels">${levelButtons}</nav>` : ""}
       <div class="header-actions">
-        <a class="nav-services${state.route === "services" ? " active" : ""}" href="#/services"${state.route === "services" ? ' aria-current="page"' : ""}>服务购买</a>
         ${memberUI.headerChip()}
       </div>
     </div>

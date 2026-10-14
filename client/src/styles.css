@@ -38,7 +38,7 @@ body {
 }
 .header-inner { display: flex; align-items: center; gap: 14px; }
 .header-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; flex: 0 0 auto; }
-.nav-levels { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; min-width: 0; }
+.nav-levels { display: flex; flex-direction: row; align-items: center; min-width: 0; flex: 1 1 auto; }
 .nav-level-row { display: flex; align-items: center; gap: 5px 6px; flex-wrap: wrap; justify-content: flex-start; }
 .nav-level-btn {
   border: 1px solid rgba(255,255,255,0.35); background: transparent; color: var(--nav-color, #fff);
