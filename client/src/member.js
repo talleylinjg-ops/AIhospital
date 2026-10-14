@@ -86,7 +86,7 @@ export function headerChip() {
   const m = loadMember();
   if (!m) {
     /* 登录/注册同一页面：上下两个小入口均指向 #/login，压缩占位让通道按钮排满单行 */
-    return `<div class="nav-auth-col"><a class="nav-services nav-auth" href="#/login">登录</a><a class="nav-services nav-auth" href="#/login">注册</a></div>`;
+    return `<div class="nav-auth-col"><a class="nav-services nav-auth" href="#/login">登录</a><a class="nav-services nav-auth" href="#/login?tab=register">注册</a></div>`;
   }
   return `<a class="nav-services nav-member${location.hash.startsWith("#/member") ? " active" : ""}" href="#/member"><span class="member-dot"></span>会员中心</a>`;
 }
@@ -134,6 +134,11 @@ export function bindLogin() {
   const nameEl = document.getElementById("a-name");
   const errEl = document.getElementById("a-error");
   let mode = "login";
+  /* 顶栏「注册」入口带 ?tab=register：进入页面直接落在注册表单 */
+  if (new URLSearchParams(location.hash.split("?")[1] || "").get("tab") === "register") {
+    const regTab = document.querySelector('.auth-tab[data-auth="register"]');
+    if (regTab) regTab.click();
+  }
   tabs.forEach((tab) =>
     tab.addEventListener("click", () => {
       mode = tab.dataset.auth;
