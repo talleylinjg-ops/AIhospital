@@ -75,8 +75,8 @@ function header(showLevels = true) {
           </picture>
         </a>
       </div>
-      <div class="header-right">
-        ${showLevels ? `<nav class="nav-levels">${levelButtons}</nav>` : ""}
+      ${showLevels ? `<nav class="nav-levels">${levelButtons}</nav>` : ""}
+      <div class="header-actions">
         <a class="nav-services${state.route === "services" ? " active" : ""}" href="#/services"${state.route === "services" ? ' aria-current="page"' : ""}>服务购买</a>
         ${memberUI.headerChip()}
       </div>

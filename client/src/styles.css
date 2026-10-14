@@ -36,10 +36,10 @@ body {
   color: #fff;
   padding: 14px 0;
 }
-.header-inner { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-.header-right { display: flex; align-items: center; gap: 8px; margin-left: auto; min-width: 0; flex: 1 1 auto; justify-content: flex-end; }
-.nav-levels { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; min-width: 0; }
-.nav-level-row { display: flex; align-items: center; gap: 5px 6px; flex-wrap: wrap; justify-content: flex-end; }
+.header-inner { display: flex; align-items: center; gap: 14px; }
+.header-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; flex: 0 0 auto; }
+.nav-levels { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; min-width: 0; }
+.nav-level-row { display: flex; align-items: center; gap: 5px 6px; flex-wrap: wrap; justify-content: flex-start; }
 .nav-level-btn {
   border: 1px solid rgba(255,255,255,0.35); background: transparent; color: var(--nav-color, #fff);
   padding: 5px 12px; border-radius: 999px; font-size: 13px; cursor: pointer; font-weight: 700;
@@ -51,8 +51,7 @@ body {
 @media (max-width: 900px) { .nav-services:not(.nav-member):not(.nav-auth) { display: none; } }
 @media (max-width: 720px) {
   .nav-level-btn { padding: 4px 9px; font-size: 12px; }
-  .header-right { gap: 5px; }
-  .brand-sub { display: none; }
+  .header-actions { gap: 5px; }
 }
 .brand { display: flex; align-items: center; gap: 12px; font-size: 22px; font-weight: 700; letter-spacing: 1px; flex: 0 0 auto; }
 .brand-link { display: flex; align-items: center; gap: 12px; color: #fff; text-decoration: none; }
@@ -477,12 +476,13 @@ body {
   /* tabbar 占位：页面主体不被遮挡 */
   body { padding-bottom: 62px; }
   .site-footer { padding-bottom: 14px; }
-  /* 移动端 header：LOGO（小图）+ 右侧 9 通道单行横向滚动 */
-  .header-inner { flex-wrap: wrap; row-gap: 6px; padding-top: 6px; }
-  .brand { flex: 0 0 auto; }
+  /* 移动端 header：第一行 LOGO 左 + 服务/会员右；第二行 9 通道单行横向滚动 */
+  .header-inner { flex-wrap: wrap; row-gap: 7px; padding-top: 8px; padding-bottom: 8px; }
+  .brand { order: 1; flex: 0 0 auto; }
   .brand-logo { height: 30px; }
-  .header-right { flex: 1 1 100%; }
+  .header-actions { order: 2; }
   .nav-levels {
+    order: 3; flex: 1 1 100%;
     display: flex; flex-direction: row; align-items: center;
     overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none;
     gap: 6px; padding-bottom: 2px;
@@ -596,7 +596,7 @@ body {
 .home-mode-strip span { color: var(--ink-2); line-height: 1.7; }
 
 /* ===== 品牌 LOGO（PC 大图 / 移动端由 picture source 切换小图） ===== */
-.brand-logo { height: 40px; width: auto; display: block; }
+.brand-logo { height: 44px; width: auto; display: block; }
 .brand-badge { display: none; }
 
 /* 导航双端短称：PC 显示全称，移动端显示短称（≤900px 规则见上） */
