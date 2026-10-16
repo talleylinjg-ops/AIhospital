@@ -43,9 +43,8 @@ function restoreLastResult() {
 
 const API = (window.__API_ORIGIN__ || "") + "/api";
 
-/* 头部导航按钮文字：PC 用全称/tag，移动端用 2 字短称 */
+/* 头部导航按钮文字：L1-L4 用全称，L5-L9 用通道 tag（PC 单行、移动端按钮内上下断行） */
 const NAV_SHORT = { L1: "轻微快诊", L2: "中等症状", L3: "危重症", L4: "日常保健" };
-const MOBILE_NAV_SHORT = { L1: "轻微", L2: "中等", L3: "危重症", L4: "保健", L5: "妇幼", L6: "中医", L7: "眼科", L8: "口腔", L9: "解读" };
 
 /* 导航未激活文字用通道色相（比 LEVEL_META.color 提亮一档，保证在深青 header 上可读）；激活态仍用原色 */
 const NAV_TEXT_COLOR = {
@@ -58,12 +57,11 @@ function header(showLevels = true) {
   const renderLevelBtn = ([key, m]) => {
     const active = state.level === key ? " active" : "";
     const text = NAV_SHORT[key] || m.tag;
-    const mText = MOBILE_NAV_SHORT[key] || m.tag;
-    return `<button class="nav-level-btn${active}" data-nav-level="${key}" title="${esc(m.name)}" aria-pressed="${active ? "true" : "false"}" style="--lv-color:${m.color};--nav-color:${NAV_TEXT_COLOR[key] || m.color}"><span class="t-pc">${esc(text)}</span><span class="t-m">${esc(mText)}</span></button>`;
+    return `<button class="nav-level-btn${active}" data-nav-level="${key}" title="${esc(m.name)}" aria-pressed="${active ? "true" : "false"}" style="--lv-color:${m.color};--nav-color:${NAV_TEXT_COLOR[key] || m.color}"><span class="lvl-t">${esc(text)}</span></button>`;
   };
   const entries = Object.entries(LEVEL_META);
-  /* PC 与移动端均为单行：9 通道按钮一排（移动端横向滚动、短称），登录/会员入口固定右侧 */
-  const levelButtons = `<div class="nav-level-row">${entries.map(renderLevelBtn).join("")}</div>`;
+  /* 单层结构：按钮直接排在 nav-levels 内（PC 可折行、移动端单行滚动，按钮内文字上下断行） */
+  const levelButtons = entries.map(renderLevelBtn).join("");
   return `
   <header class="site-header">
     <div class="container header-inner">
@@ -109,7 +107,7 @@ function homeView() {
     <div class="container">
       <div class="hero">
         <div class="hero-row">
-          <h1>AI 医院 · 智能预问诊</h1>
+          <h1>智能预问诊</h1>
           <div class="notice">急危重症请直接拨打 120，本系统不能替代急诊</div>
         </div>
       </div>
