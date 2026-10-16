@@ -108,9 +108,10 @@ function homeView() {
     ${header()}
     <div class="container">
       <div class="hero">
-        <h1>AI 医院 · 智能预问诊</h1>
-        <p>选择与您情况相符的就诊通道，AI 医生将基于完整病史为您分诊、鉴别与就医指引</p>
-        <div class="notice">急危重症请直接拨打 120，本系统不能替代急诊</div>
+        <div class="hero-row">
+          <h1>AI 医院 · 智能预问诊</h1>
+          <div class="notice">急危重症请直接拨打 120，本系统不能替代急诊</div>
+        </div>
       </div>
       <div class="level-grid">${cards}</div>
       <div class="services-entry">
