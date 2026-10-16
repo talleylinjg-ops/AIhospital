@@ -104,7 +104,10 @@ body {
   display: inline-block; align-self: flex-start; padding: 3px 12px; border-radius: 999px;
   font-size: 13px; font-weight: 700; color: #fff;
 }
-.level-title { font-size: 19px; font-weight: 700; }
+/* 卡片首行：通道 tag 与名称同行（tag 左、名称右） */
+.level-head { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+.level-head .level-tag { align-self: auto; }
+.level-title { font-size: 18px; font-weight: 700; }
 .level-sub { font-size: 13px; color: var(--ink-3); font-weight: 600; }
 .level-desc { font-size: 13px; color: var(--ink-2); flex: 1; }
 .level-required {
@@ -570,7 +573,13 @@ body {
 @media (max-width: 900px) {
   .chat-box { max-height: 62vh; }
   .hero { padding: 24px 0 4px; }
-  .hero h1 { font-size: 24px; }
+  /* 标题与急救提示强制同行：标题一行不折行，提示缩字号（超宽时省略号兜底） */
+  .hero-row { flex-wrap: nowrap; gap: 8px; }
+  .hero-row h1 { font-size: 19px; white-space: nowrap; }
+  .hero-row .notice {
+    font-size: 10px; padding: 4px 9px; white-space: nowrap;
+    flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis;
+  }
 }
 
 /* ===== 报告上传统一双入口 ===== */

@@ -93,8 +93,10 @@ function homeView() {
       const reqCount = getRequiredFields(key).length;
       return `
       <div class="level-card" data-level="${key}" role="button" tabindex="0" aria-label="${esc(m.name)}：${esc(m.subtitle)}">
-        <span class="level-tag" style="background:${m.color}">${esc(m.tag)}</span>
-        <div class="level-title">${esc(m.name)}</div>
+        <div class="level-head">
+          <span class="level-tag" style="background:${m.color}">${esc(m.tag)}</span>
+          <span class="level-title">${esc(m.name)}</span>
+        </div>
         <div class="level-sub">${esc(m.subtitle)}</div>
         <div class="level-desc">${esc(m.desc)}</div>
         <div class="level-required">必填项：<b>${reqCount}</b> 项 · 完整病史表单共 ${FIELDS.length} 项</div>
@@ -108,17 +110,10 @@ function homeView() {
       <div class="hero">
         <div class="hero-row">
           <h1>智能预问诊</h1>
-          <div class="notice">急危重症请直接拨打 120，本系统不能替代急诊</div>
+          <div class="notice">急危重症请拨打 120，本系统不能替代急诊</div>
         </div>
       </div>
       <div class="level-grid">${cards}</div>
-      <div class="services-entry">
-        <div>
-          <div class="services-entry-title">健康服务购买</div>
-          <div class="services-entry-sub">AI 慢病管理、复诊续方（合作持牌互联网医院）、就医绿通等服务，支持支付宝/微信在线支付，支付后即时开通</div>
-        </div>
-        <a class="btn btn-primary" href="#/services">进入服务购买</a>
-      </div>
       <div class="home-mode-strip">
         <div><b>AI 预问诊</b><span>9 大通道完整病史采集，输出分诊与就医指引</span></div>
         <div><b>复诊续方</b><span>合作持牌互联网医院医生复核 + 药师审方，慢病续方合规开药</span></div>
@@ -970,9 +965,6 @@ function chatPageView() {
   return `
     ${header()}
     <div class="container page-narrow chat-page">
-      <div class="chat-header">
-        <button type="button" class="btn btn-ghost btn-sm" id="chat-clear">清空对话</button>
-      </div>
       <div class="chat-box" id="chat-box">${list.map(chatBubble).join("")}</div>
       <form class="chat-input-row" id="chat-form">
         <input id="chat-input" placeholder="描述您的症状或想咨询的问题…" maxlength="2000" autocomplete="off" />
@@ -988,11 +980,6 @@ function bindChatPage() {
   const input = document.getElementById("chat-input");
   const sendBtn = document.getElementById("chat-send");
   box.scrollTop = box.scrollHeight;
-
-  document.getElementById("chat-clear").addEventListener("click", () => {
-    localStorage.removeItem(CHAT_HISTORY_KEY);
-    location.reload();
-  });
 
   document.getElementById("chat-form").addEventListener("submit", async (e) => {
     e.preventDefault();
