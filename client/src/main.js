@@ -87,10 +87,7 @@ function footer() {
   return `
   <footer class="site-footer">
     <div class="container">
-      <div class="strong">免责声明：本系统为 AI 辅助预问诊，所有输出仅供参考，不能替代执业医师的诊断与治疗。</div>
-      <div>互联网诊疗与处方服务由合作持牌互联网医院的备案执业医师提供，并经药师审方；依据监管规定，线上仅面向已在实体医院确诊的慢病复诊患者提供续方服务，首诊请前往实体医疗机构就诊。</div>
-      <div>药品及器械由合作医药供应链一件代发，处方药品类凭电子处方配送。</div>
-      <div>如出现胸痛、呼吸困难、意识改变、大出血等急危情况，请立即拨打 120 或前往急诊。</div>
+      <div class="foot-copy">© 2026 大气AI医院 · daqihospital.net</div>
     </div>
   </footer>`;
 }
@@ -980,7 +977,6 @@ function chatPageView() {
     ${header(false)}
     <div class="container page-narrow chat-page">
       <div class="chat-header">
-        <div class="chat-bot-badge">大气 · AI 健康助手</div>
         <button type="button" class="btn btn-ghost btn-sm" id="chat-clear">清空对话</button>
       </div>
       <div class="chat-box" id="chat-box">${list.map(chatBubble).join("")}</div>
