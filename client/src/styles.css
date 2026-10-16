@@ -236,7 +236,6 @@ body {
 
 .site-footer { text-align: center; padding: 24px 0 40px; color: var(--ink-3); font-size: 12px; }
 .site-footer .strong { color: var(--ink-2); }
-.foot-copy { letter-spacing: 0.3px; }
 
 /* ===== 服务购买（前台） ===== */
 .nav-services { color: #fff; text-decoration: none; font-size: 14px; font-weight: 600; padding: 5px 13px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.45); transition: background 0.15s; white-space: nowrap; flex: 0 0 auto; }
@@ -514,12 +513,8 @@ body {
 }
 .chat-row { display: flex; align-items: flex-end; gap: 8px; }
 .chat-row.me { justify-content: flex-end; }
-.chat-avatar {
-  width: 34px; height: 34px; border-radius: 50%; background: var(--primary, #0e7c86); color: #fff;
-  display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex: 0 0 auto;
-}
 .chat-bubble {
-  max-width: 78%; padding: 10px 14px; border-radius: 14px; font-size: 14px; line-height: 1.6;
+  max-width: 82%; padding: 10px 14px; border-radius: 14px; font-size: 14px; line-height: 1.6;
   background: #f3f4f6; color: var(--ink); white-space: pre-wrap; word-break: break-word;
 }
 .chat-row.me .chat-bubble { background: var(--primary, #0e7c86); color: #fff; border-bottom-right-radius: 4px; }

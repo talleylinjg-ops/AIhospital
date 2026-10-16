@@ -84,12 +84,7 @@ function header(showLevels = true) {
 }
 
 function footer() {
-  return `
-  <footer class="site-footer">
-    <div class="container">
-      <div class="foot-copy">© 2026 大气AI医院 · daqihospital.net</div>
-    </div>
-  </footer>`;
+  return "";
 }
 
 /* ===== Views ===== */
@@ -965,7 +960,7 @@ function saveChatHistory(list) {
 
 function chatBubble(m) {
   if (m.role === "user") return `<div class="chat-row me"><div class="chat-bubble">${esc(m.content)}</div></div>`;
-  return `<div class="chat-row bot"><div class="chat-avatar">大气</div><div class="chat-bubble">${esc(m.content)}</div></div>`;
+  return `<div class="chat-row bot"><div class="chat-bubble">${esc(m.content)}</div></div>`;
 }
 
 function chatPageView() {
@@ -974,7 +969,7 @@ function chatPageView() {
   const list = history.length ? history : [initMsg];
   if (!history.length) saveChatHistory(list);
   return `
-    ${header(false)}
+    ${header()}
     <div class="container page-narrow chat-page">
       <div class="chat-header">
         <button type="button" class="btn btn-ghost btn-sm" id="chat-clear">清空对话</button>
@@ -1012,7 +1007,7 @@ function bindChatPage() {
     box.scrollTop = box.scrollHeight;
 
     const waitingId = "chat-waiting-" + Date.now();
-    box.insertAdjacentHTML("beforeend", `<div class="chat-row bot" id="${waitingId}"><div class="chat-avatar">大气</div><div class="chat-bubble chat-typing">正在输入…</div></div>`);
+    box.insertAdjacentHTML("beforeend", `<div class="chat-row bot" id="${waitingId}"><div class="chat-bubble chat-typing">正在输入…</div></div>`);
     box.scrollTop = box.scrollHeight;
     sendBtn.disabled = true;
 
