@@ -48,7 +48,11 @@ body {
 .nav-level-btn:hover { background: rgba(255,255,255,0.16); }
 .nav-level-btn:focus-visible, .nav-services:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .nav-level-btn.active { background: #fff; color: var(--lv-color, var(--primary)); border-color: #fff; font-weight: 700; }
-@media (max-width: 900px) { .nav-services:not(.nav-member):not(.nav-auth) { display: none; } }
+@media (max-width: 900px) {
+  .nav-services:not(.nav-member):not(.nav-auth) { display: none; }
+  /* 移动端顶栏去掉登录/注册与会员入口，统一收纳到底部「我的」tab */
+  .header-actions { display: none; }
+}
 @media (max-width: 720px) {
   .nav-level-btn { padding: 3px 7px; font-size: 11.5px; }
   .header-actions { gap: 5px; }

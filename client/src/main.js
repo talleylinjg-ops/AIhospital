@@ -930,7 +930,7 @@ function monitorPageView() {
       ${
         logged
           ? `<div id="monitor-page-body"><div class="loading-inline">加载中…</div></div>`
-          : `<div class="error-box"><h3>请先登录</h3><p>登录后即可记录健康指标、查看趋势并管理家庭成员。</p><a class="btn btn-primary" href="#/login" style="margin-top:14px;display:inline-block">去登录 / 注册</a></div>`
+          : `<div class="error-box"><h3>请先登录</h3><p>登录后即可记录健康指标、查看趋势并管理家庭成员。</p><a class="btn btn-primary" href="#/member" style="margin-top:14px;display:inline-block">去登录 / 注册</a></div>`
       }
     </div>
     ${footer()}`;
@@ -1066,7 +1066,18 @@ function render() {
   } else if (hash.startsWith("#/member")) {
     const tab = memberUI.parseTab(hash);
     if (!memberUI.hasMember()) {
-      location.hash = "#/login";
+      /* 未登录：「我的」页内嵌登录/注册（移动端底部 tab 唯一入口），登录成功后原地进入会员中心 */
+      app.innerHTML = `
+        ${header(false)}
+        <div class="container page-narrow">
+          <div class="hero">
+            <h1>我的</h1>
+            <p>登录后可管理健康档案、家庭成员、健康监控与订单充值</p>
+          </div>
+          ${memberUI.loginView()}
+        </div>
+        ${footer()}`;
+      memberUI.bindLogin();
       return;
     }
     app.innerHTML = `${header()}<div class="container">${memberUI.memberShell()}</div>${footer()}`;

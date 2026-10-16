@@ -134,11 +134,6 @@ export function bindLogin() {
   const nameEl = document.getElementById("a-name");
   const errEl = document.getElementById("a-error");
   let mode = "login";
-  /* 顶栏「注册」入口带 ?tab=register：进入页面直接落在注册表单 */
-  if (new URLSearchParams(location.hash.split("?")[1] || "").get("tab") === "register") {
-    const regTab = document.querySelector('.auth-tab[data-auth="register"]');
-    if (regTab) regTab.click();
-  }
   tabs.forEach((tab) =>
     tab.addEventListener("click", () => {
       mode = tab.dataset.auth;
@@ -147,6 +142,11 @@ export function bindLogin() {
       bindAuthForm(mode);
     })
   );
+  /* 顶栏「注册」入口带 ?tab=register：进入页面直接落在注册表单（须在监听器绑定后触发） */
+  if (new URLSearchParams(location.hash.split("?")[1] || "").get("tab") === "register") {
+    const regTab = document.querySelector('.auth-tab[data-auth="register"]');
+    if (regTab) regTab.click();
+  }
   const submitEl = document.getElementById("a-submit");
   submitEl.addEventListener("click", async () => {
     if (submitEl.disabled) return;
@@ -164,7 +164,12 @@ export function bindLogin() {
           ? await memberApi("/register", { method: "POST", body: { phone, password, name: nameEl.value.trim() } })
           : await memberApi("/login", { method: "POST", body: { phone, password } });
       persistAuth({ token: data.token, member: data.member });
-      location.hash = "#/member";
+      /* 从「我的」页内嵌登录卡进入时 hash 未变，需手动触发重渲染进入会员中心 */
+      if (location.hash.startsWith("#/member")) {
+        window.dispatchEvent(new HashChangeEvent("hashchange"));
+      } else {
+        location.hash = "#/member";
+      }
     } catch (err) {
       errEl.textContent = netErrorText(err);
     } finally {
