@@ -899,7 +899,7 @@ function renderTabbar() {
 function monitorPageView() {
   const logged = memberUI.hasMember();
   return `
-    ${header(false)}
+    ${header()}
     <div class="container page-narrow">
       <div class="hero">
         <h1>健康监控</h1>
@@ -1037,7 +1037,7 @@ function render() {
     if (!memberUI.hasMember()) {
       /* 未登录：「我的」页内嵌登录/注册（移动端底部 tab 唯一入口），登录成功后原地进入会员中心 */
       app.innerHTML = `
-        ${header(false)}
+        ${header()}
         <div class="container page-narrow">
           <div class="hero">
             <h1>我的</h1>

@@ -75,12 +75,17 @@ body {
 }
 .hero h1 { font-size: 30px; font-weight: 800; color: var(--primary-dark); }
 .hero p { color: var(--ink-2); margin-top: 8px; font-size: 15px; }
-/* 标题与急救提示同行：PC 左右分布，窄屏自动换行堆叠 */
+/* 标题与急救提示强制同一行、行内高度垂直居中对齐 */
 .hero-row {
   display: flex; align-items: center; justify-content: space-between;
-  gap: 12px 16px; flex-wrap: wrap; text-align: left;
+  gap: 10px 16px; flex-wrap: nowrap; text-align: left;
 }
-.hero-row .notice { margin-top: 0; white-space: nowrap; }
+.hero-row h1 { margin: 0; line-height: 1.2; white-space: nowrap; }
+.hero-row .notice {
+  margin-top: 0; white-space: nowrap;
+  flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis;
+  display: flex; align-items: center;
+}
 .hero .notice {
   display: inline-block; margin-top: 14px; padding: 6px 14px;
   background: var(--danger-light); color: var(--danger);
