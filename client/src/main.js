@@ -467,23 +467,6 @@ function servicesView() {
     <div class="container">
       <div class="hero services-hero">
         <h1>服务购买</h1>
-        <p>浏览并选择所需的健康服务，可选择支付宝 / 微信在线支付，支付成功后即时开通；也可选择线下付款，客服会及时与您联系确认付款</p>
-        <div class="notice">在线支付以实际可用渠道为准；未登录用户选择在线支付时需填写下单手机号</div>
-      </div>
-      <div class="telemed-block">
-        <div class="telemed-card">
-          <b>互联网诊疗（复诊续方）</b>
-          <span>本平台的 AI 预问诊、健康档案与会员服务由大气 AI 医院提供；在线问诊、医生复核、电子处方与药师审方由<b>合作持牌互联网医院</b>的备案执业医师完成，处方归档与监管上报由合作方兜底。</span>
-          <span class="telemed-warn">合规提示：依据监管规定，线上仅面向已在实体医院确诊的慢病复诊患者提供续方服务；首次就诊请前往实体医疗机构，线上可先完成 AI 预问诊与健康咨询。</span>
-        </div>
-        <div class="telemed-card">
-          <b>医药商城（一件代发）</b>
-          <span>处方药、非处方药与人用器械由独立医药供应链一件代发直邮到家；处方药品类凭合作互联网医院开具的电子处方下单配送，全程可追溯。</span>
-        </div>
-        <div class="telemed-card">
-          <b>就医绿色通道（付费可选）</b>
-          <span>AI 线上评估提示重症或疑难情况时，可选购第三方就医服务平台提供的门诊绿通、专家预约、陪诊与代挂号服务，由持牌服务商承接，本平台提供渠道对接与订单跟进。</span>
-        </div>
       </div>
       <div class="services-grid" id="services-grid"><div class="loading-inline">加载中…</div></div>
     </div>
