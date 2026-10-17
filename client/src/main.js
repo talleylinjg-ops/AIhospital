@@ -114,11 +114,19 @@ function homeView() {
         </div>
       </div>
       <div class="level-grid">${cards}</div>
+      <div class="services-entry">
+        <div>
+          <div class="services-entry-title">健康服务购买</div>
+          <div class="services-entry-sub">AI 慢病管理、复诊续方（合作持牌互联网医院）、就医绿通等服务，支持支付宝/微信在线支付，支付后即时开通</div>
+        </div>
+        <a class="btn btn-primary" href="#/services">进入服务购买</a>
+      </div>
       <div class="home-mode-strip">
         <div><b>AI 预问诊</b><span>9 大通道完整病史采集，输出分诊与就医指引</span></div>
         <div><b>复诊续方</b><span>合作持牌互联网医院医生复核 + 药师审方，慢病续方合规开药</span></div>
         <div><b>医药商城</b><span>药品器械一件代发直邮，处方药凭电子处方配送</span></div>
       </div>
+      <div class="home-disclaimer">AI客服回复仅供参考，不能替代执业医师诊断。急危重症请立即拨打120。</div>
 
     </div>
     ${footer()}`;
@@ -407,9 +415,9 @@ function resultView() {
       ? `<div class="confidence">置信度：<b>${Math.round(r.confidence * 100)}%</b></div>`
       : "";
 
-  const channelTag = (LEVEL_META[state.level] && LEVEL_META[state.level].tag) || (r.route && r.route.scene_label) || "";
-  const routeTag = (channelTag || r.route?.fallback_used || r.route?.degraded)
-    ? `<div class="route-tag">${channelTag ? `<span class="badge-muted">${esc(channelTag)}通道</span>` : ""}${r.route?.fallback_used ? ` <span class="badge-muted">已自动切换备用模型</span>` : ""}${r.route?.degraded ? ` <span class="badge-warn">该通道未专属配置，已用可用模型兜底</span>` : ""}</div>`
+  /* 通道 tag 已在 result-head 展示，这里只保留模型路由异常提示，避免「门诊通道」类重复文案 */
+  const routeTag = (r.route?.fallback_used || r.route?.degraded)
+    ? `<div class="route-tag">${r.route?.fallback_used ? `<span class="badge-muted">已自动切换备用模型</span>` : ""}${r.route?.degraded ? ` <span class="badge-warn">该通道未专属配置，已用可用模型兜底</span>` : ""}</div>`
     : "";
 
   return `
@@ -954,7 +962,7 @@ function saveChatHistory(list) {
 
 function chatBubble(m) {
   if (m.role === "user") return `<div class="chat-row me"><div class="chat-bubble">${esc(m.content)}</div></div>`;
-  return `<div class="chat-row bot"><div class="chat-bubble">${esc(m.content)}</div></div>`;
+  return `<div class="chat-row bot"><div class="chat-bubble">${esc(m.content)}<span class="bubble-note">AI客服回复仅供参考，不能替代执业医师诊断。急危重症请立即拨打120。</span></div></div>`;
 }
 
 function chatPageView() {
