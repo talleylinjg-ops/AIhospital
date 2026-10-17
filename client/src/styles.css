@@ -75,16 +75,16 @@ body {
 }
 .hero h1 { font-size: 30px; font-weight: 800; color: var(--primary-dark); }
 .hero p { color: var(--ink-2); margin-top: 8px; font-size: 15px; }
-/* 标题与急救提示强制同一行、行内高度垂直居中对齐 */
+/* 标题与急救提示强制同一行：基线对齐让右侧小字与标题文字视觉齐平（center 会显得偏低） */
 .hero-row {
-  display: flex; align-items: center; justify-content: space-between;
+  display: flex; align-items: baseline; justify-content: space-between;
   gap: 10px 16px; flex-wrap: nowrap; text-align: left;
 }
 .hero-row h1 { margin: 0; line-height: 1.2; white-space: nowrap; }
 .hero-row .notice {
-  margin-top: 0; white-space: nowrap;
+  margin-top: 0; margin-bottom: 0; white-space: nowrap;
   flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis;
-  display: flex; align-items: center;
+  line-height: 1.4;
 }
 .hero .notice {
   display: inline-block; margin-top: 14px; padding: 6px 14px;
@@ -582,11 +582,12 @@ body {
 @media (max-width: 900px) {
   .chat-box { max-height: 62vh; }
   .hero { padding: 24px 0 4px; }
-  /* 标题与急救提示强制同行：标题一行不折行，提示缩字号（超宽时省略号兜底） */
-  .hero-row { flex-wrap: nowrap; gap: 8px; }
+  /* 标题与急救提示强制同行：标题一行不折行，提示缩字号（超宽时省略号兜底）；基线对齐补 1px 微调 */
+  .hero-row { flex-wrap: nowrap; gap: 8px; align-items: baseline; }
   .hero-row h1 { font-size: 19px; white-space: nowrap; }
   .hero-row .notice {
-    font-size: 10px; padding: 4px 9px; white-space: nowrap;
+    font-size: 10px; padding: 4px 9px; white-space: nowrap; line-height: 1.4;
+    position: relative; top: -1px;
     flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis;
   }
 }
