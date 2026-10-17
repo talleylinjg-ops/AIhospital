@@ -533,14 +533,10 @@ body {
 }
 .chat-input-row input:focus { border-color: var(--primary, #0e7c86); }
 .chat-disclaimer { margin: 10px 0 20px; font-size: 12px; color: #9ca3af; text-align: center; }
-/* 每条 AI 回复气泡尾部的固定提示 */
-.bubble-note {
-  display: block; margin-top: 7px; padding-top: 6px;
-  border-top: 1px dashed var(--border, #e5e7eb);
-  font-size: 11px; color: #9ca3af; white-space: normal;
-}
 /* 首页底部提示 */
 .home-disclaimer { margin: 26px 0 6px; font-size: 12px; color: #9ca3af; text-align: center; }
+/* 问诊结果页底部提示（9 通道报告通用） */
+.result-disclaimer { margin: 24px 0 10px; font-size: 12px; color: #9ca3af; text-align: center; }
 
 /* ===== 健康监控页 ===== */
 .page-narrow { max-width: 860px; }

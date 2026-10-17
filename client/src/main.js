@@ -455,6 +455,7 @@ function resultView() {
         <h3><span class="ico" style="background:var(--primary)">附</span>本记录附件（病历 / 检验 / 报告）</h3>
         <div id="record-docs-body"></div>
       </div>
+      <div class="result-disclaimer">AI客服回复仅供参考，不能替代执业医师诊断。急危重症请立即拨打120。</div>
     </div>
     ${footer()}`;
 }
@@ -962,7 +963,7 @@ function saveChatHistory(list) {
 
 function chatBubble(m) {
   if (m.role === "user") return `<div class="chat-row me"><div class="chat-bubble">${esc(m.content)}</div></div>`;
-  return `<div class="chat-row bot"><div class="chat-bubble">${esc(m.content)}<span class="bubble-note">AI客服回复仅供参考，不能替代执业医师诊断。急危重症请立即拨打120。</span></div></div>`;
+  return `<div class="chat-row bot"><div class="chat-bubble">${esc(m.content)}</div></div>`;
 }
 
 function chatPageView() {
