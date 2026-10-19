@@ -62,7 +62,7 @@ function header(showLevels = true) {
   const entries = Object.entries(LEVEL_META);
   /* 单层结构：按钮直接排在 nav-levels 内（PC 可折行、移动端单行滚动，按钮内文字上下断行） */
   /* 第 12 个 TAB「服务」为服务页入口，与问诊通道并列 */
-  const serviceBtn = `<button class="nav-level-btn nav-service-btn${state.route === "services" ? " active" : ""}" data-nav-services="1" title="服务购买" style="--lv-color:#f59e0b;--nav-color:#fbbf24"><span class="lvl-t">服务</span></button>`;
+  const serviceBtn = `<button class="nav-level-btn nav-service-btn${state.route === "services" ? " active" : ""}" data-nav-services="1" title="服务购买" style="--lv-color:#f59e0b;--nav-color:#fbbf24"><span class="lvl-t">服务购买</span></button>`;
   const levelButtons = entries.map(renderLevelBtn).join("") + serviceBtn;
   return `
   <header class="site-header">
