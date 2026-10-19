@@ -670,7 +670,7 @@ body {
 
 /* ===== 首页 PC 聊天框 / 移动端卡片开关 ===== */
 .m-only { display: none; }
-.home-chat { max-width: 860px; margin: 6px auto 18px; }
+.home-chat { max-width: 100%; margin: 6px 0 18px; }
 
 /* ===== 聊天输入行工具按钮 ===== */
 .chat-tool {
