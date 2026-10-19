@@ -182,35 +182,55 @@ export function initDb(env) {
   // JWT 密钥由 env 注入（auth.js 从 globalThis 读取）
   globalThis.JWT_SECRET = String(env.JWT_SECRET || "");
   initPromise = (async () => {
+    // 冷启动短路：初始化涉及 15+ 次 D1 往返，用 settings 标记跳过已完成的初始化，避免 D1 抖动时首请求超时
+    try {
+      const done = await db.prepare("SELECT value FROM settings WHERE key = 'init_done_v1'").first("value");
+      if (done === "1") return;
+    } catch {
+      /* settings 表可能尚未建立，走完整初始化 */
+    }
     // D1 exec 按行切分会截断多行语句，改为按分号拆分逐条执行
+    // 容错：schema 表在日常运行中已存在，batch 偶发超时不应让 isolate 永久 500
     const stmts = SCHEMA_SQL.split(";")
       .map((s) => s.trim())
       .filter(Boolean)
       .map((s) => db.prepare(s));
-    await db.batch(stmts);
-    const now = nowSh();
-    const adminCount = await db.prepare("SELECT COUNT(*) AS n FROM admin_users").first("n");
-    if (adminCount === 0) {
-      const username = String(env.ADMIN_USERNAME || "admin").trim() || "admin";
-      const password = env.ADMIN_PASSWORD || "admin123456";
-      await db
-        .prepare("INSERT INTO admin_users (username, password_hash, created_at) VALUES (?, ?, ?)")
-        .bind(username, await hashPassword(password), now)
-        .run();
+    try {
+      await db.batch(stmts);
+    } catch (err) {
+      console.error("initDb schema batch failed (non-fatal):", String(err?.message || err));
     }
-    for (const s of [...MEMBER_SEED.map((x) => ({ ...x, sort: 1 })), ...CHRONIC_SEED]) {
-      const hit = await db.prepare("SELECT 1 FROM services WHERE name = ?").bind(s.name).first();
-      if (!hit) {
+    try {
+      const now = nowSh();
+      const adminCount = await db.prepare("SELECT COUNT(*) AS n FROM admin_users").first("n");
+      if (adminCount === 0) {
+        const username = String(env.ADMIN_USERNAME || "admin").trim() || "admin";
+        const password = env.ADMIN_PASSWORD || "admin123456";
         await db
-          .prepare("INSERT INTO services (name, price, unit, description, active, sort_order) VALUES (?, ?, ?, ?, 1, ?)")
-          .bind(s.name, s.price, s.unit, s.description, s.sort ?? 1)
+          .prepare("INSERT INTO admin_users (username, password_hash, created_at) VALUES (?, ?, ?)")
+          .bind(username, await hashPassword(password), now)
           .run();
       }
+      for (const s of [...MEMBER_SEED.map((x) => ({ ...x, sort: 1 })), ...CHRONIC_SEED]) {
+        const hit = await db.prepare("SELECT 1 FROM services WHERE name = ?").bind(s.name).first();
+        if (!hit) {
+          await db
+            .prepare("INSERT INTO services (name, price, unit, description, active, sort_order) VALUES (?, ?, ?, ?, 1, ?)")
+            .bind(s.name, s.price, s.unit, s.description, s.sort ?? 1)
+            .run();
+        }
+      }
+      for (const n of DOC_SERVICE_NAMES) {
+        await db.prepare("UPDATE services SET needs_doc = 1 WHERE name = ?").bind(n).run();
+      }
+      await initLLMProviders(env, now);
+      await db
+        .prepare("INSERT INTO settings (key, value, updated_at) VALUES ('init_done_v1', '1', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at")
+        .bind(nowSh())
+        .run();
+    } catch (err) {
+      console.error("initDb seed failed (non-fatal):", String(err?.message || err));
     }
-    for (const n of DOC_SERVICE_NAMES) {
-      await db.prepare("UPDATE services SET needs_doc = 1 WHERE name = ?").bind(n).run();
-    }
-    await initLLMProviders(env, now);
   })();
   return initPromise;
 }

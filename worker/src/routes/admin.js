@@ -61,7 +61,7 @@ const safe = (fn) => async (c) => {
   }
 };
 
-router.post("/login", async (c) => {
+router.post("/login", safe(async (c) => {
   const { username, password } = await c.req.json().catch(() => ({}));
   if (!username || !password) return c.json({ error: "请输入账号和密码" }, 400);
   const user = await checkUserPassword(username, password);
@@ -72,7 +72,7 @@ router.post("/login", async (c) => {
     expiresIn: ADMIN_TTL_MS / 1000,
     username: user.username,
   });
-});
+}));
 
 router.get("/me", authAdmin, (c) => {
   const u = c.get("user");
