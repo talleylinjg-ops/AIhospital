@@ -824,7 +824,7 @@ export async function renderFamily(el) {
 }
 
 /* ===== 健康监控 ===== */
-const METRICS = [
+export const METRICS = [
   { id: "weight", label: "体重", unit: "kg", ph: "如 65.5" },
   { id: "body_fat", label: "体脂率", unit: "%", ph: "如 22.5" },
   { id: "blood_pressure", label: "血压", unit: "mmHg", ph: "如 120/80", text: true },

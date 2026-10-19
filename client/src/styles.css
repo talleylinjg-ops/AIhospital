@@ -496,12 +496,34 @@ body {
   /* tabbar 占位：页面主体不被遮挡 */
   body { padding-bottom: 62px; }
   .site-footer { padding-bottom: 14px; }
-  /* 移动端 header：单行 = LOGO + 9 通道横向滚动（登录/会员入口收纳于底部「我的」tab） */
-  .header-inner { flex-wrap: nowrap; row-gap: 7px; padding-top: 8px; padding-bottom: 8px; }
-  .brand { order: 0; flex: 0 0 auto; }
-  .brand-logo { height: 30px; }
+  /* 移动端 header：第一行 = 汉堡菜单 + 居中 LOGO（右侧入口隐藏占位对称），第二行 = 12 通道横向滚动 */
+  .header-inner { flex-wrap: wrap; row-gap: 7px; padding-top: 8px; padding-bottom: 8px; }
+  .hambtn {
+    display: inline-flex; flex-direction: column; justify-content: center; gap: 4px;
+    width: 36px; height: 36px; padding: 7px 8px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.45);
+    background: transparent; cursor: pointer; order: 0; flex: 0 0 auto;
+  }
+  .hambtn span { display: block; height: 2px; border-radius: 2px; background: #fff; transition: transform 0.2s, opacity 0.2s; }
+  .hambtn.open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+  .hambtn.open span:nth-child(2) { opacity: 0; }
+  .hambtn.open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+  .hambtn-menu {
+    display: flex; flex-direction: column; padding: 6px 14px 12px;
+    border-top: 1px solid rgba(255,255,255,0.18);
+  }
+  .hambtn-menu[hidden] { display: none; }
+  .hambtn-menu a {
+    display: flex; align-items: center; gap: 10px; color: #fff; text-decoration: none;
+    font-size: 14px; padding: 11px 4px; border-bottom: 1px solid rgba(255,255,255,0.12);
+  }
+  .hambtn-menu a:last-child { border-bottom: none; }
+  .hambtn-menu a b { font-size: 17px; }
+  .hambtn-menu a i { font-style: normal; font-size: 10px; color: #ffd166; border: 1px solid rgba(255,209,102,0.7); border-radius: 999px; padding: 0 6px; margin-left: auto; }
+  .brand { order: 1; flex: 1 1 auto; display: flex; justify-content: center; }
+  .brand-logo { height: 26px; }
+  .header-actions { order: 2; visibility: hidden; }
   .nav-levels {
-    order: 1; flex: 1 1 0; min-width: 0;
+    order: 3; flex: 1 1 100%; min-width: 0;
     flex-wrap: nowrap; justify-content: flex-start;
     overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none;
     gap: 6px; padding-bottom: 2px;
@@ -512,6 +534,13 @@ body {
     padding: 6px 10px; font-size: 13px; line-height: 1.3;
     white-space: normal; min-width: 62px; text-align: center;
   }
+  /* 首页：移动端显示通道卡片，隐藏 PC 聊天框 */
+  .home-chat { display: none; }
+  .m-only { display: grid; }
+  .afu-grid { grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .afu-metrics { grid-template-columns: repeat(2, 1fr); }
+  .chat-tool { width: 34px; height: 34px; font-size: 14px; }
+  .svc-tabs { position: sticky; top: 0; z-index: 5; background: var(--bg, #f5f7f8); padding: 6px 0; }
 }
 
 /* ===== 小气客服聊天 ===== */
@@ -628,6 +657,91 @@ body {
 /* ===== 品牌 LOGO（PC 大图 / 移动端由 picture source 切换小图） ===== */
 .brand-logo { height: 40px; width: auto; display: block; }
 .brand-badge { display: none; }
+
+/* ===== 移动端汉堡菜单（PC 隐藏） ===== */
+.hambtn { display: none; }
+.hambtn-menu { display: none; }
+
+/* ===== 首页 PC 聊天框 / 移动端卡片开关 ===== */
+.m-only { display: none; }
+.home-chat { max-width: 860px; margin: 6px auto 18px; }
+
+/* ===== 聊天输入行工具按钮 ===== */
+.chat-tool {
+  flex: 0 0 auto; width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--border, #e5e7eb);
+  background: #fff; cursor: pointer; font-size: 16px; line-height: 1; display: inline-flex; align-items: center; justify-content: center;
+  transition: background 0.15s;
+}
+.chat-tool:hover { background: #f3f4f6; }
+.chat-tool.listening { border-color: var(--danger, #ef4444); background: rgba(239, 68, 68, 0.08); animation: chatmic 1.1s ease-in-out infinite; }
+@keyframes chatmic { 0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.35); } 50% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); } }
+.chat-login-tip {
+  margin: 10px 0; padding: 9px 13px; border-radius: 10px; font-size: 12.5px;
+  background: var(--primary-light, #e6f4f5); color: #0a5f66; border: 1px solid #b7e2e5;
+}
+.chat-login-tip a { color: var(--primary); font-weight: 700; margin-left: 6px; }
+
+/* ===== 服务页分区 ===== */
+.svc-tabs { display: flex; gap: 8px; margin: 4px 0 18px; }
+.svc-tab {
+  flex: 1; padding: 10px 0; border-radius: 999px; border: 1px solid var(--border, #e5e7eb); background: #fff;
+  font-size: 14px; font-weight: 700; cursor: pointer; color: var(--ink-2, #4b5563); font-family: inherit;
+}
+.svc-tab.active { background: var(--primary, #0e7c86); color: #fff; border-color: var(--primary, #0e7c86); }
+.mall-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+.mall-card {
+  background: var(--card); border: 1px solid var(--border, #e5e7eb); border-radius: 14px; padding: 18px 16px;
+  display: flex; flex-direction: column; gap: 8px; align-items: flex-start;
+}
+.mall-card .mall-ico { font-size: 24px; line-height: 1; }
+.mall-card b { font-size: 15px; }
+.mall-card span { font-size: 12.5px; color: var(--ink-2, #4b5563); line-height: 1.55; }
+.mall-card .btn { margin-top: 4px; }
+.mall-note { margin: 16px 2px 0; font-size: 12.5px; color: var(--ink-3, #9ca3af); }
+
+/* ===== 健康大厅（阿福健康风格） ===== */
+.afu-hero {
+  background: linear-gradient(135deg, #0a5f66 0%, #0e7c86 60%, #22b8a0 100%);
+  border-radius: 18px; padding: 20px 18px; color: #fff; margin: 16px 0 14px;
+  box-shadow: 0 6px 22px rgba(14, 124, 134, 0.25);
+}
+.afu-greet { display: flex; flex-direction: column; gap: 4px; }
+.afu-greet b { font-size: 19px; font-weight: 800; }
+.afu-greet span { font-size: 12.5px; opacity: 0.92; }
+.afu-greet .btn-light { margin-top: 10px; align-self: flex-start; }
+.btn-light { background: #fff; color: var(--primary-dark, #0a5f66); border: none; }
+.afu-metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 14px; }
+.afu-metric {
+  background: rgba(255, 255, 255, 0.14); border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 12px;
+  padding: 10px 8px; display: flex; flex-direction: column; gap: 2px; min-width: 0;
+}
+.afu-metric .afu-mlabel { font-size: 11px; opacity: 0.9; }
+.afu-metric b { font-size: 16px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.afu-metric b i { font-style: normal; font-size: 10px; font-weight: 400; opacity: 0.85; margin-left: 2px; }
+.afu-metric .afu-mdate { font-size: 10px; opacity: 0.75; }
+.afu-metric.afu-empty { grid-column: 1 / -1; text-align: center; font-size: 12.5px; padding: 16px 8px; }
+.afu-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 4px 0 16px; }
+.afu-cell {
+  background: var(--card); border: 1px solid var(--border, #e5e7eb); border-radius: 14px; padding: 14px 6px 12px;
+  display: flex; flex-direction: column; align-items: center; gap: 6px; text-decoration: none; color: var(--ink, #1f2937);
+  position: relative; transition: transform 0.15s, box-shadow 0.15s;
+}
+.afu-cell:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(15, 42, 58, 0.1); }
+.afu-cell .afu-ico { font-size: 24px; line-height: 1.2; }
+.afu-cell .afu-label { font-size: 12.5px; font-weight: 600; }
+.afu-cell .afu-soon {
+  position: absolute; top: 6px; right: 6px; font-style: normal; font-size: 9px; color: #fff;
+  background: #f59e0b; border-radius: 999px; padding: 1px 6px;
+}
+.afu-recent { background: var(--card); border: 1px solid var(--border, #e5e7eb); border-radius: 14px; padding: 14px 16px; margin-bottom: 26px; }
+.afu-recent h3 { margin: 0 0 10px; font-size: 15px; }
+.afu-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.afu-list li { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px dashed var(--border, #e5e7eb); font-size: 13.5px; }
+.afu-list li:last-child { border-bottom: none; }
+.afu-list li b { flex: 0 0 62px; font-size: 13px; }
+.afu-list li span { flex: 1; color: var(--ink-2, #4b5563); }
+.afu-list li time { color: var(--ink-3, #9ca3af); font-size: 12px; }
+.afu-more { display: block; margin-top: 10px; font-size: 13px; color: var(--primary, #0e7c86); text-decoration: none; font-weight: 600; }
 
 /* ===== 表单：必填信息置顶区 ===== */
 .section-required {

@@ -61,10 +61,13 @@ function header(showLevels = true) {
   };
   const entries = Object.entries(LEVEL_META);
   /* 单层结构：按钮直接排在 nav-levels 内（PC 可折行、移动端单行滚动，按钮内文字上下断行） */
-  const levelButtons = entries.map(renderLevelBtn).join("");
+  /* 第 12 个 TAB「服务」为服务页入口，与问诊通道并列 */
+  const serviceBtn = `<button class="nav-level-btn nav-service-btn${state.route === "services" ? " active" : ""}" data-nav-services="1" title="服务购买" style="--lv-color:#f59e0b;--nav-color:#fbbf24"><span class="lvl-t">服务</span></button>`;
+  const levelButtons = entries.map(renderLevelBtn).join("") + serviceBtn;
   return `
   <header class="site-header">
     <div class="container header-inner">
+      <button type="button" class="hambtn" aria-label="打开菜单" aria-expanded="false"><span></span><span></span><span></span></button>
       <div class="brand">
         <a href="#/" class="brand-link" aria-label="大气AI医院首页">
           <picture>
@@ -78,6 +81,16 @@ function header(showLevels = true) {
         ${memberUI.headerChip()}
       </div>
     </div>
+    <nav class="hambtn-menu" hidden aria-label="快捷入口">
+      <a href="#/chat"><b>💬</b>大气客服</a>
+      <a href="#/member/records"><b>📋</b>问诊记录</a>
+      <a href="#/member/monitor"><b>📈</b>健康监控</a>
+      <a href="#/member/family"><b>👨‍👩‍👧</b>家庭成员</a>
+      <a href="#/member/orders"><b>🧾</b>订单与充值</a>
+      <a href="#/member"><b>👤</b>会员中心</a>
+      <a href="#/monitor"><b>🏥</b>健康服务大厅</a>
+      <a href="#/" data-community><b>👥</b>健康群聊<i>即将上线</i></a>
+    </nav>
   </header>`;
 }
 
@@ -113,7 +126,23 @@ function homeView() {
           <div class="notice">急危重症请拨打 120，本系统不能替代急诊</div>
         </div>
       </div>
-      <div class="level-grid">${cards}</div>
+      <!-- PC 正文：AI 客服聊天框（与「大气」客服页共用历史与接口） -->
+      <div class="home-chat">
+        <div class="chat-login-tip">${memberUI.hasMember() ? "已登录，聊天记录云端同步" : `未登录，登录后可使用语音、拍照与文件 <a href="#/member">去登录</a>`}</div>
+        <div class="chat-box" id="home-chat-box">${loadChatHistory().map(chatBubble).join("")}</div>
+        <form class="chat-input-row" id="home-chat-form">
+          <button type="button" class="chat-tool" data-tool="mic" title="语音输入" aria-label="语音输入">🎤</button>
+          <button type="button" class="chat-tool" data-tool="photo" title="拍照" aria-label="拍照">📷</button>
+          <button type="button" class="chat-tool" data-tool="file" title="文件" aria-label="文件">＋</button>
+          <input type="file" data-chatcam accept="image/*" capture="environment" hidden />
+          <input type="file" data-chatfile hidden />
+          <input id="home-chat-input" placeholder="向大气描述您的症状或问题…" maxlength="2000" autocomplete="off" />
+          <button type="submit" class="btn btn-primary" id="home-chat-send">发送</button>
+        </form>
+        <div class="chat-disclaimer">AI 客服回复仅供参考，不能替代执业医师诊断。急危重症请立即拨打 120。</div>
+      </div>
+      <!-- 移动端正文：就诊通道卡片 -->
+      <div class="level-grid m-only">${cards}</div>
       <div class="services-entry">
         <div>
           <div class="services-entry-title">健康服务购买</div>
@@ -468,7 +497,72 @@ function servicesView() {
       <div class="hero services-hero">
         <h1>服务购买</h1>
       </div>
-      <div class="services-grid" id="services-grid"><div class="loading-inline">加载中…</div></div>
+      <div class="svc-tabs" role="tablist">
+        <button class="svc-tab active" data-svctab="sub" role="tab" aria-selected="true">订阅服务</button>
+        <button class="svc-tab" data-svctab="mall" role="tab" aria-selected="false">医药商城</button>
+        <button class="svc-tab" data-svctab="device" role="tab" aria-selected="false">器械与耗材</button>
+      </div>
+      <section class="svc-panel" data-svcpanel="sub">
+        <div class="services-grid" id="services-grid"><div class="loading-inline">加载中…</div></div>
+      </section>
+      <section class="svc-panel" data-svcpanel="mall" hidden>
+        <div class="mall-grid">
+          <div class="mall-card">
+            <span class="mall-ico">℞</span>
+            <b>处方药</b>
+            <span>凭合作互联网医院电子处方购买，药师审方后一件代发直邮</span>
+            <a class="btn btn-ghost btn-sm" href="#/chat">咨询客服下单</a>
+          </div>
+          <div class="mall-card">
+            <span class="mall-ico">🧴</span>
+            <b>非处方药 OTC</b>
+            <span>感冒、肠胃、皮肤等常见非处方药品类，无需处方直接购买</span>
+            <a class="btn btn-ghost btn-sm" href="#/chat">咨询客服下单</a>
+          </div>
+          <div class="mall-card">
+            <span class="mall-ico">🏠</span>
+            <b>居家常备药</b>
+            <span>退热、止咳、外伤护理等家庭常备用药组合，一键配齐</span>
+            <a class="btn btn-ghost btn-sm" href="#/chat">咨询客服下单</a>
+          </div>
+          <div class="mall-card">
+            <span class="mall-ico">✈️</span>
+            <b>跨境药</b>
+            <span>海外原研药与特色品种，合规渠道清关，全程物流可查</span>
+            <a class="btn btn-ghost btn-sm" href="#/chat">咨询客服下单</a>
+          </div>
+        </div>
+        <p class="mall-note">商品库陆续上架中，可先通过客服代下单：说明药品与规格，客服确认价格与时效后安排发货。</p>
+      </section>
+      <section class="svc-panel" data-svcpanel="device" hidden>
+        <div class="mall-grid">
+          <div class="mall-card">
+            <span class="mall-ico">🩺</span>
+            <b>监测设备</b>
+            <span>血压计、血糖仪、血氧仪、体温计等家用监测器械</span>
+            <a class="btn btn-ghost btn-sm" href="#/chat">咨询客服下单</a>
+          </div>
+          <div class="mall-card">
+            <span class="mall-ico">🩹</span>
+            <b>护理耗材</b>
+            <span>敷料、纱布、口罩、消毒用品等居家护理耗材</span>
+            <a class="btn btn-ghost btn-sm" href="#/chat">咨询客服下单</a>
+          </div>
+          <div class="mall-card">
+            <span class="mall-ico">♿</span>
+            <b>康复辅具</b>
+            <span>轮椅、拐杖、护具等康复辅助器具租赁与购买</span>
+            <a class="btn btn-ghost btn-sm" href="#/chat">咨询客服下单</a>
+          </div>
+          <div class="mall-card">
+            <span class="mall-ico">👶</span>
+            <b>母婴器械</b>
+            <span>吸奶器、温奶器、婴儿体温计等母婴用品</span>
+            <a class="btn btn-ghost btn-sm" href="#/chat">咨询客服下单</a>
+          </div>
+        </div>
+        <p class="mall-note">器械与耗材由合作供应链一件代发，品类陆续上架；可通过客服代下单。</p>
+      </section>
     </div>
     <div class="modal-mask" id="buy-mask" hidden>
       <div class="modal-box" role="dialog" aria-modal="true">
@@ -483,6 +577,19 @@ function servicesView() {
 }
 
 async function bindServices() {
+  /* 分区 tab 切换：订阅服务 / 医药商城 / 器械与耗材 */
+  document.querySelectorAll(".svc-tab").forEach((tab) =>
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".svc-tab").forEach((t) => {
+        const on = t === tab;
+        t.classList.toggle("active", on);
+        t.setAttribute("aria-selected", String(on));
+      });
+      document.querySelectorAll(".svc-panel").forEach((p) => {
+        p.hidden = p.dataset.svcpanel !== tab.dataset.svctab;
+      });
+    })
+  );
   const grid = document.getElementById("services-grid");
   try {
     const res = await fetch(`${API}/services`);
@@ -898,29 +1005,94 @@ function renderTabbar() {
 /* ===== 健康监控页（移动端底部「监控」入口） ===== */
 function monitorPageView() {
   const logged = memberUI.hasMember();
+  const m = logged ? memberUI.loadMember() : null;
+  /* 阿福健康风格：问候卡 + 健康数据 + 服务宫格 + 最近记录 */
+  const cells = [
+    ["📈", "健康监控", "#/member/monitor"],
+    ["👨‍👩‍👧", "家庭成员", "#/member/family"],
+    ["📋", "问诊记录", "#/member/records"],
+    ["🖼️", "报告解读", "#/form/L9"],
+    ["🦷", "口腔", "#/form/L8"],
+    ["🧠", "心理咨询", "#/form/L11"],
+    ["✨", "医疗美容", "#/form/L10"],
+    ["💊", "用药提醒", "#", "soon"],
+  ];
   return `
     ${header()}
     <div class="container page-narrow">
-      <div class="hero">
-        <h1>健康监控</h1>
-        <p>体重 · 血压 · 血糖 · 心率 · 睡眠 · 经期 · 饮食，记录与追踪您的健康指标</p>
+      <div class="afu-hero">
+        <div class="afu-greet">
+          <b>${logged ? `您好，${esc(memberUI.displayName(m))}` : "您好，欢迎来到大气健康"}</b>
+          <span>${new Date().toLocaleDateString("zh-CN", { month: "long", day: "numeric", weekday: "long" })} · 关注健康，从记录开始</span>
+          ${logged ? "" : `<a class="btn btn-light" href="#/member">登录 / 注册</a>`}
+        </div>
+        ${logged ? `<div class="afu-metrics" id="afu-metrics"><div class="loading-inline">加载中…</div></div>` : ""}
+      </div>
+      <div class="afu-grid">
+        ${cells
+          .map(
+            ([ico, label, href, soon]) =>
+              `<a class="afu-cell" href="${href}"${soon ? ' data-soon="1"' : ""}><span class="afu-ico">${ico}</span><span class="afu-label">${label}</span>${soon ? '<i class="afu-soon">即将上线</i>' : ""}</a>`
+          )
+          .join("")}
       </div>
       ${
         logged
-          ? `<div id="monitor-page-body"><div class="loading-inline">加载中…</div></div>`
-          : `<div class="error-box"><h3>请先登录</h3><p>登录后即可记录健康指标、查看趋势并管理家庭成员。</p><a class="btn btn-primary" href="#/member" style="margin-top:14px;display:inline-block">去登录 / 注册</a></div>`
+          ? `<div class="afu-recent">
+              <h3>最近记录</h3>
+              <div id="afu-list"><div class="loading-inline">加载中…</div></div>
+              <a class="afu-more" href="#/member/monitor">查看全部与录入 →</a>
+            </div>`
+          : `<div class="error-box"><h3>登录后开启健康管理</h3><p>记录体重、血压、血糖、心率、睡眠等指标，查看趋势并管理家庭成员。</p><a class="btn btn-primary" href="#/member" style="margin-top:14px;display:inline-block">去登录 / 注册</a></div>`
       }
     </div>
     ${footer()}`;
 }
 
 async function bindMonitorPage() {
+  document.querySelectorAll(".afu-cell[data-soon]").forEach((c) =>
+    c.addEventListener("click", (e) => {
+      e.preventDefault();
+      alert("用药提醒即将上线，敬请期待");
+    })
+  );
   if (!memberUI.hasMember()) return;
-  const body = document.getElementById("monitor-page-body");
   try {
-    await memberUI.renderMonitor(body);
+    const { items } = await memberUI.memberApi("/monitor");
+    const records = items || [];
+    /* 指标摘要卡：每个指标取最新一条，优先常见项 */
+    const prefer = ["weight", "blood_pressure", "blood_sugar", "heart_rate", "steps", "sleep"];
+    const byMetric = new Map();
+    const valOf = (r) => r.value_text || (r.value_num !== null && r.value_num !== undefined ? String(r.value_num) : "-");
+    for (const r of records) if (!byMetric.has(r.metric)) byMetric.set(r.metric, r);
+    const picked = prefer.filter((k) => byMetric.has(k)).slice(0, 4);
+    const box = document.getElementById("afu-metrics");
+    if (box) {
+      box.innerHTML = picked.length
+        ? picked
+            .map((k) => {
+              const r = byMetric.get(k);
+              const meta = memberUI.METRICS.find((x) => x.id === k) || { label: r.metric, unit: r.unit };
+              return `<div class="afu-metric"><span class="afu-mlabel">${esc(meta.label)}</span><b>${esc(valOf(r))}<i>${esc(r.unit || meta.unit || "")}</i></b><span class="afu-mdate">${esc((r.recorded_at || "").slice(0, 10))}</span></div>`;
+            })
+            .join("")
+        : `<div class="afu-metric afu-empty">暂无健康数据，点击「健康监控」开始记录</div>`;
+    }
+    const list = document.getElementById("afu-list");
+    if (list) {
+      list.innerHTML = records.length
+        ? `<ul class="afu-list">${records
+            .slice(0, 5)
+            .map((r) => {
+              const meta = memberUI.METRICS.find((x) => x.id === r.metric) || { label: r.metric, unit: r.unit };
+              return `<li><b>${esc(meta.label)}</b><span>${esc(valOf(r))} ${esc(r.unit || meta.unit || "")}</span><time>${esc((r.recorded_at || "").slice(0, 10))}</time></li>`;
+            })
+            .join("")}</ul>`
+        : `<div class="loading-inline">还没有记录，点击「健康监控」录入第一条数据</div>`;
+    }
   } catch (err) {
-    body.innerHTML = `<div class="error-box"><h3>加载失败</h3><p>${esc(netErrorText(err))}</p></div>`;
+    const box = document.getElementById("afu-metrics");
+    if (box) box.innerHTML = `<div class="loading-inline">${esc(netErrorText(err))}</div>`;
   }
 }
 
@@ -957,8 +1129,18 @@ function chatPageView() {
   return `
     ${header()}
     <div class="container page-narrow chat-page">
+      ${
+        memberUI.hasMember()
+          ? ""
+          : `<div class="chat-login-tip">登录后可使用语音、拍照、文件与云端聊天记录 <a href="#/member">去登录</a></div>`
+      }
       <div class="chat-box" id="chat-box">${list.map(chatBubble).join("")}</div>
       <form class="chat-input-row" id="chat-form">
+        <button type="button" class="chat-tool" data-tool="mic" title="语音输入" aria-label="语音输入">🎤</button>
+        <button type="button" class="chat-tool" data-tool="photo" title="拍照" aria-label="拍照">📷</button>
+        <button type="button" class="chat-tool" data-tool="file" title="文件" aria-label="文件">＋</button>
+        <input type="file" data-chatcam accept="image/*" capture="environment" hidden />
+        <input type="file" data-chatfile hidden />
         <input id="chat-input" placeholder="描述您的症状或想咨询的问题…" maxlength="2000" autocomplete="off" />
         <button type="submit" class="btn btn-primary" id="chat-send">发送</button>
       </form>
@@ -967,21 +1149,19 @@ function chatPageView() {
     ${footer()}`;
 }
 
-function bindChatPage() {
-  const box = document.getElementById("chat-box");
-  const input = document.getElementById("chat-input");
-  const sendBtn = document.getElementById("chat-send");
+function bindChatArea(formId, inputId, sendId, boxId) {
+  const box = document.getElementById(boxId);
+  const input = document.getElementById(inputId);
+  const sendBtn = document.getElementById(sendId);
+  const form = document.getElementById(formId);
+  if (!box || !input || !sendBtn || !form) return;
   box.scrollTop = box.scrollHeight;
 
-  document.getElementById("chat-form").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const text = input.value.trim();
-    if (!text || sendBtn.disabled) return;
+  const sendText = async (text) => {
     const history = loadChatHistory();
     history.push({ role: "user", content: text });
     saveChatHistory(history);
     box.insertAdjacentHTML("beforeend", chatBubble({ role: "user", content: text }));
-    input.value = "";
     box.scrollTop = box.scrollHeight;
 
     const waitingId = "chat-waiting-" + Date.now();
@@ -1012,7 +1192,91 @@ function bindChatPage() {
       sendBtn.disabled = false;
       input.focus();
     }
+  };
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const text = input.value.trim();
+    if (!text || sendBtn.disabled) return;
+    input.value = "";
+    await sendText(text);
   });
+
+  /* ===== 输入行工具：语音 / 拍照 / 文件 ===== */
+  /* 语音：Web Speech 识别结果追加进输入框 */
+  const micBtn = form.querySelector('[data-tool="mic"]');
+  if (micBtn) {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) {
+      micBtn.hidden = true;
+    } else {
+      let rec = null;
+      micBtn.addEventListener("click", () => {
+        if (rec) {
+          rec.stop();
+          rec = null;
+          micBtn.classList.remove("listening");
+          return;
+        }
+        rec = new SR();
+        rec.lang = "zh-CN";
+        rec.interimResults = false;
+        rec.onresult = (ev) => {
+          const t = Array.from(ev.results).map((r) => r[0].transcript).join("");
+          input.value = (input.value ? input.value + " " : "") + t.trim();
+        };
+        rec.onend = () => {
+          rec = null;
+          micBtn.classList.remove("listening");
+        };
+        rec.onerror = () => {
+          rec = null;
+          micBtn.classList.remove("listening");
+        };
+        micBtn.classList.add("listening");
+        try {
+          rec.start();
+        } catch {
+          micBtn.classList.remove("listening");
+        }
+      });
+    }
+  }
+
+  /* 拍照/文件：未登录引导到「我的」登录；登录后以附件说明消息发出，并引导走报告解读通道 */
+  const needLogin = () => {
+    box.insertAdjacentHTML("beforeend", `<div class="chat-row bot"><div class="chat-bubble">发送图片与文件需要先登录会员。请点击底部「我的」完成登录后再试。</div></div>`);
+    box.scrollTop = box.scrollHeight;
+    setTimeout(() => (location.hash = "#/member"), 900);
+  };
+  const pickAndSend = (label, fileName) => {
+    const text = `${label}${fileName ? `（${fileName}）` : ""} 请协助查看，如需详细解读请使用「解读」通道上传。`;
+    sendText(text);
+  };
+  const camInput = form.querySelector("[data-chatcam]");
+  const fileInput = form.querySelector("[data-chatfile]");
+  form.querySelector('[data-tool="photo"]')?.addEventListener("click", () => {
+    if (!memberUI.hasMember()) return needLogin();
+    camInput?.click();
+  });
+  form.querySelector('[data-tool="file"]')?.addEventListener("click", () => {
+    if (!memberUI.hasMember()) return needLogin();
+    fileInput?.click();
+  });
+  camInput?.addEventListener("change", () => {
+    const f = camInput.files && camInput.files[0];
+    if (f) pickAndSend("[图片]", f.name || "拍照图片");
+    camInput.value = "";
+  });
+  fileInput?.addEventListener("change", () => {
+    const f = fileInput.files && fileInput.files[0];
+    if (f) pickAndSend("[文件]", f.name);
+    fileInput.value = "";
+  });
+}
+
+function bindChatPage() {
+  bindChatArea("chat-form", "chat-input", "chat-send", "chat-box");
 }
 
 /* ===== Router ===== */
@@ -1046,7 +1310,10 @@ function render() {
           ${memberUI.loginView()}
         </div>
         ${footer()}`;
+      bindHeader();
       memberUI.bindLogin();
+      renderTabbar();
+      window.scrollTo(0, 0);
       return;
     }
     app.innerHTML = `${header()}<div class="container">${memberUI.memberShell()}</div>${footer()}`;
@@ -1078,6 +1345,34 @@ function bindHeader() {
       location.hash = `#/form/${state.level}`;
     });
   });
+  const svcBtn = document.querySelector("[data-nav-services]");
+  if (svcBtn) svcBtn.addEventListener("click", () => (location.hash = "#/services"));
+  /* 移动端汉堡菜单开合 */
+  const hambtn = document.querySelector(".hambtn");
+  const hamMenu = document.querySelector(".hambtn-menu");
+  if (hambtn && hamMenu) {
+    hambtn.addEventListener("click", () => {
+      const open = hamMenu.hidden;
+      hamMenu.hidden = !open;
+      hambtn.classList.toggle("open", open);
+      hambtn.setAttribute("aria-expanded", String(open));
+    });
+    hamMenu.querySelectorAll("a").forEach((a) =>
+      a.addEventListener("click", () => {
+        hamMenu.hidden = true;
+        hambtn.classList.remove("open");
+        if (a.hasAttribute("data-community")) {
+          setTimeout(() => alert("健康群聊即将上线，敬请期待"), 60);
+        }
+      })
+    );
+  }
+  document.addEventListener("click", (e) => {
+    if (hamMenu && !hamMenu.hidden && !e.target.closest(".hambtn") && !e.target.closest(".hambtn-menu")) {
+      hamMenu.hidden = true;
+      hambtn?.classList.remove("open");
+    }
+  });
 }
 
 function bindHome() {
@@ -1094,6 +1389,8 @@ function bindHome() {
       }
     });
   });
+  /* 首页聊天框与客服页共用逻辑 */
+  bindChatArea("home-chat-form", "home-chat-input", "home-chat-send", "home-chat-box");
 }
 
 function collectForm(level) {

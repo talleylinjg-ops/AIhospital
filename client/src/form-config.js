@@ -67,6 +67,20 @@ export const LEVEL_META = {
     subtitle: "检验报告 · 体检报告 · 影像报告",
     desc: "适合各类检验报告、体检报告、影像报告的解读：上传报告照片（手机端支持拍照/扫一扫），AI 逐项解读指标、标注异常并给出复查与就医建议。",
   },
+  L10: {
+    name: "医疗美容",
+    tag: "美容",
+    color: "#db2777",
+    subtitle: "皮肤美容 · 微整形 · 医美项目咨询",
+    desc: "适合皮肤管理、注射填充、光电项目、手术整形等医美需求：AI 评估诉求与禁忌，给出项目建议、机构选择要点与风险提示。",
+  },
+  L11: {
+    name: "心理咨询",
+    tag: "心理",
+    color: "#7c3aed",
+    subtitle: "情绪困扰 · 睡眠问题 · 压力疏导",
+    desc: "适合情绪低落、焦虑失眠、职场压力、家庭关系等心理困扰：AI 倾听疏导、初步评估状态，必要时建议寻求专业心理援助。",
+  },
 };
 
 export const SECTIONS = [
@@ -150,6 +164,9 @@ const EXTRA_REQUIRED = {
   L8: new Set(["gender", "age", "is_emergency", "chief_complaint", "symptom_onset", "symptom_severity"]),
   /* L9 报告解读：基础信息 + 关注问题 + 近期检查异常（报告内容主体靠拍照上传） */
   L9: new Set(["gender", "age", "chief_complaint", "prior_exams"]),
+  /* L10 医美 / L11 心理：基础信息 + 主诉求（细节靠选填字段补充） */
+  L10: new Set(["gender", "age", "chief_complaint"]),
+  L11: new Set(["gender", "age", "chief_complaint", "symptom_onset"]),
 };
 
 export function getRequiredFields(level) {
