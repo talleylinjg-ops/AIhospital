@@ -270,6 +270,13 @@ function formView(level) {
     location.hash = "#/";
     return;
   }
+  /* 字段级默认值（按通道覆盖，如美容 L10 性别默认女）：为空时写入 formData 使 select 预选且提交生效 */
+  for (const f of FIELDS) {
+    const dv = f.defaultBy && f.defaultBy[level];
+    if (dv && (state.formData[f.id] === undefined || state.formData[f.id] === null || state.formData[f.id] === "")) {
+      state.formData[f.id] = dv;
+    }
+  }
 
   const renderField = (f) => {
     const req = isRequired(f, level);

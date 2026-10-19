@@ -106,7 +106,7 @@ export const FIELDS = [
   { id: "phone", section: "basic", type: "text", label: "手机号（选填，用于建立个人健康档案）", placeholder: "如 13800001234", requiredBy: [] },
 
   // 一、基础信息
-  { id: "gender", section: "basic", type: "select", label: "性别", options: ["男", "女"], placeholder: "请选择性别", requiredBy: ["L1", "L2", "L3", "L4"] },
+  { id: "gender", section: "basic", type: "select", label: "性别", options: ["男", "女"], defaultBy: { L10: "女" }, placeholder: "请选择性别", requiredBy: ["L1", "L2", "L3", "L4"] },
   { id: "age", section: "basic", type: "number", label: "年龄", placeholder: "如 35", requiredBy: ["L1", "L2", "L3", "L4"] },
   { id: "height_weight", section: "basic", type: "text", label: "身高体重", placeholder: "如 170cm / 65kg", requiredBy: ["L2", "L3"] },
   { id: "region", section: "basic", type: "text", label: "所在地区", placeholder: "用于适配流行病、常见病，如：北京", requiredBy: ["L2", "L3"] },
