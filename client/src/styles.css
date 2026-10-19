@@ -28,7 +28,7 @@ body {
 
 #app { min-height: 100vh; }
 
-.container { max-width: 920px; margin: 0 auto; padding: 0 20px; }
+.container { max-width: 1280px; margin: 0 auto; padding: 0 20px; }
 
 /* ===== Header（单行：品牌标题 + 通道导航同行，不换行，放不下导航内部横向滚动） ===== */
 .site-header {
@@ -36,12 +36,18 @@ body {
   color: #fff;
   padding: 14px 0;
 }
-.header-inner { display: flex; align-items: center; gap: 14px; }
+.header-inner { display: flex; align-items: center; gap: 10px; }
 .header-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; flex: 0 0 auto; }
-.nav-levels { display: flex; flex-direction: row; align-items: center; justify-content: center; flex-wrap: wrap; min-width: 0; flex: 1 1 auto; gap: 5px 7px; }
+/* PC：12 个 TAB 强制一排（超宽窗口一排排下；较窄窗口横向滚动兜底，绝不折行） */
+.nav-levels {
+  display: flex; flex-direction: row; align-items: center; justify-content: center;
+  flex-wrap: nowrap; min-width: 0; flex: 1 1 auto; gap: 4px;
+  overflow-x: auto; scrollbar-width: none;
+}
+.nav-levels::-webkit-scrollbar { display: none; }
 .nav-level-btn {
   border: 1px solid rgba(255,255,255,0.35); background: transparent; color: var(--nav-color, #fff);
-  padding: 5px 11px; border-radius: 999px; font-size: 14px; cursor: pointer; font-weight: 700;
+  padding: 5px 10px; border-radius: 999px; font-size: 13.5px; cursor: pointer; font-weight: 700;
   font-family: inherit; transition: background 0.15s, color 0.15s, border-color 0.15s; white-space: nowrap; flex: 0 0 auto;
 }
 .nav-level-btn:hover { background: rgba(255,255,255,0.16); }
@@ -271,7 +277,7 @@ body {
 @media (max-width: 640px) { .services-entry { flex-direction: column; align-items: flex-start; } }
 
 /* ===== 首页 SEO / GEO 内容区 ===== */
-.geo-content { max-width: 860px; margin: 8px auto 48px; color: var(--ink-2, #4b5563); line-height: 1.85; font-size: 14.5px; }
+.geo-content { max-width: 1040px; margin: 8px auto 48px; color: var(--ink-2, #4b5563); line-height: 1.85; font-size: 14.5px; }
 .geo-content h2 { font-size: 22px; color: var(--ink-1, #111827); margin: 0 0 12px; }
 .geo-content h3 { font-size: 16.5px; color: var(--ink-1, #111827); margin: 26px 0 8px; }
 .geo-content p { margin: 0 0 10px; }
@@ -364,11 +370,11 @@ body {
 .buy-form .buy-opt label { display: flex; align-items: center; gap: 6px; font-weight: 500; margin: 2px 0; }
 
 /* ===== 账号设置 ===== */
-.acct-header { max-width: 860px; margin: 0 auto 20px; }
+.acct-header { max-width: 1100px; margin: 0 auto 20px; }
 .acct-header h2 { font-size: 19px; font-weight: 800; letter-spacing: -.2px; }
 .acct-header p { font-size: 13px; color: var(--ink-3, #9ca3af); margin-top: 3px; }
 
-.acct-layout { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 20px; align-items: start; max-width: 860px; margin: 0 auto; }
+.acct-layout { display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 22px; align-items: start; max-width: 1100px; margin: 0 auto; }
 .acct-side { position: sticky; top: 16px; }
 
 .acct-profile {
@@ -573,7 +579,7 @@ body {
 .result-disclaimer { margin: 24px 0 10px; font-size: 12px; color: #9ca3af; text-align: center; }
 
 /* ===== 健康监控页 ===== */
-.page-narrow { max-width: 860px; }
+.page-narrow { max-width: 1060px; }
 .monitor-form-row { display: grid; grid-template-columns: 1.2fr 1.4fr 1fr auto; gap: 8px; align-items: center; }
 .monitor-form-row select, .monitor-form-row input {
   padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; background: #fff;
