@@ -117,7 +117,7 @@ export const FIELDS = [
   { id: "impact_daily", section: "emergency", type: "radio", label: "当前症状是否影响行动、睡眠、进食", options: ["是", "否"], requiredBy: ["L2", "L3"] },
 
   // 三、现病史
-  { id: "chief_complaint", section: "present", type: "textarea", label: "核心症状主诉（一句话概括不适）", placeholder: "如：右侧头痛伴恶心 2 天，搏动性", requiredBy: ["L1", "L2", "L3", "L4"] },
+  { id: "chief_complaint", section: "present", type: "textarea", label: "核心症状主诉（一句话概括不适）", labelBy: { L10: "核心现状和期望主诉（一句话概括，可展开）" }, placeholderBy: { L10: "如：想改善双眼皮形态，期望自然款，无手术史" }, placeholder: "如：右侧头痛伴恶心 2 天，搏动性", requiredBy: ["L1", "L2", "L3", "L4"] },
   { id: "symptom_onset", section: "present", type: "text", label: "症状起始时间、发作频率（偶尔 / 间断 / 持续）", placeholder: "如：3 天前开始，间断发作", requiredBy: ["L1", "L2", "L3"] },
   { id: "symptom_location", section: "present", type: "text", label: "具体位置、范围、单侧/双侧", placeholder: "如：右下腹，麦氏点附近", requiredBy: ["L2", "L3"] },
   { id: "symptom_severity", section: "present", type: "select", label: "症状程度", options: ["轻微", "中度", "重度"], placeholder: "请选择症状程度", requiredBy: ["L1", "L2", "L3"] },
@@ -190,7 +190,7 @@ export function validate(formData, level) {
       val === null ||
       (typeof val === "string" && val.trim() === "") ||
       (Array.isArray(val) && val.length === 0);
-    if (empty) missing.push(field.label);
+    if (empty) missing.push((field.labelBy && field.labelBy[level]) || field.label);
   }
   return missing;
 }

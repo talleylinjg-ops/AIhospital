@@ -274,6 +274,7 @@ function formView(level) {
   const renderField = (f) => {
     const req = isRequired(f, level);
     const val = state.formData[f.id] ?? "";
+    const ph = (f.placeholderBy && f.placeholderBy[level]) || f.placeholder || "";
     const optMark = req ? "" : `<span class="opt-mark">选填</span>`;
     const reqMark = req ? '<span class="req">*</span>' : "";
     const id = `f-${f.id}`;
@@ -295,16 +296,16 @@ function formView(level) {
         .join("");
       control = `<div class="radio-group" id="${id}">${radios}</div>`;
     } else if (f.type === "number") {
-      control = `<div class="input-with-mic"><input id="${id}" type="number" data-field="${f.id}" placeholder="${esc(f.placeholder || "")}" value="${esc(val)}" inputmode="decimal" />${mic}</div>`;
+      control = `<div class="input-with-mic"><input id="${id}" type="number" data-field="${f.id}" placeholder="${esc(ph)}" value="${esc(val)}" inputmode="decimal" />${mic}</div>`;
     } else if (f.type === "textarea") {
-      control = `<div class="input-with-mic"><textarea id="${id}" data-field="${f.id}" placeholder="${esc(f.placeholder || "")}">${esc(val)}</textarea>${mic}</div>`;
+      control = `<div class="input-with-mic"><textarea id="${id}" data-field="${f.id}" placeholder="${esc(ph)}">${esc(val)}</textarea>${mic}</div>`;
     } else {
-      control = `<div class="input-with-mic"><input id="${id}" type="text" data-field="${f.id}" placeholder="${esc(f.placeholder || "")}" value="${esc(val)}" />${mic}</div>`;
+      control = `<div class="input-with-mic"><input id="${id}" type="text" data-field="${f.id}" placeholder="${esc(ph)}" value="${esc(val)}" />${mic}</div>`;
     }
 
     return `
       <div class="field" data-field-id="${f.id}">
-        <label for="${id}">${esc(f.label)}${reqMark}${optMark}</label>
+        <label for="${id}">${esc((f.labelBy && f.labelBy[level]) || f.label)}${reqMark}${optMark}</label>
         ${control}
       </div>`;
   };
@@ -591,15 +592,17 @@ async function bindServices() {
     })
   );
   const grid = document.getElementById("services-grid");
-  try {
-    const res = await fetch(`${API}/services`);
-    const data = await res.json();
-    if (!res.ok || !data.ok) throw new Error(data.error || "加载失败");
-    const services = data.services || [];
-    if (!services.length) {
-      grid.innerHTML = '<div class="loading-inline">暂无上架服务，请稍后再来</div>';
-      return;
-    }
+  const loadServices = async () => {
+    grid.innerHTML = '<div class="loading-inline">加载中…</div>';
+    try {
+      const res = await fetch(`${API}/services`);
+      const data = await res.json();
+      if (!res.ok || !data.ok) throw new Error(data.error || "加载失败");
+      const services = data.services || [];
+      if (!services.length) {
+        grid.innerHTML = '<div class="loading-inline">暂无上架服务，请稍后再来</div>';
+        return;
+      }
     grid.innerHTML = services
       .map(
         (s) => `
@@ -625,8 +628,11 @@ async function bindServices() {
       )
     );
   } catch (err) {
-    grid.innerHTML = `<div class="loading-inline">${esc(netErrorText(err) || "服务加载失败，请稍后重试")}</div>`;
+    grid.innerHTML = `<div class="error-box" style="margin:16px auto;max-width:560px"><p>${esc(netErrorText(err) || "服务加载失败，请稍后重试")}</p><button class="btn btn-primary" data-svc-retry style="margin-top:12px">重新加载</button></div>`;
+    grid.querySelector("[data-svc-retry]")?.addEventListener("click", () => loadServices());
   }
+  };
+  loadServices();
 }
 
 function money2(v) {
@@ -989,10 +995,10 @@ function tabbar() {
     (prefix === "#/" ? location.hash === "#/" || location.hash === "" : location.hash.startsWith(prefix)) ? " active" : "";
   return `
   <nav class="tabbar" aria-label="底部导航">
-    <a href="#/chat" class="tab-item${active("#/chat")}"><span class="tab-ico">💬</span><span>大气</span></a>
-    <a href="#/monitor" class="tab-item${active("#/monitor")}"><span class="tab-ico">📈</span><span>监控</span></a>
-    <a href="#/services" class="tab-item${active("#/services")}"><span class="tab-ico">🛒</span><span>服务</span></a>
-    <a href="#/member" class="tab-item${active("#/member")}"><span class="tab-ico">👤</span><span>我的</span></a>
+    <a href="#/chat" data-hash="#/chat" class="tab-item${active("#/chat")}"><span class="tab-ico">💬</span><span>大气</span></a>
+    <a href="#/monitor" data-hash="#/monitor" class="tab-item${active("#/monitor")}"><span class="tab-ico">📈</span><span>监控</span></a>
+    <a href="#/services" data-hash="#/services" class="tab-item${active("#/services")}"><span class="tab-ico">🛒</span><span>服务</span></a>
+    <a href="#/member" data-hash="#/member" class="tab-item${active("#/member")}"><span class="tab-ico">👤</span><span>我的</span></a>
   </nav>`;
 }
 
@@ -1622,4 +1628,13 @@ function bindBack() {
 
 /* ===== Boot ===== */
 window.addEventListener("hashchange", render);
+/* 底部 tab 与快捷入口统一走事件委托（document 级一次绑定，路由重渲染不影响点击跳转） */
+document.addEventListener("click", (e) => {
+  const link = e.target.closest("[data-hash]");
+  if (!link) return;
+  e.preventDefault();
+  const target = link.getAttribute("data-hash");
+  if (location.hash === target) render();
+  else location.hash = target;
+});
 render();
